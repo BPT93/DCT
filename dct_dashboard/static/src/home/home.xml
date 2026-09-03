@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="dct_dashboard.Home">
+        <main class="o_dct_home">
+            <div class="o_dct_home_orbit o_dct_home_orbit_one"/>
+            <div class="o_dct_home_orbit o_dct_home_orbit_two"/>
+
+            <header class="o_dct_home_header">
+                <div class="o_dct_home_identity">
+                    <img src="/dct_dashboard/static/src/img/dct_logo.png" alt="DCT"/>
+                    <div>
+                        <p class="o_dct_home_eyebrow">DCT BUSINESS OPERATING SYSTEM</p>
+                        <h1><t t-esc="greeting"/>, <span t-esc="userName"/>.</h1>
+                        <p class="o_dct_home_intro">One clear place for every part of your business.</p>
+                    </div>
+                </div>
+
+                <div class="o_dct_home_search">
+                    <i class="fa fa-search" aria-hidden="true"/>
+                    <input t-ref="searchInput"
+                           t-model="state.search"
+                           type="search"
+                           placeholder="Find an application…"
+                           aria-label="Find an application"/>
+                    <button t-if="state.search" t-on-click="clearSearch" title="Clear search" aria-label="Clear search">
+                        <i class="fa fa-times" aria-hidden="true"/>
+                    </button>
+                    <span t-else="" class="o_dct_search_hint">TYPE TO FOCUS</span>
+                </div>
+            </header>
+
+            <section class="o_dct_apps_section" aria-label="Applications">
+                <div class="o_dct_apps_heading">
+                    <div>
+                        <p class="o_dct_home_eyebrow">YOUR WORKSPACE</p>
+                        <h2>Applications</h2>
+                    </div>
+                    <span>
+                        <strong t-esc="apps.length"/>
+                        <t t-if="state.search"> matching <t t-esc="apps.length === 1 ? 'application' : 'applications'"/></t>
+                        <t t-else=""> available</t>
+                    </span>
+                </div>
+
+                <div t-if="apps.length" class="o_dct_apps_grid">
+                    <button class="o_dct_app_card"
+                            t-foreach="apps"
+                            t-as="app"
+                            t-key="app.id"
+                            t-att-data-menu-xmlid="app.xmlid"
+                            t-on-click="() => openApp(app)">
+                        <span class="o_dct_app_icon_wrap">
+                            <img t-if="app.webIconData" t-att-src="app.webIconData" t-att-alt="app.name"/>
+                            <span t-else="" class="o_dct_app_initials" t-esc="appInitials(app.name)"/>
+                        </span>
+                        <span class="o_dct_app_copy">
+                            <strong t-esc="app.name"/>
+                            <small t-esc="appPreview(app)"/>
+                        </span>
+                        <span class="o_dct_app_arrow"><i class="fa fa-arrow-right" aria-hidden="true"/></span>
+                    </button>
+                </div>
+
+                <div t-else="" class="o_dct_apps_empty">
+                    <span><i class="fa fa-search" aria-hidden="true"/></span>
+                    <h3>No applications match “<t t-esc="state.search"/>”</h3>
+                    <button class="btn btn-light" t-on-click="clearSearch">Show all applications</button>
+                </div>
+            </section>
+
+            <footer class="o_dct_home_footer">
+                <span class="o_dct_status_dot"/> All systems ready
+                <span class="o_dct_footer_rule"/>
+                Empowering Business, Enhancing Security
+            </footer>
+        </main>
+    </t>
+</templates>
+
+

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_dct_financial_statement" model="ir.actions.report">
+        <field name="name">DCT Financial Report</field>
+        <field name="model">dct.account.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dct_accounting.report_dct_financial_statement</field>
+        <field name="report_file">dct_accounting.report_dct_financial_statement</field>
+        <field name="print_report_name">'DCT - %s - %s' % (object.report_name, object.date_to)</field>
+    </record>
+
+    <template id="report_dct_financial_statement">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div>
+                                <p class="text-uppercase mb-1" style="color:#1577ff; font-weight:700; letter-spacing:.12em;">DCT ACCOUNTING</p>
+                                <h1 class="mb-1" t-out="doc.report_name"/>
+                                <p class="text-muted mb-0" t-out="doc.company_id.display_name"/>
+                            </div>
+                            <div class="text-end">
+                                <p class="mb-1"><strong>Period</strong></p>
+                                <p class="mb-0" t-if="doc.report_type != 'balance_sheet'">
+                                    <span t-field="doc.date_from"/> — <span t-field="doc.date_to"/>
+                                </p>
+                                <p class="mb-0" t-else=""><span t-field="doc.date_to"/></p>
+                                <p class="text-muted mb-0" t-out="'Posted Entries' if doc.target_move == 'posted' else 'All Entries'"/>
+                            </div>
+                        </div>
+                        <table class="table table-sm" style="font-size:10.5px;">
+                            <thead style="background:#0a132b; color:#fff;">
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Account / Partner / Journal</th>
+                                    <t t-if="doc.report_type in ('profit_loss', 'balance_sheet')">
+                                        <th class="text-end">Balance</th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="text-end">Opening</th>
+                                        <th class="text-end">Debit</th>
+                                        <th class="text-end">Credit</th>
+                                        <th class="text-end">Ending</th>
+                                    </t>
+                                    <t t-if="doc.comparison != 'none'">
+                                        <th class="text-end" t-out="doc.comparison_label"/>
+                                        <th class="text-end">Variance</th>
+                                    </t>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr t-if="line.line_type == 'section'" style="background:#eaf2ff; color:#0a132b; font-weight:700;">
+                                        <td t-att-colspan="2 + (1 if doc.report_type in ('profit_loss', 'balance_sheet') else 4) + (2 if doc.comparison != 'none' else 0)"
+                                            class="py-2" t-out="line.name"/>
+                                    </tr>
+                                    <tr t-else="" t-att-style="'font-weight:700; border-top:1px solid #8aafe0;' if line.is_total else ''">
+                                        <td t-out="line.code or ''"/>
+                                        <td t-out="line.name"/>
+                                        <t t-if="doc.report_type in ('profit_loss', 'balance_sheet')">
+                                            <td class="text-end"><span t-out="line.balance" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                        </t>
+                                        <t t-else="">
+                                            <td class="text-end"><span t-out="line.opening_balance" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                            <td class="text-end"><span t-out="line.period_debit" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                            <td class="text-end"><span t-out="line.period_credit" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                            <td class="text-end"><span t-out="line.ending_balance" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                        </t>
+                                        <t t-if="doc.comparison != 'none'">
+                                            <td class="text-end"><span t-out="line.comparison_balance" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                            <td class="text-end"><span t-out="line.variance" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        <div class="mt-3 pt-2 border-top text-muted" style="font-size:9px;">
+                            Generated from native Odoo Community journal items on <span t-field="doc.generated_at"/>.
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
+
+

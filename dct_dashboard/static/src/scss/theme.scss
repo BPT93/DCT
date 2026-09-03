@@ -1,0 +1,206 @@
+:root {
+    --dct-primary: #1577ff;
+    --dct-primary-bright: #5aa1ff;
+    --dct-ink: #071024;
+    --dct-surface: #ffffff;
+    --dct-canvas: #f6f7fb;
+    --dct-muted: #6f7084;
+    --dct-line: #e6e6ef;
+    --dct-success: #16886a;
+    --dct-warning: #d88b24;
+    --dct-danger: #d44f63;
+    --dct-shadow: 0 16px 45px rgba(27, 24, 74, 0.10);
+}
+
+.o_web_client {
+    background:
+        radial-gradient(circle at 92% 8%, rgba(76, 154, 255, 0.08), transparent 26rem),
+        var(--dct-canvas);
+}
+
+.o_main_navbar {
+    --NavBar-entry-backgroundColor: transparent;
+    --NavBar-entry-backgroundColor--hover: rgba(255, 255, 255, 0.11);
+    --NavBar-entry-backgroundColor--focus: rgba(255, 255, 255, 0.11);
+    --NavBar-entry-backgroundColor--active: rgba(255, 255, 255, 0.16);
+    --NavBar-entry-borderColor-active: rgba(255, 255, 255, 0.18);
+    background: linear-gradient(105deg, #071024 0%, #0c1b3d 38%, #0e3c80 68%, #1577ff 100%) !important;
+    background-color: #0c1b3d !important;
+    border: 0 !important;
+    box-shadow: 0 7px 24px rgba(12, 10, 38, 0.24);
+
+    .o_menu_sections,
+    .o_menu_sections > *,
+    .o_menu_sections .o_nav_entry,
+    .o_menu_sections .dropdown-toggle,
+    .o_menu_systray,
+    .o_navbar_apps_menu,
+    .o_navbar_apps_menu .dropdown-toggle,
+    .o_menu_brand {
+        background-color: transparent;
+    }
+
+    .o_menu_brand {
+        color: #fff !important;
+        font-weight: 750;
+        letter-spacing: 0.015em;
+    }
+
+    .o_nav_entry,
+    .dropdown-toggle,
+    .o_menu_systray > * > *,
+    .o_navbar_apps_menu button {
+        color: rgba(255, 255, 255, 0.92) !important;
+        border-radius: 0.65rem;
+    }
+
+    .o_nav_entry:hover,
+    .dropdown-toggle:hover,
+    .o_navbar_apps_menu button:hover {
+        background: rgba(255, 255, 255, 0.11) !important;
+    }
+
+    .o_nav_entry:focus,
+    .dropdown-toggle:focus {
+        background: rgba(255, 255, 255, 0.11) !important;
+    }
+
+    .o_nav_entry:active,
+    .dropdown-toggle:active,
+    .dropdown.show > .dropdown-toggle {
+        background: rgba(255, 255, 255, 0.16) !important;
+    }
+}
+
+.o_action_manager > .o_action:has(> .o_dct_home),
+.o_action_manager > .o_action:has(> .o_dct_dashboard),
+.o_action_manager > .o_action:has(> .o_dct_accounting),
+.o_action_manager > .o_action:has(> .o_dct_interactive_report) {
+    min-height: 0;
+    overflow: hidden !important;
+}
+
+.o_action_manager > .o_action,
+.o_action_manager > .o_view_controller,
+.o_action_manager > .o_client_action {
+    animation: dct-action-arrive 280ms cubic-bezier(0.2, 0.75, 0.3, 1) both;
+    transform-origin: 52% 18%;
+}
+
+@keyframes dct-action-arrive {
+    from {
+        opacity: 0;
+        transform: translateY(9px) scale(0.992);
+        filter: saturate(0.82);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: saturate(1);
+    }
+}
+
+.o_control_panel {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-bottom: 1px solid rgba(21, 119, 255, 0.10) !important;
+    backdrop-filter: blur(16px);
+
+    .breadcrumb-item.active,
+    .o_last_breadcrumb_item {
+        color: var(--dct-ink);
+        font-weight: 720;
+    }
+}
+
+.btn-primary,
+.btn-outline-primary:hover {
+    border-color: var(--dct-primary) !important;
+    background: linear-gradient(135deg, var(--dct-primary-bright), var(--dct-primary)) !important;
+    box-shadow: 0 7px 18px rgba(21, 119, 255, 0.19);
+}
+
+.btn-primary:hover {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+}
+
+.btn,
+.form-control,
+.form-select,
+.o_input {
+    border-radius: 0.62rem;
+}
+
+.form-control:focus,
+.form-select:focus,
+.o_input:focus {
+    border-color: rgba(21, 119, 255, 0.72) !important;
+    box-shadow: 0 0 0 0.2rem rgba(21, 119, 255, 0.12) !important;
+}
+
+.o_form_view .o_form_sheet_bg {
+    background:
+        radial-gradient(circle at 82% 0%, rgba(21, 119, 255, 0.07), transparent 24rem),
+        var(--dct-canvas);
+}
+
+.o_form_view .o_form_sheet {
+    border: 1px solid rgba(21, 119, 255, 0.09);
+    border-radius: 1rem;
+    box-shadow: var(--dct-shadow);
+}
+
+.o_list_renderer,
+.o_kanban_renderer {
+    background-color: rgba(255, 255, 255, 0.86);
+}
+
+.o_list_table {
+    thead {
+        background: #f0f0f8;
+        color: #3b3956;
+    }
+
+    tbody tr:hover {
+        background-color: rgba(21, 119, 255, 0.045) !important;
+    }
+}
+
+.o_kanban_record,
+.modal-content,
+.o_popover {
+    border-color: rgba(21, 119, 255, 0.11) !important;
+    border-radius: 0.9rem !important;
+    box-shadow: 0 13px 34px rgba(27, 24, 74, 0.09) !important;
+}
+
+.dropdown-menu {
+    border: 1px solid rgba(21, 119, 255, 0.12);
+    border-radius: 0.8rem;
+    box-shadow: 0 18px 42px rgba(20, 18, 58, 0.15);
+
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+        color: var(--dct-primary);
+        background: rgba(21, 119, 255, 0.08);
+    }
+}
+
+.o_app_menu_sidebar {
+    background: linear-gradient(165deg, #071024 0%, #0d2a5a 66%, #1577ff 100%) !important;
+    color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_action_manager > .o_action,
+    .o_action_manager > .o_view_controller,
+    .o_action_manager > .o_client_action {
+        animation: none;
+    }
+
+    .btn-primary:hover {
+        transform: none;
+    }
+}
+
+

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_dct_home" model="ir.actions.client">
+        <field name="name">DCT App Launcher</field>
+        <field name="tag">dct_dashboard.home</field>
+        <field name="target">current</field>
+    </record>
+</odoo>
+
+
+

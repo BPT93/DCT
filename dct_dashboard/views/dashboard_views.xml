@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_dct_dashboard" model="ir.actions.client">
+        <field name="name">DCT Dashboard</field>
+        <field name="tag">dct_dashboard.Dashboard</field>
+    </record>
+
+    <menuitem
+        id="menu_dct_dashboard_root"
+        name="DCT Dashboard"
+        action="action_dct_dashboard"
+        sequence="5"
+        groups="base.group_user"
+        web_icon="dct_dashboard,static/description/icon.png"
+    />
+</odoo>
+
+
+

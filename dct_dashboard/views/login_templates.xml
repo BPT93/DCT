@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="dct_login_layout" inherit_id="web.login_layout" name="DCT Login Layout">
+        <xpath expr="//t[@t-set='body_classname']" position="replace">
+            <t t-set="body_classname" t-value="'o_dct_login_page'"/>
+        </xpath>
+        <xpath expr="//div[contains(@t-attf-class, 'o_database_list')]" position="attributes">
+            <attribute name="t-attf-class" add="o_dct_login_card" separator=" "/>
+            <attribute name="style">max-width: 430px;</attribute>
+        </xpath>
+        <xpath expr="//img[contains(@t-attf-src, '/web/binary/company_logo')]" position="replace">
+            <img src="/dct_dashboard/static/src/img/dct_logo.png" alt="DCT" class="o_dct_login_logo"/>
+        </xpath>
+        <xpath expr="//div[hasclass('text-center', 'small') and @t-if='not disable_footer']" position="replace">
+            <div class="text-center small mt-4 pt-3 border-top o_dct_login_footer">
+                <span>DCT Business Platform</span>
+                <span class="mx-2">·</span>
+                <span>Powered by Odoo Community</span>
+            </div>
+        </xpath>
+    </template>
+</odoo>
+
+

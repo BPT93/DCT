@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="dct_dashboard.Dashboard">
+        <div class="o_dct_dashboard">
+            <div t-if="!state.data" class="dct_loading_state">
+                <span class="dct_spinner"/>
+                <p>Preparing your dashboard…</p>
+            </div>
+
+            <t t-else="">
+                <header class="dct_hero">
+                    <div class="dct_hero_brand">
+                        <img src="/dct_dashboard/static/src/img/dct_logo.png" alt="DCT" class="dct_logo"/>
+                        <span class="dct_brand_divider"/>
+                        <div>
+                            <p class="dct_eyebrow">Executive workspace</p>
+                            <h1><t t-esc="state.data.company.name"/></h1>
+                            <p class="dct_period_caption"><t t-esc="state.data.period.label"/> · Updated <t t-esc="state.data.updated_at"/></p>
+                        </div>
+                    </div>
+                    <div class="dct_hero_actions">
+                        <label class="dct_period_picker">
+                            <i class="fa fa-calendar"/>
+                            <select t-att-value="state.period" t-on-change="onPeriodChange">
+                                <option value="month">This month</option>
+                                <option value="quarter">This quarter</option>
+                                <option value="year">This year</option>
+                            </select>
+                        </label>
+                        <button class="dct_refresh" t-on-click="loadData" t-att-disabled="state.loading" title="Refresh dashboard">
+                            <i t-att-class="'fa fa-refresh ' + (state.loading ? 'fa-spin' : '')"/>
+                        </button>
+                    </div>
+                </header>
+
+                <div t-if="state.error" class="dct_error_banner">
+                    <i class="fa fa-exclamation-circle"/>
+                    Some information could not be refreshed. The previous snapshot is still displayed.
+                </div>
+
+                <main class="dct_dashboard_content">
+                    <section class="dct_metric_grid" aria-label="Key performance indicators">
+                        <article t-foreach="state.data.metrics" t-as="metric" t-key="metric.id" t-att-class="'dct_metric_card accent-' + metric.accent">
+                            <div class="dct_metric_topline">
+                                <span class="dct_metric_icon"><i t-att-class="'fa ' + metric.icon"/></span>
+                                <span t-if="metric.change !== null and metric.available" t-att-class="'dct_change ' + changeClass(metric)">
+                                    <i t-att-class="'fa ' + changeIcon(metric)"/>
+                                    <t t-esc="formatNumber(Math.abs(metric.change), 1)"/>%
+                                </span>
+                            </div>
+                            <p class="dct_metric_label"><t t-esc="metric.label"/></p>
+                            <t t-if="metric.available">
+                                <h2 class="dct_metric_value"><t t-esc="formatMetric(metric)"/></h2>
+                                <p class="dct_metric_hint" t-if="metric.change !== null">versus previous period</p>
+                                <p class="dct_metric_hint" t-else="">current open balance</p>
+                            </t>
+                            <div t-else="" class="dct_metric_unavailable">
+                                <span>App unavailable</span>
+                                <small>Install the related Odoo app or request access.</small>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section class="dct_primary_grid">
+                        <article class="dct_panel dct_revenue_panel">
+                            <div class="dct_panel_header">
+                                <div>
+                                    <p class="dct_eyebrow">Performance</p>
+                                    <h3>Revenue trend</h3>
+                                </div>
+                                <span class="dct_panel_badge">Last 6 months</span>
+                            </div>
+                            <div t-if="state.data.availability.accounting" class="dct_bar_chart">
+                                <div t-foreach="revenueBars" t-as="bar" t-key="bar.label" class="dct_bar_column">
+                                    <div class="dct_bar_track" t-att-title="formatCurrency(bar.value)">
+                                        <span class="dct_bar_fill" t-att-style="'height:' + bar.height + '%'"/>
+                                    </div>
+                                    <span class="dct_chart_label"><t t-esc="bar.label"/></span>
+                                </div>
+                            </div>
+                            <div t-else="" class="dct_empty_state compact">
+                                <i class="fa fa-line-chart"/>
+                                <p>Accounting data will appear here when available.</p>
+                            </div>
+                        </article>
+
+                        <article class="dct_panel dct_pipeline_panel">
+                            <div class="dct_panel_header">
+                                <div>
+                                    <p class="dct_eyebrow">Commercial</p>
+                                    <h3>Sales pipeline</h3>
+                                </div>
+                            </div>
+                            <t t-if="state.data.availability.sales">
+                                <div class="dct_pipeline_bar" role="img" aria-label="Sales pipeline distribution">
+                                    <span t-foreach="pipelineRows" t-as="row" t-key="row.id" t-att-style="'width:' + row.share + '%;background:' + row.color"/>
+                                </div>
+                                <div class="dct_pipeline_legend">
+                                    <div t-foreach="pipelineRows" t-as="row" t-key="row.id" class="dct_pipeline_row">
+                                        <span class="dct_legend_dot" t-att-style="'background:' + row.color"/>
+                                        <span class="dct_pipeline_label"><t t-esc="row.label"/></span>
+                                        <strong><t t-esc="formatNumber(row.count)"/></strong>
+                                    </div>
+                                </div>
+                            </t>
+                            <div t-else="" class="dct_empty_state compact">
+                                <i class="fa fa-shopping-bag"/>
+                                <p>Sales data will appear here when available.</p>
+                            </div>
+                            <div class="dct_logistics_strip" t-if="state.data.availability.inventory">
+                                <div><i class="fa fa-arrow-circle-down"/><span>Open receipts</span><strong><t t-esc="formatNumber(state.data.logistics.receipts)"/></strong></div>
+                                <div><i class="fa fa-arrow-circle-up"/><span>Open deliveries</span><strong><t t-esc="formatNumber(state.data.logistics.deliveries)"/></strong></div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section class="dct_secondary_grid">
+                        <article class="dct_panel dct_recent_panel">
+                            <div class="dct_panel_header">
+                                <div>
+                                    <p class="dct_eyebrow">Latest activity</p>
+                                    <h3>Recent customer documents</h3>
+                                </div>
+                            </div>
+                            <div t-if="state.data.recent_documents.length" class="dct_table_wrap">
+                                <table class="dct_table">
+                                    <thead><tr><th>Document</th><th>Customer</th><th>Date</th><th class="text-end">Amount</th></tr></thead>
+                                    <tbody>
+                                        <tr t-foreach="state.data.recent_documents" t-as="document" t-key="document.id" t-on-click="() => this.openInvoice(document.id)">
+                                            <td><strong><t t-esc="document.name"/></strong><span t-att-class="'dct_status status-' + document.state"><t t-esc="document.state.replaceAll('_', ' ')"/></span></td>
+                                            <td><t t-esc="document.partner"/></td>
+                                            <td><t t-esc="document.date"/></td>
+                                            <td class="text-end"><strong><t t-esc="formatCurrency(document.amount)"/></strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div t-else="" class="dct_empty_state">
+                                <i class="fa fa-folder-open-o"/>
+                                <p>No recent customer documents to show.</p>
+                            </div>
+                        </article>
+
+                        <aside class="dct_panel dct_shortcuts_panel">
+                            <div class="dct_panel_header">
+                                <div>
+                                    <p class="dct_eyebrow">Navigation</p>
+                                    <h3>Quick access</h3>
+                                </div>
+                            </div>
+                            <div t-if="state.data.shortcuts.length" class="dct_shortcut_list">
+                                <button t-foreach="state.data.shortcuts" t-as="shortcut" t-key="shortcut.xmlid" t-on-click="() => this.openAction(shortcut.xmlid)" class="dct_shortcut">
+                                    <span><i t-att-class="'fa ' + shortcut.icon"/></span>
+                                    <strong><t t-esc="shortcut.label"/></strong>
+                                    <i class="fa fa-chevron-right"/>
+                                </button>
+                            </div>
+                            <div t-else="" class="dct_empty_state compact">
+                                <i class="fa fa-th-large"/>
+                                <p>Install business apps to enable shortcuts.</p>
+                            </div>
+                            <div class="dct_brand_note">
+                                <span class="dct_brand_mark">DCT</span>
+                                <p>Digital clarity for every decision.</p>
+                            </div>
+                        </aside>
+                    </section>
+                </main>
+            </t>
+        </div>
+    </t>
+</templates>
+
+
+

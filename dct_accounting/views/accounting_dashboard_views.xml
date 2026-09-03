@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_dct_accounting_dashboard" model="ir.actions.client">
+        <field name="name">Accounting Overview</field>
+        <field name="tag">dct_accounting.Dashboard</field>
+    </record>
+
+    <menuitem
+        id="menu_dct_accounting_root"
+        name="DCT Accounting"
+        sequence="6"
+        groups="account.group_account_readonly"
+        web_icon="dct_accounting,static/description/icon.png"
+    />
+
+    <menuitem
+        id="menu_dct_accounting_dashboard"
+        name="Dashboard"
+        parent="menu_dct_accounting_root"
+        action="action_dct_accounting_dashboard"
+        sequence="1"
+    />
+
+    <menuitem id="menu_dct_accounting_customers" name="Customers" parent="menu_dct_accounting_root" sequence="10"/>
+    <menuitem id="menu_dct_customer_invoices" name="Invoices" parent="menu_dct_accounting_customers" action="account.action_move_out_invoice" sequence="10"/>
+    <menuitem id="menu_dct_customer_payments" name="Payments" parent="menu_dct_accounting_customers" action="account.action_account_payments" sequence="20"/>
+
+    <menuitem id="menu_dct_accounting_vendors" name="Vendors" parent="menu_dct_accounting_root" sequence="20"/>
+    <menuitem id="menu_dct_vendor_bills" name="Bills" parent="menu_dct_accounting_vendors" action="account.action_move_in_invoice" sequence="10"/>
+    <menuitem id="menu_dct_vendor_payments" name="Payments" parent="menu_dct_accounting_vendors" action="account.action_account_payments_payable" sequence="20"/>
+
+    <menuitem id="menu_dct_accounting_entries" name="Accounting" parent="menu_dct_accounting_root" sequence="30" groups="account.group_account_readonly"/>
+    <menuitem id="menu_dct_journal_overview" name="Journals Overview" parent="menu_dct_accounting_entries" action="account.open_account_journal_dashboard_kanban" sequence="10"/>
+    <menuitem id="menu_dct_journal_items" name="Journal Items" parent="menu_dct_accounting_entries" action="account.action_move_journal_line" sequence="20"/>
+    <menuitem id="menu_dct_chart_of_accounts" name="Chart of Accounts" parent="menu_dct_accounting_entries" action="account.action_account_form" sequence="30"/>
+    <menuitem id="menu_dct_journals" name="Journals" parent="menu_dct_accounting_entries" action="account.action_account_journal_form" sequence="40" groups="account.group_account_manager"/>
+
+    <menuitem id="menu_dct_accounting_reports" name="Reporting" parent="menu_dct_accounting_root" sequence="40"/>
+    <menuitem id="menu_dct_profit_loss" name="Profit &amp; Loss" parent="menu_dct_accounting_reports" action="action_dct_profit_loss_interactive" sequence="10"/>
+    <menuitem id="menu_dct_balance_sheet" name="Balance Sheet" parent="menu_dct_accounting_reports" action="action_dct_balance_sheet_interactive" sequence="20"/>
+    <menuitem id="menu_dct_trial_balance" name="Trial Balance" parent="menu_dct_accounting_reports" action="action_dct_trial_balance_interactive" sequence="30"/>
+    <menuitem id="menu_dct_general_ledger" name="General Ledger" parent="menu_dct_accounting_reports" action="action_dct_general_ledger_interactive" sequence="40"/>
+    <menuitem id="menu_dct_partner_ledger" name="Partner Ledger" parent="menu_dct_accounting_reports" action="action_dct_partner_ledger_interactive" sequence="50"/>
+    <menuitem id="menu_dct_journal_ledger" name="Journal Ledger" parent="menu_dct_accounting_reports" action="action_dct_journal_ledger_interactive" sequence="60"/>
+</odoo>
+
+

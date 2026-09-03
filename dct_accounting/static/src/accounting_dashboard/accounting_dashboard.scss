@@ -1,0 +1,353 @@
+$dcta-navy: #0a132b;
+$dcta-blue: #1577ff;
+$dcta-cyan: #2bb9ff;
+$dcta-bg: #f3f6fb;
+$dcta-border: #e3e9f2;
+$dcta-muted: #64748b;
+$dcta-coral: #ff7452;
+
+.o_dct_accounting {
+    height: 100%;
+    overflow: auto;
+    color: $dcta-navy;
+    background:
+        radial-gradient(circle at 8% 8%, rgba(21, 119, 255, 0.08), transparent 26rem),
+        $dcta-bg;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    .dcta_loading_state {
+        min-height: 70vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: $dcta-muted;
+    }
+
+    .dcta_spinner {
+        width: 42px;
+        height: 42px;
+        border: 3px solid #d7e5f9;
+        border-top-color: $dcta-blue;
+        border-radius: 50%;
+        animation: dcta-spin 0.8s linear infinite;
+    }
+
+    .dcta_hero {
+        min-height: 148px;
+        padding: 2rem clamp(1.25rem, 4vw, 3.5rem);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        color: #fff;
+        background:
+            linear-gradient(110deg, transparent 42%, rgba(21, 119, 255, 0.2)),
+            $dcta-navy;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dcta_hero::before {
+        content: "";
+        position: absolute;
+        inset-inline-end: 10%;
+        top: -60px;
+        width: 165px;
+        height: 260px;
+        border-inline: 1px solid rgba(255, 255, 255, 0.08);
+        transform: skew(-22deg);
+    }
+
+    .dcta_hero_brand,
+    .dcta_hero_actions { position: relative; z-index: 1; display: flex; align-items: center; }
+    .dcta_hero_brand { gap: 1.35rem; }
+    .dcta_hero_actions { gap: 0.75rem; }
+
+    .dcta_logo {
+        width: clamp(130px, 16vw, 205px);
+        height: 74px;
+        object-fit: contain;
+        padding: 0.55rem 0.7rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 10px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .dcta_brand_divider { width: 1px; align-self: stretch; background: rgba(255, 255, 255, 0.2); }
+
+    .dcta_eyebrow {
+        margin: 0 0 0.3rem;
+        color: $dcta-blue;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+    }
+
+    .dcta_hero .dcta_eyebrow { color: #78b2ff; }
+    .dcta_hero h1 { margin: 0; max-width: 610px; font-size: clamp(1.35rem, 2.4vw, 2rem); font-weight: 750; line-height: 1.2; }
+    .dcta_period_caption { margin: 0.45rem 0 0; color: rgba(255, 255, 255, 0.62); font-size: 0.82rem; }
+
+    .dcta_period_picker {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0 0.8rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.09);
+        backdrop-filter: blur(8px);
+    }
+
+    .dcta_period_picker select { border: 0; outline: 0; color: #fff; background: transparent; font-weight: 650; cursor: pointer; }
+    .dcta_period_picker option { color: $dcta-navy; background: #fff; }
+
+    .dcta_refresh {
+        width: 42px;
+        height: 42px;
+        border: 0;
+        border-radius: 10px;
+        color: #fff;
+        background: $dcta-blue;
+        box-shadow: 0 6px 16px rgba(21, 119, 255, 0.32);
+    }
+
+    .dcta_refresh:hover { background: #0f68e7; }
+    .dcta_refresh:disabled { opacity: 0.65; }
+
+    .dcta_error_banner {
+        margin: 1rem clamp(1.25rem, 4vw, 3.5rem) 0;
+        padding: 0.75rem 1rem;
+        border: 1px solid #fecaca;
+        border-radius: 10px;
+        color: #991b1b;
+        background: #fef2f2;
+    }
+
+    .dcta_content {
+        max-width: 1680px;
+        margin: 0 auto;
+        padding: 1.4rem clamp(1rem, 3vw, 2rem) 2.5rem;
+    }
+
+    .dcta_metric_grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .dcta_metric_card,
+    .dcta_panel,
+    .dcta_balance_strip {
+        border: 1px solid $dcta-border;
+        border-radius: 15px;
+        background: #fff;
+        box-shadow: 0 8px 28px rgba(10, 19, 43, 0.045);
+    }
+
+    .dcta_metric_card {
+        min-height: 174px;
+        padding: 1.15rem 1.25rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dcta_metric_card::after {
+        content: "";
+        position: absolute;
+        inset-inline-end: -25px;
+        bottom: -44px;
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background: rgba(21, 119, 255, 0.055);
+    }
+
+    .dcta_metric_topline { display: flex; align-items: center; justify-content: space-between; }
+
+    .dcta_metric_icon {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        color: $dcta-blue;
+        background: #eaf2ff;
+    }
+
+    .accent-coral .dcta_metric_icon { color: #cc4c2d; background: #fff0ec; }
+    .accent-cyan .dcta_metric_icon { color: #087eb7; background: #e3f7ff; }
+    .accent-violet .dcta_metric_icon { color: #7657c9; background: #f0ebff; }
+
+    .dcta_change { padding: 0.25rem 0.42rem; border-radius: 999px; font-size: 0.7rem; font-weight: 750; }
+    .dcta_change.is-positive { color: #087a55; background: #e8f8f1; }
+    .dcta_change.is-negative { color: #b42318; background: #feeeee; }
+    .dcta_change.is-neutral { color: #64748b; background: #f1f5f9; }
+
+    .dcta_metric_label { margin: 1rem 0 0.25rem; color: $dcta-muted; font-size: 0.8rem; font-weight: 650; }
+    .dcta_metric_value { margin: 0; color: $dcta-navy; font-size: clamp(1.25rem, 2vw, 1.7rem); font-weight: 780; letter-spacing: -0.03em; word-break: break-word; }
+    .dcta_metric_hint { margin: 0.35rem 0 0; color: #94a3b8; font-size: 0.7rem; }
+
+    .dcta_balance_strip {
+        min-height: 105px;
+        margin-top: 1rem;
+        padding: 1.2rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        color: #fff;
+        border: 0;
+        background: linear-gradient(110deg, $dcta-navy 0%, #111f43 70%, #123c83 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dcta_balance_strip > div { min-width: 260px; display: grid; grid-template-columns: 42px 1fr; column-gap: 0.75rem; align-items: center; position: relative; z-index: 1; }
+    .dcta_balance_strip p { margin: 0; color: rgba(255, 255, 255, 0.62); font-size: 0.75rem; }
+    .dcta_balance_strip strong { grid-column: 2; font-size: 1.25rem; }
+    .dcta_balance_icon { grid-row: 1 / span 2; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 11px; color: #fff; background: $dcta-blue; }
+    .dcta_balance_icon.profit { background: #0a9f74; }
+    .dcta_balance_icon.loss { background: #cf463f; }
+    .dcta_balance_rule { width: 1px; height: 54px; background: rgba(255, 255, 255, 0.16); }
+    .dcta_balance_art { margin-inline-start: auto; color: rgba(255, 255, 255, 0.055); font-size: 5.2rem; font-weight: 900; letter-spacing: -0.08em; line-height: 0.8; }
+    .dcta_balance_strip .is-profit { color: #7ee5c2; }
+    .dcta_balance_strip .is-loss { color: #ffaca2; }
+
+    .dcta_primary_grid {
+        margin-top: 1rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.72fr) minmax(260px, 0.72fr);
+        gap: 1rem;
+    }
+
+    .dcta_secondary_grid {
+        margin-top: 1rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.55fr);
+        gap: 1rem;
+    }
+
+    .dcta_panel { padding: 1.25rem; }
+    .dcta_panel_header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .dcta_panel_header h3 { margin: 0; color: $dcta-navy; font-size: 1.03rem; font-weight: 750; }
+
+    .dcta_chart_legend { display: flex; gap: 0.75rem; color: $dcta-muted; font-size: 0.67rem; }
+    .dcta_chart_legend span { display: flex; align-items: center; gap: 0.3rem; }
+    .dcta_chart_legend i { width: 8px; height: 8px; border-radius: 2px; }
+    .dcta_chart_legend .revenue { background: $dcta-blue; }
+    .dcta_chart_legend .expense { background: $dcta-coral; }
+
+    .dcta_dual_chart {
+        height: 248px;
+        margin-top: 1.35rem;
+        display: flex;
+        gap: clamp(0.55rem, 2vw, 1.4rem);
+        padding: 0.8rem 0.6rem 0;
+        border-bottom: 1px solid $dcta-border;
+        background: repeating-linear-gradient(to top, transparent 0, transparent 58px, #eef2f7 59px);
+    }
+
+    .dcta_dual_column { flex: 1; min-width: 31px; display: flex; flex-direction: column; align-items: center; color: $dcta-muted; font-size: 0.7rem; font-weight: 650; }
+    .dcta_dual_track { width: 90%; max-width: 74px; flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 4px; }
+    .dcta_dual_track > span { width: 42%; min-height: 3px; border-radius: 6px 6px 2px 2px; transition: height 350ms ease; }
+    .dcta_revenue_bar { background: linear-gradient(180deg, #4998ff, $dcta-blue); }
+    .dcta_expense_bar { background: linear-gradient(180deg, #ff9b82, $dcta-coral); }
+    .dcta_dual_column > span { padding: 0.7rem 0 0.35rem; }
+
+    .dcta_aging_list { margin-top: 1.15rem; display: flex; flex-direction: column; gap: 0.85rem; }
+    .dcta_aging_meta { margin-bottom: 0.3rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; color: $dcta-muted; font-size: 0.7rem; }
+    .dcta_aging_meta strong { color: $dcta-navy; font-size: 0.72rem; }
+    .dcta_aging_track { height: 7px; overflow: hidden; border-radius: 999px; background: #edf1f6; }
+    .dcta_aging_track span { height: 100%; display: block; border-radius: inherit; background: linear-gradient(90deg, $dcta-blue, #55a0ff); transition: width 350ms ease; }
+    .dcta_aging_panel.payable .dcta_aging_track span { background: linear-gradient(90deg, #7657c9, #a58de5); }
+
+    .dcta_text_action { padding: 0.35rem 0; border: 0; color: $dcta-blue; background: transparent; font-size: 0.72rem; font-weight: 700; }
+    .dcta_text_action:hover { color: #0d5fc8; }
+
+    .dcta_table_wrap { margin: 1rem -0.25rem -0.4rem; overflow-x: auto; }
+    .dcta_table { width: 100%; min-width: 660px; border-collapse: collapse; }
+    .dcta_table th { padding: 0.65rem 0.75rem; color: #94a3b8; border-bottom: 1px solid $dcta-border; font-size: 0.67rem; font-weight: 750; letter-spacing: 0.06em; text-align: start; text-transform: uppercase; }
+    .dcta_table td { padding: 0.75rem; color: $dcta-muted; border-bottom: 1px solid #eef2f6; font-size: 0.78rem; }
+    .dcta_table tbody tr { cursor: pointer; transition: background 120ms ease; }
+    .dcta_table tbody tr:hover { background: #f7faff; }
+    .dcta_table tbody tr:last-child td { border-bottom: 0; }
+    .dcta_table td strong { color: $dcta-navy; }
+    .dcta_table td small { margin-inline-start: 0.4rem; color: #94a3b8; }
+    .dcta_overdue_badge { padding: 0.2rem 0.42rem; border-radius: 999px; color: #b42318; background: #feeeee; font-size: 0.64rem; font-weight: 700; }
+
+    .dcta_shortcut_list { margin-top: 0.9rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .dcta_shortcut { width: 100%; min-height: 48px; display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 0.7rem; padding: 0.45rem 0.6rem; border: 1px solid transparent; border-radius: 10px; color: $dcta-navy; background: $dcta-bg; text-align: start; transition: border-color 120ms ease, background 120ms ease; }
+    .dcta_shortcut:hover { border-color: #bad6ff; background: #eef5ff; }
+    .dcta_shortcut > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; color: #fff; background: $dcta-blue; }
+    .dcta_shortcut > i { color: #a2aec0; font-size: 0.7rem; }
+    .dcta_shortcut strong { font-size: 0.78rem; }
+
+    .dcta_activity_panel { margin-top: 1rem; }
+    .dcta_activity_grid { margin-top: 1rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+    .dcta_activity_item { min-width: 0; display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 0.65rem; padding: 0.7rem; border: 1px solid #edf1f6; border-radius: 10px; color: $dcta-navy; background: #fff; text-align: start; }
+    .dcta_activity_item:hover { border-color: #bad6ff; background: #f8fbff; }
+    .dcta_entry_icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9px; color: $dcta-blue; background: #eaf2ff; }
+    .dcta_entry_text,
+    .dcta_entry_amount { min-width: 0; display: flex; flex-direction: column; }
+    .dcta_entry_text strong,
+    .dcta_entry_amount strong { overflow: hidden; font-size: 0.76rem; text-overflow: ellipsis; white-space: nowrap; }
+    .dcta_entry_text small,
+    .dcta_entry_amount small { overflow: hidden; color: #94a3b8; font-size: 0.64rem; text-overflow: ellipsis; white-space: nowrap; }
+    .dcta_entry_amount { align-items: flex-end; }
+
+    .dcta_empty_state { min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.55rem; color: #94a3b8; text-align: center; }
+    .dcta_empty_state i { color: #82d3b8; font-size: 1.8rem; }
+    .dcta_empty_state p { margin: 0; }
+}
+
+@keyframes dcta-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 1250px) {
+    .o_dct_accounting {
+        .dcta_metric_grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .dcta_primary_grid { grid-template-columns: 1fr 1fr; }
+        .dcta_profit_panel { grid-column: 1 / -1; }
+        .dcta_activity_grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+}
+
+@media (max-width: 900px) {
+    .o_dct_accounting {
+        .dcta_secondary_grid { grid-template-columns: 1fr; }
+        .dcta_balance_art { display: none; }
+        .dcta_balance_strip { flex-wrap: wrap; }
+    }
+}
+
+@media (max-width: 680px) {
+    .o_dct_accounting {
+        .dcta_hero { align-items: stretch; flex-direction: column; padding: 1.25rem; }
+        .dcta_hero_brand { align-items: flex-start; }
+        .dcta_logo { width: 112px; height: 62px; }
+        .dcta_brand_divider { display: none; }
+        .dcta_hero_actions { justify-content: space-between; }
+        .dcta_period_picker { flex: 1; }
+        .dcta_period_picker select { flex: 1; }
+        .dcta_metric_grid,
+        .dcta_primary_grid,
+        .dcta_activity_grid { grid-template-columns: 1fr; }
+        .dcta_profit_panel { grid-column: auto; }
+        .dcta_balance_strip { align-items: flex-start; flex-direction: column; }
+        .dcta_balance_rule { width: 100%; height: 1px; }
+        .dcta_balance_strip > div { min-width: 0; width: 100%; }
+        .dcta_panel { padding: 1rem; }
+        .dcta_chart_legend { flex-direction: column; gap: 0.25rem; }
+    }
+}
+
+[dir="rtl"] .o_dct_accounting {
+    .dcta_shortcut > .fa-chevron-right,
+    .dcta_text_action .fa-arrow-right { transform: rotate(180deg); }
+}
+
+

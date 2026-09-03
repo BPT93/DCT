@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_dct_account_report_wizard_form" model="ir.ui.view">
+        <field name="name">dct.account.report.wizard.form</field>
+        <field name="model">dct.account.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="DCT Financial Report" create="0" delete="0" class="o_dct_report_form">
+                <header>
+                    <button name="action_generate_report" type="object" string="Generate" icon="fa-refresh" class="btn-primary"/>
+                    <button name="action_print_pdf" type="object" string="PDF" icon="fa-file-pdf-o" invisible="not line_count"/>
+                    <button name="action_export_xlsx" type="object" string="XLSX" icon="fa-file-excel-o" invisible="not line_count"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="report_type"/>
+                        <h1><field name="report_type"/></h1>
+                        <p class="text-muted mb-0">
+                            Built from native Odoo Community journal items in <field name="currency_id" class="oe_inline" readonly="1"/>.
+                        </p>
+                    </div>
+                    <group>
+                        <group string="Period &amp; Scope">
+                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                            <field name="date_from" invisible="report_type == 'balance_sheet'"/>
+                            <field name="date_to"/>
+                            <field name="target_move" widget="radio" options="{'horizontal': true}"/>
+                            <field name="show_zero"/>
+                        </group>
+                        <group string="Detailed Filters">
+                            <field name="journal_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="account_ids" widget="many2many_tags" options="{'no_create': True}" invisible="report_type in ('partner_ledger', 'journal_ledger')"/>
+                            <field name="partner_ids" widget="many2many_tags" options="{'no_create': True}" invisible="report_type != 'partner_ledger'"/>
+                            <field name="comparison"/>
+                            <field name="generated_at" invisible="not generated_at"/>
+                            <field name="line_count" invisible="1"/>
+                            <field name="report_name" invisible="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info border-0 mt-3" role="status" invisible="line_count">
+                        Choose the scope and select <strong>Generate</strong>. Report lines can then be opened to inspect the underlying journal items.
+                    </div>
+                    <field name="line_ids" nolabel="1" readonly="1" invisible="not line_count">
+                        <list create="0" delete="0" edit="0"
+                              decoration-bf="is_total"
+                              decoration-info="line_type == 'section'"
+                              default_order="sequence">
+                            <field name="sequence" column_invisible="True"/>
+                            <field name="line_type" column_invisible="True"/>
+                            <field name="is_total" column_invisible="True"/>
+                            <field name="can_drilldown" column_invisible="True"/>
+                            <field name="currency_id" column_invisible="True"/>
+                            <field name="code" string="Code" optional="show"/>
+                            <field name="name" string="Account / Partner / Journal"/>
+                            <field name="opening_balance" string="Opening" widget="monetary"
+                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet')"/>
+                            <field name="period_debit" string="Debit" widget="monetary"
+                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet')"/>
+                            <field name="period_credit" string="Credit" widget="monetary"
+                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet')"/>
+                            <field name="debit" widget="monetary"
+                                   column_invisible="parent.report_type not in ('profit_loss', 'balance_sheet')" optional="hide"/>
+                            <field name="credit" widget="monetary"
+                                   column_invisible="parent.report_type not in ('profit_loss', 'balance_sheet')" optional="hide"/>
+                            <field name="balance" string="Balance" widget="monetary"/>
+                            <field name="ending_balance" string="Ending" widget="monetary"
+                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet')"/>
+                            <field name="comparison_balance" string="Comparison" widget="monetary"
+                                   column_invisible="parent.comparison == 'none'"/>
+                            <field name="variance" string="Variance" widget="monetary"
+                                   column_invisible="parent.comparison == 'none'"/>
+                            <button name="action_open_journal_items" type="object" icon="fa-external-link"
+                                    title="Open Journal Items" invisible="not can_drilldown"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dct_profit_loss" model="ir.actions.act_window">
+        <field name="name">Profit &amp; Loss</field>
+        <field name="res_model">dct.account.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dct_account_report_wizard_form"/>
+        <field name="target">current</field>
+        <field name="context">{'default_report_type': 'profit_loss'}</field>
+    </record>
+    <record id="action_dct_balance_sheet" model="ir.actions.act_window">
+        <field name="name">Balance Sheet</field>
+        <field name="res_model">dct.account.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dct_account_report_wizard_form"/>
+        <field name="target">current</field>
+        <field name="context">{'default_report_type': 'balance_sheet'}</field>
+    </record>
+    <record id="action_dct_trial_balance" model="ir.actions.act_window">
+        <field name="name">Trial Balance</field>
+        <field name="res_model">dct.account.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dct_account_report_wizard_form"/>
+        <field name="target">current</field>
+        <field name="context">{'default_report_type': 'trial_balance'}</field>
+    </record>
+    <record id="action_dct_general_ledger" model="ir.actions.act_window">
+        <field name="name">General Ledger</field>
+        <field name="res_model">dct.account.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dct_account_report_wizard_form"/>
+        <field name="target">current</field>
+        <field name="context">{'default_report_type': 'general_ledger'}</field>
+    </record>
+    <record id="action_dct_partner_ledger" model="ir.actions.act_window">
+        <field name="name">Partner Ledger</field>
+        <field name="res_model">dct.account.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dct_account_report_wizard_form"/>
+        <field name="target">current</field>
+        <field name="context">{'default_report_type': 'partner_ledger'}</field>
+    </record>
+    <record id="action_dct_journal_ledger" model="ir.actions.act_window">
+        <field name="name">Journal Ledger</field>
+        <field name="res_model">dct.account.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dct_account_report_wizard_form"/>
+        <field name="target">current</field>
+        <field name="context">{'default_report_type': 'journal_ledger'}</field>
+    </record>
+
+    <!-- Clean-room interactive reports with an Enterprise-style workflow. The
+         legacy form actions above remain available as a safe fallback. -->
+    <record id="action_dct_profit_loss_interactive" model="ir.actions.client">
+        <field name="name">Profit &amp; Loss</field>
+        <field name="tag">dct_accounting.report</field>
+        <field name="target">current</field>
+        <field name="context">{'report_type': 'profit_loss'}</field>
+    </record>
+    <record id="action_dct_balance_sheet_interactive" model="ir.actions.client">
+        <field name="name">Balance Sheet</field>
+        <field name="tag">dct_accounting.report</field>
+        <field name="target">current</field>
+        <field name="context">{'report_type': 'balance_sheet'}</field>
+    </record>
+    <record id="action_dct_trial_balance_interactive" model="ir.actions.client">
+        <field name="name">Trial Balance</field>
+        <field name="tag">dct_accounting.report</field>
+        <field name="target">current</field>
+        <field name="context">{'report_type': 'trial_balance'}</field>
+    </record>
+    <record id="action_dct_general_ledger_interactive" model="ir.actions.client">
+        <field name="name">General Ledger</field>
+        <field name="tag">dct_accounting.report</field>
+        <field name="target">current</field>
+        <field name="context">{'report_type': 'general_ledger'}</field>
+    </record>
+    <record id="action_dct_partner_ledger_interactive" model="ir.actions.client">
+        <field name="name">Partner Ledger</field>
+        <field name="tag">dct_accounting.report</field>
+        <field name="target">current</field>
+        <field name="context">{'report_type': 'partner_ledger'}</field>
+    </record>
+    <record id="action_dct_journal_ledger_interactive" model="ir.actions.client">
+        <field name="name">Journal Ledger</field>
+        <field name="tag">dct_accounting.report</field>
+        <field name="target">current</field>
+        <field name="context">{'report_type': 'journal_ledger'}</field>
+    </record>
+</odoo>
+
+

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="dct_accounting.InteractiveReport">
+        <main class="o_dct_interactive_report">
+            <header class="o_dct_report_topbar">
+                <div class="o_dct_report_title">
+                    <span class="o_dct_report_mark"><i class="fa fa-bar-chart" aria-hidden="true"/></span>
+                    <div>
+                        <p>ACCOUNTING REPORT</p>
+                        <h1 t-esc="state.data.report_name || 'Financial Report'"/>
+                        <span><t t-esc="state.data.company_name"/> · <t t-esc="periodLabel"/></span>
+                    </div>
+                </div>
+                <div class="o_dct_report_actions">
+                    <button class="btn btn-light" t-on-click="loadReport" t-att-disabled="state.loading">
+                        <i class="fa fa-refresh" aria-hidden="true"/><span>Refresh</span>
+                    </button>
+                    <button class="btn btn-light" t-on-click="printPdf" t-att-disabled="state.loading">
+                        <i class="fa fa-file-pdf-o" aria-hidden="true"/><span>PDF</span>
+                    </button>
+                    <button class="btn btn-primary" t-on-click="exportXlsx" t-att-disabled="state.loading">
+                        <i class="fa fa-file-excel-o" aria-hidden="true"/><span>Export XLSX</span>
+                    </button>
+                </div>
+            </header>
+
+            <section class="o_dct_report_toolbar">
+                <label class="o_dct_report_selector">
+                    <i class="fa fa-file-text-o" aria-hidden="true"/>
+                    <select t-att-value="state.options.report_type" t-on-change="onReportTypeChange" aria-label="Report">
+                        <option t-foreach="reportTypes" t-as="report" t-key="report[0]"
+                                t-att-value="report[0]" t-att-selected="report[0] === state.options.report_type"
+                                t-esc="report[1]"/>
+                    </select>
+                </label>
+                <div class="o_dct_direct_filter o_dct_period_filter">
+                    <i class="fa fa-calendar" aria-hidden="true"/>
+                    <span><small>Period</small><strong t-esc="periodLabel"/></span>
+                    <select t-att-value="state.periodPreset" t-on-change="onPeriodPresetChange" aria-label="Period">
+                        <option value="month" t-att-selected="state.periodPreset === 'month'">This Month</option>
+                        <option value="quarter" t-att-selected="state.periodPreset === 'quarter'">This Quarter</option>
+                        <option value="year" t-att-selected="state.periodPreset === 'year'">This Year</option>
+                        <option value="last_month" t-att-selected="state.periodPreset === 'last_month'">Last Month</option>
+                        <option value="custom" t-att-selected="state.periodPreset === 'custom'">Custom Range</option>
+                    </select>
+                    <i class="fa fa-angle-down" aria-hidden="true"/>
+                    <div t-if="state.dateOpen" class="o_dct_direct_popover o_dct_date_popover">
+                        <label>Date From<input type="date" t-att-value="state.options.date_from" t-on-change="onDateFromChange"/></label>
+                        <label>Date To<input type="date" t-att-value="state.options.date_to" t-on-change="onDateToChange"/></label>
+                        <button type="button" class="btn btn-primary" t-on-click.prevent="applyFilters">Update Period</button>
+                    </div>
+                </div>
+                <label class="o_dct_direct_filter">
+                    <i class="fa fa-check-circle-o" aria-hidden="true"/>
+                    <span><small>Entries</small><strong t-esc="targetMoveLabel"/></span>
+                    <select t-att-value="state.options.target_move" t-on-change="onTargetMoveChange" aria-label="Entries">
+                        <option value="posted" t-att-selected="state.options.target_move === 'posted'">Posted Entries</option>
+                        <option value="all" t-att-selected="state.options.target_move === 'all'">All Entries</option>
+                    </select>
+                    <i class="fa fa-angle-down" aria-hidden="true"/>
+                </label>
+                <label class="o_dct_direct_filter">
+                    <i class="fa fa-columns" aria-hidden="true"/>
+                    <span><small>Comparison</small><strong t-esc="comparisonLabel"/></span>
+                    <select t-att-value="state.options.comparison" t-on-change="onComparisonChange" aria-label="Comparison">
+                        <option value="none" t-att-selected="state.options.comparison === 'none'">No Comparison</option>
+                        <option value="previous_period" t-att-selected="state.options.comparison === 'previous_period'">Previous Period</option>
+                        <option value="previous_year" t-att-selected="state.options.comparison === 'previous_year'">Previous Year</option>
+                    </select>
+                    <i class="fa fa-angle-down" aria-hidden="true"/>
+                </label>
+                <div class="o_dct_direct_filter o_dct_journal_filter">
+                    <button type="button" class="o_dct_direct_button" t-on-click="toggleJournals">
+                        <i class="fa fa-book" aria-hidden="true"/>
+                        <span><small>Journals</small><strong t-esc="journalLabel"/></span>
+                        <i class="fa fa-angle-down" aria-hidden="true"/>
+                    </button>
+                    <div t-if="state.journalOpen" class="o_dct_direct_popover o_dct_journal_options">
+                        <label t-foreach="state.data.journals" t-as="journal" t-key="journal.id">
+                            <input type="checkbox"
+                                   t-att-checked="state.options.journal_ids.includes(journal.id)"
+                                   t-on-change="() => this.toggleJournal(journal.id)"/>
+                            <span><strong t-esc="journal.code"/> <t t-esc="journal.name"/></span>
+                        </label>
+                        <p t-if="!state.data.journals.length">No journals available.</p>
+                        <div class="o_dct_popover_actions">
+                            <button type="button" class="btn btn-light" t-on-click="clearJournals">Clear</button>
+                            <button type="button" class="btn btn-primary" t-on-click="applyFilters">Apply Journals</button>
+                        </div>
+                    </div>
+                </div>
+                <label class="o_dct_direct_zero_filter">
+                    <input type="checkbox" t-att-checked="state.options.show_zero" t-on-change="onShowZeroChange"/>
+                    <span>Show Zero</span>
+                </label>
+                <button type="button" class="o_dct_reset_filters" t-on-click="resetFilters" title="Reset filters" aria-label="Reset filters">
+                    <i class="fa fa-undo"/><span>Reset</span>
+                </button>
+            </section>
+
+            <section class="o_dct_report_workspace">
+                <div class="o_dct_report_subbar">
+                    <div class="o_dct_line_search">
+                        <i class="fa fa-search" aria-hidden="true"/>
+                        <input t-model="state.lineSearch" type="search" placeholder="Search report lines…" aria-label="Search report lines"/>
+                        <span><t t-esc="visibleLines.length"/> lines</span>
+                    </div>
+                    <div class="o_dct_fold_actions" t-if="sectionKeys.length">
+                        <button t-on-click="unfoldAll"><i class="fa fa-plus-square-o"/> Unfold All</button>
+                        <button t-on-click="foldAll"><i class="fa fa-minus-square-o"/> Fold All</button>
+                    </div>
+                </div>
+
+                <div t-if="state.loading" class="o_dct_report_loading">
+                    <span class="o_dct_report_spinner"><i class="fa fa-refresh fa-spin"/></span>
+                    <strong>Building <t t-esc="state.data.report_name || 'your report'"/>…</strong>
+                    <small>Reading posted journal items</small>
+                </div>
+
+                <div t-else="" class="o_dct_report_table_wrap">
+                    <table class="o_dct_report_table">
+                        <thead>
+                            <tr>
+                                <th class="is-code">Code</th>
+                                <th class="is-name">Account / Partner / Journal</th>
+                                <t t-if="isStatement">
+                                    <th class="is-number">Balance</th>
+                                </t>
+                                <t t-else="">
+                                    <th class="is-number is-secondary">Opening</th>
+                                    <th class="is-number is-secondary">Debit</th>
+                                    <th class="is-number is-secondary">Credit</th>
+                                    <th class="is-number">Ending Balance</th>
+                                </t>
+                                <t t-if="hasComparison">
+                                    <th class="is-number is-comparison" t-esc="state.data.comparison_label"/>
+                                    <th class="is-number is-variance">Variance</th>
+                                </t>
+                                <th class="is-drill" aria-label="Drill down"/>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="visibleLines" t-as="line" t-key="line.id"
+                                t-att-class="'is-' + line.line_type + (line.is_total ? ' is-total' : '')">
+                                <td class="is-code" t-esc="line.code"/>
+                                <td class="is-name">
+                                    <button t-if="line.line_type === 'section'" class="o_dct_section_toggle"
+                                            t-on-click="() => this.toggleSection(line.section_key)">
+                                        <i t-att-class="state.collapsed[line.section_key] ? 'fa fa-caret-right' : 'fa fa-caret-down'"/>
+                                        <span t-esc="line.name"/>
+                                    </button>
+                                    <button t-elif="line.can_drilldown" class="o_dct_report_line_link"
+                                            t-on-click="() => this.openLine(line)" t-esc="line.name"/>
+                                    <span t-else="" t-esc="line.name"/>
+                                </td>
+                                <t t-if="isStatement">
+                                    <td class="is-number" t-esc="formatCurrency(line.balance)"/>
+                                </t>
+                                <t t-else="">
+                                    <td class="is-number is-secondary" t-esc="formatCurrency(line.opening_balance)"/>
+                                    <td class="is-number is-secondary" t-esc="formatCurrency(line.debit)"/>
+                                    <td class="is-number is-secondary" t-esc="formatCurrency(line.credit)"/>
+                                    <td class="is-number" t-esc="formatCurrency(line.ending_balance)"/>
+                                </t>
+                                <t t-if="hasComparison">
+                                    <td class="is-number is-comparison" t-esc="formatCurrency(line.comparison_balance)"/>
+                                    <td class="is-number is-variance"
+                                        t-att-class="{'is-positive': line.variance > 0, 'is-negative': line.variance &lt; 0}"
+                                        t-esc="formatCurrency(line.variance)"/>
+                                </t>
+                                <td class="is-drill">
+                                    <button t-if="line.can_drilldown" t-on-click="() => this.openLine(line)" title="Open journal items" aria-label="Open journal items">
+                                        <i class="fa fa-chevron-right"/>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div t-if="!visibleLines.length" class="o_dct_report_empty">
+                        <i class="fa fa-search"/>
+                        <h3>No report lines found</h3>
+                        <p>Change the filters or clear your line search.</p>
+                    </div>
+                </div>
+
+                <footer class="o_dct_report_footer" t-if="!state.loading">
+                    <span><i class="fa fa-check-circle"/> Generated from native Odoo journal items</span>
+                    <span><t t-esc="state.data.lines.length"/> total lines · <t t-esc="targetMoveLabel"/></span>
+                </footer>
+            </section>
+        </main>
+    </t>
+</templates>
+
+

@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dct_account_report_wizard,dct.account.report.wizard,model_dct_account_report_wizard,account.group_account_readonly,1,1,1,1
+access_dct_account_report_line,dct.account.report.line,model_dct_account_report_line,account.group_account_readonly,1,1,1,1
+
+

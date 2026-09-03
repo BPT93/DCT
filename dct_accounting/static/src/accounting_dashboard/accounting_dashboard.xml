@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="dct_accounting.Dashboard">
+        <div class="o_dct_accounting">
+            <div t-if="!state.data" class="dcta_loading_state">
+                <span class="dcta_spinner"/>
+                <p>Preparing your financial workspace…</p>
+            </div>
+
+            <t t-else="">
+                <header class="dcta_hero">
+                    <div class="dcta_hero_brand">
+                        <img src="/dct_accounting/static/src/img/dct_logo.png" alt="DCT" class="dcta_logo"/>
+                        <span class="dcta_brand_divider"/>
+                        <div>
+                            <p class="dcta_eyebrow">Accounting command center</p>
+                            <h1><t t-esc="state.data.company.name"/></h1>
+                            <p class="dcta_period_caption"><t t-esc="state.data.period.label"/> · Updated <t t-esc="state.data.updated_at"/></p>
+                        </div>
+                    </div>
+                    <div class="dcta_hero_actions">
+                        <label class="dcta_period_picker">
+                            <i class="fa fa-calendar"/>
+                            <select t-att-value="state.period" t-on-change="onPeriodChange">
+                                <option value="month">This month</option>
+                                <option value="quarter">This quarter</option>
+                                <option value="year">This year</option>
+                            </select>
+                        </label>
+                        <button class="dcta_refresh" t-on-click="loadData" t-att-disabled="state.loading" title="Refresh dashboard">
+                            <i t-att-class="'fa fa-refresh ' + (state.loading ? 'fa-spin' : '')"/>
+                        </button>
+                    </div>
+                </header>
+
+                <div t-if="state.error" class="dcta_error_banner">
+                    <i class="fa fa-exclamation-circle"/>
+                    Some information could not be refreshed. The previous snapshot is still displayed.
+                </div>
+
+                <main class="dcta_content">
+                    <section class="dcta_metric_grid" aria-label="Financial key performance indicators">
+                        <article t-foreach="state.data.metrics" t-as="metric" t-key="metric.id" t-att-class="'dcta_metric_card accent-' + metric.accent">
+                            <div class="dcta_metric_topline">
+                                <span class="dcta_metric_icon"><i t-att-class="'fa ' + metric.icon"/></span>
+                                <span t-if="metric.change !== null" t-att-class="'dcta_change ' + metricTone(metric)">
+                                    <i t-att-class="'fa ' + changeIcon(metric)"/>
+                                    <t t-esc="formatNumber(Math.abs(metric.change), 1)"/>%
+                                </span>
+                            </div>
+                            <p class="dcta_metric_label"><t t-esc="metric.label"/></p>
+                            <h2 class="dcta_metric_value"><t t-esc="formatCurrency(metric.value)"/></h2>
+                            <p class="dcta_metric_hint" t-if="metric.change !== null">versus previous period</p>
+                            <p class="dcta_metric_hint" t-else="">current open balance</p>
+                        </article>
+                    </section>
+
+                    <section class="dcta_balance_strip">
+                        <div>
+                            <span class="dcta_balance_icon"><i class="fa fa-bank"/></span>
+                            <p>Cash &amp; bank balance</p>
+                            <strong><t t-esc="formatCurrency(state.data.cash_balance)"/></strong>
+                        </div>
+                        <span class="dcta_balance_rule"/>
+                        <div>
+                            <span t-att-class="'dcta_balance_icon ' + (state.data.net_profit >= 0 ? 'profit' : 'loss')"><i class="fa fa-balance-scale"/></span>
+                            <p>Net profit</p>
+                            <strong t-att-class="state.data.net_profit >= 0 ? 'is-profit' : 'is-loss'"><t t-esc="formatCurrency(state.data.net_profit)"/></strong>
+                        </div>
+                        <span class="dcta_balance_art" aria-hidden="true">DCT</span>
+                    </section>
+
+                    <section class="dcta_primary_grid">
+                        <article class="dcta_panel dcta_profit_panel">
+                            <div class="dcta_panel_header">
+                                <div><p class="dcta_eyebrow">Income statement</p><h3>Revenue vs expenses</h3></div>
+                                <div class="dcta_chart_legend"><span><i class="revenue"/>Revenue</span><span><i class="expense"/>Expenses</span></div>
+                            </div>
+                            <div class="dcta_dual_chart">
+                                <div t-foreach="profitBars" t-as="bar" t-key="bar.label" class="dcta_dual_column">
+                                    <div class="dcta_dual_track">
+                                        <span class="dcta_revenue_bar" t-att-style="'height:' + bar.revenueHeight + '%'" t-att-title="'Revenue: ' + formatCurrency(bar.revenue)"/>
+                                        <span class="dcta_expense_bar" t-att-style="'height:' + bar.expenseHeight + '%'" t-att-title="'Expenses: ' + formatCurrency(bar.expenses)"/>
+                                    </div>
+                                    <span><t t-esc="bar.label"/></span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="dcta_panel dcta_aging_panel">
+                            <div class="dcta_panel_header"><div><p class="dcta_eyebrow">Working capital</p><h3>Receivable aging</h3></div></div>
+                            <div class="dcta_aging_list">
+                                <div t-foreach="agingRows('receivable')" t-as="bucket" t-key="bucket.id" class="dcta_aging_row">
+                                    <div class="dcta_aging_meta"><span><t t-esc="bucket.label"/></span><strong><t t-esc="formatCurrency(bucket.value)"/></strong></div>
+                                    <div class="dcta_aging_track"><span t-att-style="'width:' + bucket.width + '%'"/></div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="dcta_panel dcta_aging_panel payable">
+                            <div class="dcta_panel_header"><div><p class="dcta_eyebrow">Liabilities</p><h3>Payable aging</h3></div></div>
+                            <div class="dcta_aging_list">
+                                <div t-foreach="agingRows('payable')" t-as="bucket" t-key="bucket.id" class="dcta_aging_row">
+                                    <div class="dcta_aging_meta"><span><t t-esc="bucket.label"/></span><strong><t t-esc="formatCurrency(bucket.value)"/></strong></div>
+                                    <div class="dcta_aging_track"><span t-att-style="'width:' + bucket.width + '%'"/></div>
+                                </div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section class="dcta_secondary_grid">
+                        <article class="dcta_panel dcta_overdue_panel">
+                            <div class="dcta_panel_header">
+                                <div><p class="dcta_eyebrow">Collection focus</p><h3>Overdue customer invoices</h3></div>
+                                <button class="dcta_text_action" t-on-click="() => this.openAction('account.action_move_out_invoice')">View all <i class="fa fa-arrow-right"/></button>
+                            </div>
+                            <div t-if="state.data.overdue_invoices.length" class="dcta_table_wrap">
+                                <table class="dcta_table">
+                                    <thead><tr><th>Invoice</th><th>Customer</th><th>Due</th><th class="text-end">Open amount</th></tr></thead>
+                                    <tbody>
+                                        <tr t-foreach="state.data.overdue_invoices" t-as="invoice" t-key="invoice.id" t-on-click="() => this.openMove(invoice.id)">
+                                            <td><strong><t t-esc="invoice.name"/></strong></td>
+                                            <td><t t-esc="invoice.partner"/></td>
+                                            <td><span class="dcta_overdue_badge"><t t-esc="formatNumber(invoice.days_overdue)"/> days</span><small><t t-esc="invoice.due_date"/></small></td>
+                                            <td class="text-end"><strong><t t-esc="formatCurrency(invoice.amount)"/></strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div t-else="" class="dcta_empty_state"><i class="fa fa-check-circle"/><p>No overdue customer invoices.</p></div>
+                        </article>
+
+                        <aside class="dcta_panel dcta_shortcuts_panel">
+                            <div class="dcta_panel_header"><div><p class="dcta_eyebrow">Daily work</p><h3>Quick access</h3></div></div>
+                            <div class="dcta_shortcut_list">
+                                <button t-foreach="state.data.shortcuts" t-as="shortcut" t-key="shortcut.xmlid" t-on-click="() => this.openAction(shortcut.xmlid)" class="dcta_shortcut">
+                                    <span><i t-att-class="'fa ' + shortcut.icon"/></span><strong><t t-esc="shortcut.label"/></strong><i class="fa fa-chevron-right"/>
+                                </button>
+                            </div>
+                        </aside>
+                    </section>
+
+                    <section class="dcta_panel dcta_activity_panel">
+                        <div class="dcta_panel_header"><div><p class="dcta_eyebrow">Ledger activity</p><h3>Recent posted entries</h3></div></div>
+                        <div class="dcta_activity_grid">
+                            <button t-foreach="state.data.recent_entries" t-as="entry" t-key="entry.id" t-on-click="() => this.openMove(entry.id)" class="dcta_activity_item">
+                                <span class="dcta_entry_icon"><i class="fa fa-book"/></span>
+                                <span class="dcta_entry_text"><strong><t t-esc="entry.name"/></strong><small><t t-esc="entry.label"/></small></span>
+                                <span class="dcta_entry_amount"><strong><t t-esc="formatCurrency(entry.amount)"/></strong><small><t t-esc="entry.date"/></small></span>
+                            </button>
+                        </div>
+                        <div t-if="!state.data.recent_entries.length" class="dcta_empty_state"><i class="fa fa-folder-open-o"/><p>No posted entries to show.</p></div>
+                    </section>
+                </main>
+            </t>
+        </div>
+    </t>
+</templates>
+
+

@@ -1,0 +1,49 @@
+.o_dct_login_page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 15% 18%, rgba(76, 154, 255, 0.30), transparent 30rem),
+        radial-gradient(circle at 90% 78%, rgba(21, 119, 255, 0.24), transparent 34rem),
+        linear-gradient(145deg, #0d0c1e 0%, #0b1f46 56%, #0a132b 100%) !important;
+
+    &::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.19;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+        background-size: 54px 54px;
+        mask-image: linear-gradient(to bottom, black, transparent 82%);
+    }
+
+    .o_dct_login_card {
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.19) !important;
+        border-radius: 1.35rem;
+        background: rgba(255, 255, 255, 0.94) !important;
+        box-shadow: 0 28px 90px rgba(4, 3, 22, 0.43);
+        backdrop-filter: blur(20px);
+    }
+
+    .o_dct_login_logo {
+        width: 100%;
+        max-width: 330px;
+        max-height: 112px;
+        object-fit: contain;
+    }
+
+    .o_dct_login_footer {
+        color: #737286;
+        letter-spacing: 0.01em;
+    }
+
+    .btn-primary {
+        border-color: #1577ff;
+        background: linear-gradient(135deg, #5aa1ff, #0f5fcd);
+        box-shadow: 0 10px 24px rgba(21, 119, 255, 0.24);
+    }
+}
+
+
