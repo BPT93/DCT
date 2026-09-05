@@ -137,12 +137,25 @@ $dct-muted: #64748b;
 
     .dct_period_picker option { color: $dct-navy; background: #fff; }
 
+    .dct_theme_toggle,
     .dct_refresh {
         width: 42px;
         height: 42px;
-        border: 0;
         border-radius: 10px;
         color: #fff;
+        cursor: pointer;
+    }
+
+    .dct_theme_toggle {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.09);
+        backdrop-filter: blur(8px);
+    }
+
+    .dct_theme_toggle:hover { background: rgba(255, 255, 255, 0.17); }
+
+    .dct_refresh {
+        border: 0;
         background: $dct-blue;
         box-shadow: 0 6px 16px rgba(21, 119, 255, 0.32);
     }
@@ -500,6 +513,73 @@ $dct-muted: #64748b;
     .dct_empty_state.compact { min-height: 180px; }
     .dct_empty_state i { color: #cbd5e1; font-size: 1.8rem; }
     .dct_empty_state p { margin: 0; max-width: 280px; font-size: 0.8rem; }
+
+    &.dct-theme-dark {
+        color: #e5eefb;
+        background:
+            radial-gradient(circle at 92% 4%, rgba(43, 185, 255, 0.11), transparent 25rem),
+            #08111f;
+
+        .dct_loading_state,
+        .dct_metric_label,
+        .dct_chart_label,
+        .dct_pipeline_row,
+        .dct_logistics_strip > div,
+        .dct_table td,
+        .dct_empty_state { color: #9aabc0; }
+
+        .dct_spinner { border-color: #263b55; border-top-color: $dct-blue; }
+
+        .dct_metric_card,
+        .dct_panel {
+            border-color: #23354b;
+            background: #101c2e;
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.2);
+        }
+
+        .dct_metric_card:hover { box-shadow: 0 16px 38px rgba(0, 0, 0, 0.28); }
+        .dct_metric_card::after { background: rgba(43, 185, 255, 0.06); }
+
+        .dct_metric_value,
+        .dct_panel_header h3,
+        .dct_pipeline_row strong,
+        .dct_logistics_strip strong,
+        .dct_table td strong { color: #f5f9ff; }
+
+        .dct_metric_icon { background: #172c48; }
+        .accent-navy .dct_metric_icon { color: #78b2ff; background: #1d3150; }
+        .accent-cyan .dct_metric_icon { color: #62ccff; background: #133044; }
+        .accent-violet .dct_metric_icon { color: #b9a4ff; background: #292347; }
+
+        .dct_change.is-positive { color: #66dab4; background: #11372f; }
+        .dct_change.is-negative { color: #ff9b92; background: #402027; }
+        .dct_change.is-neutral { color: #b1bfd0; background: #223147; }
+        .dct_panel_badge { color: #8fc1ff; background: #172c48; }
+
+        .dct_bar_chart {
+            border-bottom-color: #2a3d55;
+            background: repeating-linear-gradient(to top, transparent 0, transparent 58px, #22334a 59px);
+        }
+
+        .dct_pipeline_bar { background: #223248; }
+        .dct_pipeline_row { border-bottom-color: #223248; }
+        .dct_logistics_strip > div,
+        .dct_shortcut { background: #172438; }
+
+        .dct_table th { border-bottom-color: #2a3d55; }
+        .dct_table td { border-bottom-color: #223248; }
+        .dct_table tbody tr:hover { background: #162740; }
+
+        .dct_status { color: #b8c5d5; background: #223248; }
+        .dct_status.status-paid { color: #66dab4; background: #11372f; }
+        .dct_status.status-not_paid,
+        .dct_status.status-partial { color: #ffb27f; background: #3e2a1d; }
+
+        .dct_shortcut { color: #edf5ff; }
+        .dct_shortcut:hover { border-color: #315d91; background: #1a3150; }
+
+        .dct_error_banner { color: #ffb0aa; border-color: #6a3038; background: #351b22; }
+    }
 }
 
 @keyframes dct-spin { to { transform: rotate(360deg); } }

@@ -11,6 +11,11 @@ class TestDctDashboard(TransactionCase):
         self.assertEqual(len(payload["metrics"]), 4)
         self.assertEqual(len(payload["revenue_trend"]), 6)
         self.assertIn("accounting", payload["availability"])
+        self.assertEqual(payload["company"]["id"], self.env.company.id)
+        self.assertEqual(
+            payload["company"]["logo_url"],
+            f"/web/image/res.company/{self.env.company.id}/logo_web",
+        )
 
     def test_invalid_period_falls_back_to_month(self):
         payload = self.env["dct.dashboard"].get_dashboard_data(period="invalid")

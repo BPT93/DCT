@@ -107,5 +107,10 @@ class TestDctAccountReports(AccountTestInvoicingCommon):
         self.assertEqual(len(payload["metrics"]), 4)
         self.assertEqual(len(payload["profit_trend"]), 6)
         self.assertEqual(len(payload["receivable_aging"]), 5)
+        self.assertEqual(payload["company"]["id"], self.env.company.id)
+        self.assertEqual(
+            payload["company"]["logo_url"],
+            f"/web/image/res.company/{self.env.company.id}/logo_web",
+        )
 
 

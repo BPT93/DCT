@@ -203,4 +203,64 @@
     }
 }
 
+:root[data-dct-theme="dark"] {
+    color-scheme: dark;
+    --dct-ink: #e7eef8;
+    --dct-surface: #101c2e;
+    --dct-canvas: #08111f;
+    --dct-muted: #9aabc0;
+    --dct-line: #26384e;
+    --dct-shadow: 0 16px 45px rgba(0, 0, 0, 0.24);
+
+    body,
+    .o_web_client,
+    .o_action_manager,
+    .o_content,
+    .o_view_controller { color: #e5eefb; background-color: var(--dct-canvas); }
+
+    .o_control_panel {
+        color: #e5eefb;
+        border-bottom-color: #26384e !important;
+        background: rgba(16, 28, 46, 0.94) !important;
+    }
+
+    .o_list_renderer,
+    .o_kanban_renderer,
+    .o_form_view .o_form_sheet_bg { background-color: #08111f; }
+
+    .o_form_view .o_form_sheet,
+    .o_kanban_record,
+    .modal-content,
+    .o_popover,
+    .dropdown-menu {
+        color: #e5eefb;
+        border-color: #26384e !important;
+        background-color: #101c2e;
+    }
+
+    .o_list_table {
+        color: #dbe7f5;
+
+        thead { color: #bac8d8; background: #172438; }
+        tbody tr { border-color: #26384e; }
+        tbody tr:hover { background-color: #162740 !important; }
+    }
+
+    .dropdown-menu .dropdown-item { color: #dbe7f5; }
+    .dropdown-menu .dropdown-item:hover,
+    .dropdown-menu .dropdown-item:focus { color: #8fc1ff; background: #1a3150; }
+
+    .form-control,
+    .form-select,
+    .o_input {
+        color: #e5eefb;
+        border-color: #354960;
+        background-color: #111f32;
+    }
+
+    .text-muted { color: #9aabc0 !important; }
+}
+
+:root[data-dct-theme="light"] { color-scheme: light; }
+
 

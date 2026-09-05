@@ -107,12 +107,25 @@ $dcta-coral: #ff7452;
     .dcta_period_picker select { border: 0; outline: 0; color: #fff; background: transparent; font-weight: 650; cursor: pointer; }
     .dcta_period_picker option { color: $dcta-navy; background: #fff; }
 
+    .dcta_theme_toggle,
     .dcta_refresh {
         width: 42px;
         height: 42px;
-        border: 0;
         border-radius: 10px;
         color: #fff;
+        cursor: pointer;
+    }
+
+    .dcta_theme_toggle {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.09);
+        backdrop-filter: blur(8px);
+    }
+
+    .dcta_theme_toggle:hover { background: rgba(255, 255, 255, 0.17); }
+
+    .dcta_refresh {
+        border: 0;
         background: $dcta-blue;
         box-shadow: 0 6px 16px rgba(21, 119, 255, 0.32);
     }
@@ -303,6 +316,66 @@ $dcta-coral: #ff7452;
     .dcta_empty_state { min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.55rem; color: #94a3b8; text-align: center; }
     .dcta_empty_state i { color: #82d3b8; font-size: 1.8rem; }
     .dcta_empty_state p { margin: 0; }
+
+    &.dct-theme-dark {
+        color: #e5eefb;
+        background:
+            radial-gradient(circle at 8% 8%, rgba(43, 185, 255, 0.1), transparent 26rem),
+            #08111f;
+
+        .dcta_loading_state,
+        .dcta_metric_label,
+        .dcta_chart_legend,
+        .dcta_dual_column,
+        .dcta_aging_meta,
+        .dcta_table td,
+        .dcta_empty_state { color: #9aabc0; }
+
+        .dcta_spinner { border-color: #263b55; border-top-color: $dcta-blue; }
+
+        .dcta_metric_card,
+        .dcta_panel {
+            border-color: #23354b;
+            background: #101c2e;
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.2);
+        }
+
+        .dcta_metric_card::after { background: rgba(43, 185, 255, 0.06); }
+
+        .dcta_metric_value,
+        .dcta_panel_header h3,
+        .dcta_aging_meta strong,
+        .dcta_table td strong { color: #f5f9ff; }
+
+        .dcta_metric_icon,
+        .dcta_entry_icon { background: #172c48; }
+        .accent-coral .dcta_metric_icon { color: #ff9f87; background: #40251f; }
+        .accent-cyan .dcta_metric_icon { color: #62ccff; background: #133044; }
+        .accent-violet .dcta_metric_icon { color: #b9a4ff; background: #292347; }
+
+        .dcta_change.is-positive { color: #66dab4; background: #11372f; }
+        .dcta_change.is-negative { color: #ff9b92; background: #402027; }
+        .dcta_change.is-neutral { color: #b1bfd0; background: #223147; }
+
+        .dcta_dual_chart {
+            border-bottom-color: #2a3d55;
+            background: repeating-linear-gradient(to top, transparent 0, transparent 58px, #22334a 59px);
+        }
+
+        .dcta_aging_track { background: #223248; }
+        .dcta_table th { border-bottom-color: #2a3d55; }
+        .dcta_table td { border-bottom-color: #223248; }
+        .dcta_table tbody tr:hover { background: #162740; }
+        .dcta_overdue_badge { color: #ff9b92; background: #402027; }
+
+        .dcta_shortcut,
+        .dcta_activity_item { color: #edf5ff; background: #172438; }
+        .dcta_shortcut:hover,
+        .dcta_activity_item:hover { border-color: #315d91; background: #1a3150; }
+        .dcta_activity_item { border-color: #23354b; }
+
+        .dcta_error_banner { color: #ffb0aa; border-color: #6a3038; background: #351b22; }
+    }
 }
 
 @keyframes dcta-spin { to { transform: rotate(360deg); } }

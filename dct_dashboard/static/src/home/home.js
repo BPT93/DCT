@@ -6,6 +6,8 @@ import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 import { Component, onMounted, useRef, useState } from "@odoo/owl";
+import { imageUrl } from "@web/core/utils/urls";
+import { getPreferredTheme, saveTheme } from "@dct_dashboard/theme/theme";
 
 
 export class DctHome extends Component {
@@ -16,7 +18,7 @@ export class DctHome extends Component {
         this.menuService = useService("menu");
         this.menuService.setCurrentMenu(this.menuService.getMenu("root"));
         this.searchInput = useRef("searchInput");
-        this.state = useState({ search: "" });
+        this.state = useState({ search: "", theme: getPreferredTheme() });
         this.openApp = this.openApp.bind(this);
         this.clearSearch = this.clearSearch.bind(this);
         onMounted(() => this.searchInput.el?.focus());
@@ -24,6 +26,14 @@ export class DctHome extends Component {
 
     get userName() {
         return user.name || _t("there");
+    }
+
+    get companyName() {
+        return user.activeCompany?.name || _t("Company");
+    }
+
+    get companyLogoUrl() {
+        return imageUrl("res.company", user.activeCompany.id, "logo_web");
     }
 
     get greeting() {
@@ -90,6 +100,10 @@ export class DctHome extends Component {
     clearSearch() {
         this.state.search = "";
         this.searchInput.el?.focus();
+    }
+
+    toggleTheme() {
+        this.state.theme = saveTheme(this.state.theme === "dark" ? "light" : "dark");
     }
 }
 

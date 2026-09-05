@@ -5,6 +5,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
+import { getPreferredTheme, saveTheme } from "@dct_accounting/theme/theme";
 
 
 export class DctAccountingDashboard extends Component {
@@ -17,6 +18,7 @@ export class DctAccountingDashboard extends Component {
         this.notification = useService("notification");
         this.state = useState({
             period: "month",
+            theme: getPreferredTheme(),
             loading: true,
             data: null,
             error: false,
@@ -45,6 +47,10 @@ export class DctAccountingDashboard extends Component {
     onPeriodChange(event) {
         this.state.period = event.target.value;
         return this.loadData();
+    }
+
+    toggleTheme() {
+        this.state.theme = saveTheme(this.state.theme === "dark" ? "light" : "dark");
     }
 
     async openAction(xmlid) {

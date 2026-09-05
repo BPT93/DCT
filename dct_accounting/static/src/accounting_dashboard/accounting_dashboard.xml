@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="dct_accounting.Dashboard">
-        <div class="o_dct_accounting">
+        <div t-att-class="'o_dct_accounting dct-theme-' + state.theme">
             <div t-if="!state.data" class="dcta_loading_state">
                 <span class="dcta_spinner"/>
                 <p>Preparing your financial workspace…</p>
@@ -10,7 +10,7 @@
             <t t-else="">
                 <header class="dcta_hero">
                     <div class="dcta_hero_brand">
-                        <img src="/dct_accounting/static/src/img/dct_logo.png" alt="DCT" class="dcta_logo"/>
+                        <img t-att-src="state.data.company.logo_url" t-att-alt="state.data.company.name + ' logo'" class="dcta_logo"/>
                         <span class="dcta_brand_divider"/>
                         <div>
                             <p class="dcta_eyebrow">Accounting command center</p>
@@ -19,6 +19,12 @@
                         </div>
                     </div>
                     <div class="dcta_hero_actions">
+                        <button class="dcta_theme_toggle"
+                                t-on-click="toggleTheme"
+                                t-att-title="state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+                                t-att-aria-label="state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+                            <i t-att-class="'fa ' + (state.theme === 'dark' ? 'fa-sun-o' : 'fa-moon-o')"/>
+                        </button>
                         <label class="dcta_period_picker">
                             <i class="fa fa-calendar"/>
                             <select t-att-value="state.period" t-on-change="onPeriodChange">

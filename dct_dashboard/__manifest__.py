@@ -17,6 +17,7 @@
         ],
         "web.assets_backend": [
             "dct_dashboard/static/src/scss/theme.scss",
+            "dct_dashboard/static/src/theme/theme.js",
             "dct_dashboard/static/src/home/**/*",
             "dct_dashboard/static/src/dashboard/dashboard.js",
             "dct_dashboard/static/src/dashboard/dashboard.xml",

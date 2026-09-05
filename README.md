@@ -8,14 +8,16 @@ styled with the official DCT navy (`#0A132B`) and electric blue (`#1577FF`).
 - `dct_dashboard` — responsive executive dashboard. It depends only on `web`
   and automatically shows data for Accounting, Sales, Purchase, and Inventory
   when those applications are installed and readable by the current user. It
-  also provides the DCT app launcher, backend palette, navbar, and login theme.
+  also provides the DCT app launcher, a persistent light/dark appearance,
+  company-aware branding, backend palette, navbar, and login theme.
 - `dct_accounting` — dedicated accounting workspace built on Odoo Community's
   `account` module, with period KPIs, cash balance, profit trend, receivable and
   payable aging, overdue invoices, recent activity, and navigation shortcuts.
   Its app menu is restricted to Accounting read-only users and above because it
   summarizes general-ledger balances. It also provides interactive Profit &
   Loss, Balance Sheet, Trial Balance, General Ledger, Partner Ledger, and
-  Journal Ledger reports with drill-down plus PDF/XLSX export.
+  Journal Ledger reports with drill-down plus PDF/XLSX export. Its dashboard
+  uses the active company's Odoo logo and the same saved light/dark preference.
 
 ## Installation
 

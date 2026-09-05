@@ -31,7 +31,9 @@ class DctAccountingDashboard(models.AbstractModel):
         company = self.env.company
         return {
             "company": {
+                "id": company.id,
                 "name": company.name,
+                "logo_url": f"/web/image/res.company/{company.id}/logo_web",
                 "currency": self._currency_payload(company.currency_id),
             },
             "period": {

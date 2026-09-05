@@ -15,6 +15,7 @@
     ],
     "assets": {
         "web.assets_backend": [
+            "dct_accounting/static/src/theme/theme.js",
             "dct_accounting/static/src/accounting_dashboard/accounting_dashboard.js",
             "dct_accounting/static/src/accounting_dashboard/accounting_dashboard.xml",
             "dct_accounting/static/src/accounting_dashboard/accounting_dashboard.scss",
