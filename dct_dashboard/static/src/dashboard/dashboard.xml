@@ -13,7 +13,7 @@
                         <img t-att-src="state.data.company.logo_url" t-att-alt="state.data.company.name + ' logo'" class="dct_logo"/>
                         <span class="dct_brand_divider"/>
                         <div>
-                            <p class="dct_eyebrow">Executive workspace</p>
+                            <p class="dct_eyebrow">Dashboard</p>
                             <h1><t t-esc="state.data.company.name"/></h1>
                             <p class="dct_period_caption"><t t-esc="state.data.period.label"/> · Updated <t t-esc="state.data.updated_at"/></p>
                         </div>

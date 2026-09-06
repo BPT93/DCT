@@ -1,0 +1,6 @@
+# Runtime dependencies for the vendored OCA 19.0 add-ons.
+python-dateutil
+XlsxWriter
+xlrd
+openpyxl
+requests

@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="dct_dashboard.NavBarAppsLauncher"
-       t-inherit="web.NavBar.AppsMenu"
+    <t t-name="dct_dashboard.NavBarHomeLauncher"
+       t-inherit="web.NavBar"
        t-inherit-mode="extension">
-        <xpath expr="//a[hasclass('o_menu_toggle')]" position="replace">
+        <xpath expr="//t[@t-call='web.NavBar.AppsMenu']" position="replace">
             <button class="o_dct_home_toggle o_menu_toggle border-0"
-                    data-hotkey="h"
-                    title="DCT Home"
-                    aria-label="DCT Home"
-                    t-on-click="() => this.actionService.doAction('dct_dashboard.action_dct_home', { clearBreadcrumbs: true })">
-                <i class="oi oi-apps" aria-hidden="true"/>
-            </button>
-        </xpath>
-        <xpath expr="//div[hasclass('o_navbar_apps_menu')]/Dropdown" position="replace">
-            <button class="o_dct_home_toggle"
                     data-hotkey="h"
                     title="DCT Home"
                     aria-label="DCT Home"

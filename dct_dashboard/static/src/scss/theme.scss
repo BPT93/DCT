@@ -1,33 +1,33 @@
 :root {
-    --dct-primary: #1577ff;
-    --dct-primary-bright: #5aa1ff;
-    --dct-ink: #071024;
+    --dct-primary: #714b67;
+    --dct-action: #017e84;
+    --dct-ink: #212529;
     --dct-surface: #ffffff;
-    --dct-canvas: #f6f7fb;
-    --dct-muted: #6f7084;
-    --dct-line: #e6e6ef;
-    --dct-success: #16886a;
-    --dct-warning: #d88b24;
-    --dct-danger: #d44f63;
-    --dct-shadow: 0 16px 45px rgba(27, 24, 74, 0.10);
+    --dct-canvas: #f4f5f6;
+    --dct-muted: #6c757d;
+    --dct-line: #dee2e6;
+    --dct-success: #28a745;
+    --dct-warning: #f0ad4e;
+    --dct-danger: #dc3545;
 }
 
-.o_web_client {
-    background:
-        radial-gradient(circle at 92% 8%, rgba(76, 154, 255, 0.08), transparent 26rem),
-        var(--dct-canvas);
+.o_web_client,
+.o_action_manager {
+    background: var(--dct-canvas);
 }
 
+/* Keep Community/OCA markup and align its visual tokens with Odoo 19's
+   light Enterprise application shell. */
 .o_main_navbar {
     --NavBar-entry-backgroundColor: transparent;
-    --NavBar-entry-backgroundColor--hover: rgba(255, 255, 255, 0.11);
-    --NavBar-entry-backgroundColor--focus: rgba(255, 255, 255, 0.11);
-    --NavBar-entry-backgroundColor--active: rgba(255, 255, 255, 0.16);
-    --NavBar-entry-borderColor-active: rgba(255, 255, 255, 0.18);
-    background: linear-gradient(105deg, #071024 0%, #0c1b3d 38%, #0e3c80 68%, #1577ff 100%) !important;
-    background-color: #0c1b3d !important;
-    border: 0 !important;
-    box-shadow: 0 7px 24px rgba(12, 10, 38, 0.24);
+    --NavBar-entry-backgroundColor--hover: #f0edef;
+    --NavBar-entry-backgroundColor--focus: #f0edef;
+    --NavBar-entry-backgroundColor--active: #e8e3e7;
+    --NavBar-entry-borderColor-active: #714b67;
+    color: #374151 !important;
+    border-bottom: 1px solid #d8dadd !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 
     .o_menu_sections,
     .o_menu_sections > *,
@@ -40,35 +40,36 @@
         background-color: transparent;
     }
 
-    .o_menu_brand {
-        color: #fff !important;
-        font-weight: 750;
-        letter-spacing: 0.015em;
-    }
-
+    .o_menu_brand,
     .o_nav_entry,
     .dropdown-toggle,
     .o_menu_systray > * > *,
     .o_navbar_apps_menu button {
-        color: rgba(255, 255, 255, 0.92) !important;
-        border-radius: 0.65rem;
+        color: #374151 !important;
+    }
+
+    .o_menu_brand {
+        font-weight: 600;
+    }
+
+    .o_nav_entry,
+    .dropdown-toggle,
+    .o_navbar_apps_menu button {
+        border-radius: 0;
     }
 
     .o_nav_entry:hover,
     .dropdown-toggle:hover,
-    .o_navbar_apps_menu button:hover {
-        background: rgba(255, 255, 255, 0.11) !important;
-    }
-
+    .o_navbar_apps_menu button:hover,
     .o_nav_entry:focus,
     .dropdown-toggle:focus {
-        background: rgba(255, 255, 255, 0.11) !important;
+        background: #f0edef !important;
     }
 
     .o_nav_entry:active,
     .dropdown-toggle:active,
     .dropdown.show > .dropdown-toggle {
-        background: rgba(255, 255, 255, 0.16) !important;
+        background: #e8e3e7 !important;
     }
 }
 
@@ -80,187 +81,197 @@
     overflow: hidden !important;
 }
 
-.o_action_manager > .o_action,
-.o_action_manager > .o_view_controller,
-.o_action_manager > .o_client_action {
-    animation: dct-action-arrive 280ms cubic-bezier(0.2, 0.75, 0.3, 1) both;
-    transform-origin: 52% 18%;
-}
-
-@keyframes dct-action-arrive {
-    from {
-        opacity: 0;
-        transform: translateY(9px) scale(0.992);
-        filter: saturate(0.82);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: saturate(1);
-    }
-}
-
 .o_control_panel {
-    background: rgba(255, 255, 255, 0.92) !important;
-    border-bottom: 1px solid rgba(21, 119, 255, 0.10) !important;
-    backdrop-filter: blur(16px);
+    border-bottom-color: #d8dadd !important;
+    background: #ffffff !important;
 
     .breadcrumb-item.active,
     .o_last_breadcrumb_item {
         color: var(--dct-ink);
-        font-weight: 720;
+        font-weight: 600;
     }
 }
 
 .btn-primary,
 .btn-outline-primary:hover {
-    border-color: var(--dct-primary) !important;
-    background: linear-gradient(135deg, var(--dct-primary-bright), var(--dct-primary)) !important;
-    box-shadow: 0 7px 18px rgba(21, 119, 255, 0.19);
+    border-color: #714b67 !important;
+    background: #714b67 !important;
+    box-shadow: none !important;
 }
 
-.btn-primary:hover {
-    filter: brightness(1.07);
-    transform: translateY(-1px);
+.btn-primary:hover,
+.btn-primary:focus {
+    border-color: #5f3f57 !important;
+    background: #5f3f57 !important;
 }
 
 .btn,
 .form-control,
 .form-select,
 .o_input {
-    border-radius: 0.62rem;
+    border-radius: 0.25rem;
 }
 
 .form-control:focus,
 .form-select:focus,
 .o_input:focus {
-    border-color: rgba(21, 119, 255, 0.72) !important;
-    box-shadow: 0 0 0 0.2rem rgba(21, 119, 255, 0.12) !important;
+    border-color: rgba(113, 75, 103, 0.72) !important;
+    box-shadow: 0 0 0 0.2rem rgba(113, 75, 103, 0.12) !important;
 }
 
 .o_form_view .o_form_sheet_bg {
-    background:
-        radial-gradient(circle at 82% 0%, rgba(21, 119, 255, 0.07), transparent 24rem),
-        var(--dct-canvas);
+    background: var(--dct-canvas);
 }
 
 .o_form_view .o_form_sheet {
-    border: 1px solid rgba(21, 119, 255, 0.09);
-    border-radius: 1rem;
-    box-shadow: var(--dct-shadow);
+    border-color: #d8dadd;
+    border-radius: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .o_list_renderer,
 .o_kanban_renderer {
-    background-color: rgba(255, 255, 255, 0.86);
+    background-color: #ffffff;
 }
 
 .o_list_table {
     thead {
-        background: #f0f0f8;
-        color: #3b3956;
+        color: #495057;
+        background: #f4f5f6;
     }
 
     tbody tr:hover {
-        background-color: rgba(21, 119, 255, 0.045) !important;
+        background-color: #f7f5f7 !important;
     }
 }
 
 .o_kanban_record,
 .modal-content,
-.o_popover {
-    border-color: rgba(21, 119, 255, 0.11) !important;
-    border-radius: 0.9rem !important;
-    box-shadow: 0 13px 34px rgba(27, 24, 74, 0.09) !important;
+.o_popover,
+.dropdown-menu {
+    border-color: #d8dadd !important;
+    border-radius: 0.25rem !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
 }
 
 .dropdown-menu {
-    border: 1px solid rgba(21, 119, 255, 0.12);
-    border-radius: 0.8rem;
-    box-shadow: 0 18px 42px rgba(20, 18, 58, 0.15);
-
     .dropdown-item:hover,
     .dropdown-item:focus {
-        color: var(--dct-primary);
-        background: rgba(21, 119, 255, 0.08);
-    }
-}
-
-.o_app_menu_sidebar {
-    background: linear-gradient(165deg, #071024 0%, #0d2a5a 66%, #1577ff 100%) !important;
-    color: #fff;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .o_action_manager > .o_action,
-    .o_action_manager > .o_view_controller,
-    .o_action_manager > .o_client_action {
-        animation: none;
-    }
-
-    .btn-primary:hover {
-        transform: none;
+        color: #212529;
+        background: #f0edef;
     }
 }
 
 :root[data-dct-theme="dark"] {
     color-scheme: dark;
-    --dct-ink: #e7eef8;
-    --dct-surface: #101c2e;
-    --dct-canvas: #08111f;
-    --dct-muted: #9aabc0;
-    --dct-line: #26384e;
-    --dct-shadow: 0 16px 45px rgba(0, 0, 0, 0.24);
+    --dct-ink: #f1f3f5;
+    --dct-surface: #252525;
+    --dct-canvas: #191919;
+    --dct-muted: #adb5bd;
+    --dct-line: #454545;
 
     body,
     .o_web_client,
     .o_action_manager,
     .o_content,
-    .o_view_controller { color: #e5eefb; background-color: var(--dct-canvas); }
+    .o_view_controller {
+        color: #e9ecef;
+        background-color: var(--dct-canvas);
+    }
+
+    .o_main_navbar {
+        --NavBar-entry-backgroundColor--hover: #3a3338;
+        --NavBar-entry-backgroundColor--focus: #3a3338;
+        --NavBar-entry-backgroundColor--active: #493e46;
+        color: #e9ecef !important;
+        border-bottom-color: #454545 !important;
+        background: #252525 !important;
+
+        .o_menu_brand,
+        .o_nav_entry,
+        .dropdown-toggle,
+        .o_menu_systray > * > *,
+        .o_navbar_apps_menu button {
+            color: #e9ecef !important;
+        }
+
+        .o_nav_entry:hover,
+        .dropdown-toggle:hover,
+        .o_navbar_apps_menu button:hover,
+        .o_nav_entry:focus,
+        .dropdown-toggle:focus {
+            background: #3a3338 !important;
+        }
+
+        .o_nav_entry:active,
+        .dropdown-toggle:active,
+        .dropdown.show > .dropdown-toggle {
+            background: #493e46 !important;
+        }
+    }
 
     .o_control_panel {
-        color: #e5eefb;
-        border-bottom-color: #26384e !important;
-        background: rgba(16, 28, 46, 0.94) !important;
+        color: #e9ecef;
+        border-bottom-color: #454545 !important;
+        background: #252525 !important;
     }
 
     .o_list_renderer,
     .o_kanban_renderer,
-    .o_form_view .o_form_sheet_bg { background-color: #08111f; }
+    .o_form_view .o_form_sheet_bg {
+        background-color: #191919;
+    }
 
     .o_form_view .o_form_sheet,
     .o_kanban_record,
     .modal-content,
     .o_popover,
     .dropdown-menu {
-        color: #e5eefb;
-        border-color: #26384e !important;
-        background-color: #101c2e;
+        color: #e9ecef;
+        border-color: #454545 !important;
+        background-color: #252525;
     }
 
     .o_list_table {
-        color: #dbe7f5;
+        color: #e9ecef;
 
-        thead { color: #bac8d8; background: #172438; }
-        tbody tr { border-color: #26384e; }
-        tbody tr:hover { background-color: #162740 !important; }
+        thead {
+            color: #ced4da;
+            background: #303030;
+        }
+
+        tbody tr {
+            border-color: #454545;
+        }
+
+        tbody tr:hover {
+            background-color: #343034 !important;
+        }
     }
 
-    .dropdown-menu .dropdown-item { color: #dbe7f5; }
+    .dropdown-menu .dropdown-item {
+        color: #e9ecef;
+    }
+
     .dropdown-menu .dropdown-item:hover,
-    .dropdown-menu .dropdown-item:focus { color: #8fc1ff; background: #1a3150; }
+    .dropdown-menu .dropdown-item:focus {
+        color: #ffffff;
+        background: #3a3338;
+    }
 
     .form-control,
     .form-select,
     .o_input {
-        color: #e5eefb;
-        border-color: #354960;
-        background-color: #111f32;
+        color: #e9ecef;
+        border-color: #555555;
+        background-color: #2b2b2b;
     }
 
-    .text-muted { color: #9aabc0 !important; }
+    .text-muted {
+        color: #adb5bd !important;
+    }
 }
 
-:root[data-dct-theme="light"] { color-scheme: light; }
-
-
+:root[data-dct-theme="light"] {
+    color-scheme: light;
+}

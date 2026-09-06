@@ -1,0 +1,449 @@
+// Enterprise-style workspace for the native/OCA Accounting journal dashboard.
+// All selectors are scoped so ordinary kanban views keep Odoo's defaults.
+.o_account_kanban.dcta_enterprise_dashboard {
+    .o_kanban_renderer {
+        gap: 0;
+        padding: clamp(0.8rem, 2vw, 1.5rem);
+        background: var(--dct-canvas, #f4f5f6);
+    }
+
+    .dcta_accounting_command_center {
+        flex: 0 0 100%;
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 1.15rem;
+        overflow: hidden;
+        border: 1px solid var(--dct-line, #dee2e6);
+        border-radius: 0.6rem;
+        background: var(--dct-surface, #fff);
+        box-shadow: 0 2px 8px rgba(10, 19, 43, 0.07);
+    }
+
+    .dcta_accounting_command_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        min-height: 6.5rem;
+        padding: 1rem 1.2rem;
+        border-bottom: 1px solid var(--dct-line, #dee2e6);
+        background:
+            radial-gradient(
+                circle at 4% 0,
+                rgba(113, 75, 103, 0.11),
+                transparent 32%
+            ),
+            var(--dct-surface, #fff);
+    }
+
+    .dcta_accounting_command_title {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        gap: 0.9rem;
+
+        h1 {
+            margin: 0;
+            color: var(--dct-ink, #212529);
+            font-size: clamp(1.25rem, 2vw, 1.6rem);
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        p {
+            margin: 0.15rem 0 0;
+            color: var(--dct-muted, #6c757d);
+            font-size: 0.8rem;
+        }
+
+        .dcta_accounting_command_eyebrow {
+            margin: 0 0 0.15rem;
+            color: #714b67;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+        }
+    }
+
+    .dcta_accounting_command_mark {
+        display: grid;
+        flex: 0 0 3rem;
+        width: 3rem;
+        height: 3rem;
+        place-items: center;
+        border-radius: 0.6rem;
+        color: #fff;
+        background: #714b67;
+        box-shadow: 0 6px 16px rgba(113, 75, 103, 0.22);
+        font-size: 1.2rem;
+    }
+
+    .dcta_accounting_create_actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.5rem;
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            min-height: 2.45rem;
+            white-space: nowrap;
+        }
+    }
+
+    .dcta_accounting_feature_bar {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(8.5rem, 1fr));
+        overflow-x: auto;
+        scrollbar-width: thin;
+
+        > button {
+            display: grid;
+            grid-template-columns: 2.1rem minmax(0, 1fr);
+            align-items: center;
+            gap: 0.6rem;
+            min-width: 0;
+            min-height: 4.7rem;
+            padding: 0.75rem 0.9rem;
+            color: var(--dct-ink, #212529);
+            border: 0;
+            border-inline-end: 1px solid var(--dct-line, #dee2e6);
+            background: transparent;
+            text-align: start;
+            transition: background-color 120ms ease;
+
+            &:last-child {
+                border-inline-end: 0;
+            }
+
+            &:hover {
+                background: rgba(113, 75, 103, 0.055);
+            }
+
+            &:focus-visible {
+                position: relative;
+                z-index: 1;
+                outline: 3px solid rgba(113, 75, 103, 0.22);
+                outline-offset: -3px;
+            }
+
+            > span:last-child {
+                display: flex;
+                min-width: 0;
+                flex-direction: column;
+            }
+
+            strong,
+            small {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            strong {
+                font-size: 0.78rem;
+                font-weight: 650;
+            }
+
+            small {
+                margin-top: 0.12rem;
+                color: var(--dct-muted, #6c757d);
+                font-size: 0.68rem;
+            }
+        }
+    }
+
+    .dcta_feature_icon {
+        display: grid;
+        width: 2.1rem;
+        height: 2.1rem;
+        place-items: center;
+        border-radius: 0.5rem;
+        color: #714b67;
+        background: rgba(113, 75, 103, 0.11);
+
+        &.is-reconcile,
+        &.is-bank {
+            color: #017e84;
+            background: rgba(1, 126, 132, 0.11);
+        }
+
+        &.is-report {
+            color: #3567b0;
+            background: rgba(53, 103, 176, 0.11);
+        }
+
+        &.is-assets {
+            color: #a45b16;
+            background: rgba(164, 91, 22, 0.11);
+        }
+
+        &.is-budget {
+            color: #7657c9;
+            background: rgba(118, 87, 201, 0.11);
+        }
+    }
+
+    .o_kanban_renderer.o_kanban_ungrouped {
+        --KanbanRecord-width: calc(50% - 1rem);
+
+        .o_kanban_record.dcta_journal_card {
+            position: relative;
+            min-width: 22rem;
+            min-height: 15rem;
+            margin: 0.5rem;
+            padding: 1.05rem 1.1rem;
+            overflow: hidden;
+            border: 1px solid var(--dct-line, #dee2e6) !important;
+            border-inline-start: 4px solid #7a8796 !important;
+            border-radius: 0.55rem !important;
+            background: var(--dct-surface, #fff);
+            box-shadow: 0 2px 7px rgba(10, 19, 43, 0.075) !important;
+            transition:
+                border-color 120ms ease,
+                box-shadow 120ms ease,
+                transform 120ms ease;
+
+            &:hover {
+                border-color: rgba(113, 75, 103, 0.38) !important;
+                box-shadow: 0 8px 22px rgba(10, 19, 43, 0.12) !important;
+                transform: translateY(-1px);
+            }
+
+            &.dcta_journal_sale {
+                border-inline-start-color: #017e84 !important;
+            }
+
+            &.dcta_journal_purchase {
+                border-inline-start-color: #714b67 !important;
+            }
+
+            &.dcta_journal_bank {
+                border-inline-start-color: #3567b0 !important;
+            }
+
+            &.dcta_journal_cash {
+                border-inline-start-color: #2b8a5a !important;
+            }
+
+            &.dcta_journal_credit {
+                border-inline-start-color: #7657c9 !important;
+            }
+
+            .dcta_journal_card_header {
+                display: flex !important;
+                align-items: center !important;
+                min-width: 0;
+                gap: 0.65rem;
+
+                > a {
+                    min-width: 0;
+                    overflow: hidden;
+                    color: var(--dct-ink, #212529);
+                    font-size: 1.05rem !important;
+                    font-weight: 700 !important;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+            }
+
+            .dcta_journal_icon {
+                display: grid;
+                flex: 0 0 2.35rem;
+                width: 2.35rem;
+                height: 2.35rem;
+                place-items: center;
+                border-radius: 0.55rem;
+                color: #5d6875;
+                background: #edf0f3;
+
+                &_sale,
+                &_cash {
+                    color: #017e84;
+                    background: rgba(1, 126, 132, 0.11);
+                }
+
+                &_purchase {
+                    color: #714b67;
+                    background: rgba(113, 75, 103, 0.11);
+                }
+
+                &_bank {
+                    color: #3567b0;
+                    background: rgba(53, 103, 176, 0.11);
+                }
+
+                &_credit {
+                    color: #7657c9;
+                    background: rgba(118, 87, 201, 0.11);
+                }
+            }
+
+            .dcta_journal_card_body {
+                margin-top: 1rem !important;
+
+                a:not(.btn) {
+                    font-weight: 550;
+                    text-decoration: none;
+                }
+
+                .row {
+                    min-height: 1.55rem;
+                    align-items: center;
+                }
+            }
+
+            .btn {
+                min-height: 2.2rem;
+                border-radius: 0.35rem;
+            }
+
+            .o_dashboard_graph {
+                margin: 1rem -1.1rem -1.05rem;
+                padding-top: 0.4rem;
+                border-top: 1px solid var(--dct-line, #dee2e6);
+                background: linear-gradient(
+                    180deg,
+                    rgba(113, 75, 103, 0.015),
+                    rgba(113, 75, 103, 0.045)
+                );
+            }
+
+            .o_kanban_manage_toggle_button {
+                border-radius: 50%;
+            }
+        }
+    }
+}
+
+:root[data-dct-theme="dark"]
+    .o_account_kanban.dcta_enterprise_dashboard {
+    .dcta_accounting_command_center,
+    .dcta_accounting_command_header,
+    .o_kanban_renderer.o_kanban_ungrouped .o_kanban_record.dcta_journal_card {
+        background: var(--dct-surface, #252525);
+    }
+
+    .dcta_accounting_command_header {
+        background:
+            radial-gradient(
+                circle at 4% 0,
+                rgba(202, 165, 191, 0.13),
+                transparent 32%
+            ),
+            var(--dct-surface, #252525);
+    }
+
+    .dcta_accounting_command_title .dcta_accounting_command_eyebrow {
+        color: #ca9dbf;
+    }
+
+    .dcta_accounting_create_actions .btn-outline-secondary {
+        color: #e9ecef;
+        border-color: #555;
+
+        &:hover {
+            border-color: #777;
+            background: #383838;
+        }
+    }
+
+    .dcta_accounting_feature_bar > button:hover {
+        background: rgba(202, 165, 191, 0.09);
+    }
+
+    .o_kanban_renderer.o_kanban_ungrouped .o_kanban_record.dcta_journal_card {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+
+        &:hover {
+            border-color: rgba(202, 165, 191, 0.48) !important;
+            box-shadow: 0 9px 24px rgba(0, 0, 0, 0.32) !important;
+        }
+
+        .dcta_journal_icon {
+            color: #c8d0d8;
+            background: #353a40;
+        }
+
+        .o_dashboard_graph {
+            background: linear-gradient(
+                180deg,
+                rgba(202, 165, 191, 0.02),
+                rgba(202, 165, 191, 0.07)
+            );
+        }
+    }
+}
+
+@media (min-width: 1600px) {
+    .o_account_kanban.dcta_enterprise_dashboard
+        .o_kanban_renderer.o_kanban_ungrouped:has(
+            > .o_kanban_record:nth-of-type(6)
+        ) {
+        --KanbanRecord-width: calc(33.333% - 1rem);
+    }
+}
+
+@media (max-width: 1100px) {
+    .o_account_kanban.dcta_enterprise_dashboard {
+        .dcta_accounting_command_header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .dcta_accounting_create_actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .dcta_accounting_feature_bar {
+            grid-template-columns: repeat(6, minmax(9.5rem, 1fr));
+        }
+    }
+}
+
+@media (max-width: 767.98px) {
+    .o_account_kanban.dcta_enterprise_dashboard {
+        .o_kanban_renderer {
+            padding: 0.65rem;
+        }
+
+        .dcta_accounting_command_center {
+            margin-bottom: 0.65rem;
+        }
+
+        .dcta_accounting_command_header {
+            padding: 0.9rem;
+        }
+
+        .dcta_accounting_create_actions .btn {
+            flex: 1 1 auto;
+            justify-content: center;
+        }
+
+        .dcta_accounting_feature_bar {
+            grid-template-columns: repeat(6, 9.5rem);
+        }
+
+        .o_kanban_renderer.o_kanban_ungrouped {
+            --KanbanRecord-width: calc(100% - 0.5rem);
+
+            .o_kanban_record.dcta_journal_card {
+                min-width: 0;
+                margin: 0.35rem 0.25rem;
+            }
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_account_kanban.dcta_enterprise_dashboard {
+        .dcta_accounting_feature_bar > button,
+        .o_kanban_renderer.o_kanban_ungrouped .o_kanban_record.dcta_journal_card {
+            transition: none;
+        }
+    }
+}

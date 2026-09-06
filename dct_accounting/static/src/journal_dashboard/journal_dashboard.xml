@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t
+        t-name="dct_accounting.DashboardKanbanRenderer"
+        t-inherit="account.DashboardKanbanRenderer"
+        t-inherit-mode="extension"
+    >
+        <xpath expr="//t[@t-foreach='getGroupsOrRecords()']" position="before">
+            <section
+                t-if="!props.list.isGrouped"
+                class="dcta_accounting_command_center d-print-none"
+                aria-labelledby="dcta_accounting_workspace_title"
+            >
+                <div class="dcta_accounting_command_header">
+                    <div class="dcta_accounting_command_title">
+                        <span class="dcta_accounting_command_mark" aria-hidden="true">
+                            <i class="fa fa-line-chart" />
+                        </span>
+                        <div>
+                            <p class="dcta_accounting_command_eyebrow">Accounting</p>
+                            <h1 id="dcta_accounting_workspace_title">
+                                Financial workspace
+                            </h1>
+                            <p>
+                                <t t-esc="props.list.records.length" /> journals on your dashboard
+                            </p>
+                        </div>
+                    </div>
+                    <div class="dcta_accounting_create_actions">
+                        <button
+                            t-if="dctPermissions.canCreateInvoice"
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            t-on-click="() => this.createDctMove('in_invoice')"
+                        >
+                            <i class="fa fa-file-text-o" />
+                            <span>New bill</span>
+                        </button>
+                        <button
+                            t-if="dctPermissions.canPostEntries"
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            t-on-click="() => this.createDctMove('entry')"
+                        >
+                            <i class="fa fa-book" />
+                            <span>Journal entry</span>
+                        </button>
+                        <button
+                            t-if="dctPermissions.canCreateInvoice"
+                            type="button"
+                            class="btn btn-primary"
+                            t-on-click="() => this.createDctMove('out_invoice')"
+                        >
+                            <i class="fa fa-plus" />
+                            <span>New invoice</span>
+                        </button>
+                    </div>
+                </div>
+
+                <nav
+                    class="dcta_accounting_feature_bar"
+                    aria-label="Accounting quick access"
+                >
+                    <button
+                        type="button"
+                        t-on-click="() => this.openDctFeature('overview')"
+                    >
+                        <span class="dcta_feature_icon is-overview">
+                            <i class="fa fa-dashboard" />
+                        </span>
+                        <span><strong>Overview</strong><small>KPIs and activity</small></span>
+                    </button>
+                    <button
+                        t-if="dctPermissions.canPostEntries"
+                        type="button"
+                        t-on-click="() => this.openDctFeature('reconcile')"
+                    >
+                        <span class="dcta_feature_icon is-reconcile">
+                            <i class="fa fa-random" />
+                        </span>
+                        <span><strong>Reconcile</strong><small>Match open items</small></span>
+                    </button>
+                    <button
+                        t-if="dctPermissions.canPostEntries"
+                        type="button"
+                        t-on-click="() => this.openDctFeature('statements')"
+                    >
+                        <span class="dcta_feature_icon is-bank">
+                            <i class="fa fa-bank" />
+                        </span>
+                        <span><strong>Import</strong><small>Bank statement</small></span>
+                    </button>
+                    <button
+                        t-if="dctPermissions.canReadAccounting"
+                        type="button"
+                        t-on-click="() => this.openDctFeature('balanceSheet')"
+                    >
+                        <span class="dcta_feature_icon is-report">
+                            <i class="fa fa-bar-chart" />
+                        </span>
+                        <span><strong>Reports</strong><small>Balance sheet</small></span>
+                    </button>
+                    <button
+                        t-if="dctPermissions.canReadAccounting"
+                        type="button"
+                        t-on-click="() => this.openDctFeature('assets')"
+                    >
+                        <span class="dcta_feature_icon is-assets">
+                            <i class="fa fa-building-o" />
+                        </span>
+                        <span><strong>Assets</strong><small>Depreciation</small></span>
+                    </button>
+                    <button
+                        t-if="dctPermissions.canReadAccounting"
+                        type="button"
+                        t-on-click="() => this.openDctFeature('budgets')"
+                    >
+                        <span class="dcta_feature_icon is-budget">
+                            <i class="fa fa-pie-chart" />
+                        </span>
+                        <span><strong>Budgets</strong><small>Plan vs actual</small></span>
+                    </button>
+                </nav>
+            </section>
+        </xpath>
+    </t>
+</templates>

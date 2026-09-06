@@ -14,6 +14,8 @@
             <t t-foreach="docs" t-as="doc">
                 <t t-call="web.external_layout">
                     <div class="page">
+                        <t t-set="is_statement" t-value="doc.report_type in ('profit_loss', 'balance_sheet', 'executive_summary')"/>
+                        <t t-set="is_aged" t-value="doc.report_type in ('aged_receivable', 'aged_payable')"/>
                         <div class="d-flex justify-content-between align-items-start mb-4">
                             <div>
                                 <p class="text-uppercase mb-1" style="color:#1577ff; font-weight:700; letter-spacing:.12em;">DCT ACCOUNTING</p>
@@ -22,7 +24,7 @@
                             </div>
                             <div class="text-end">
                                 <p class="mb-1"><strong>Period</strong></p>
-                                <p class="mb-0" t-if="doc.report_type != 'balance_sheet'">
+                                <p class="mb-0" t-if="doc.report_type not in ('balance_sheet', 'aged_receivable', 'aged_payable')">
                                     <span t-field="doc.date_from"/> — <span t-field="doc.date_to"/>
                                 </p>
                                 <p class="mb-0" t-else=""><span t-field="doc.date_to"/></p>
@@ -32,9 +34,17 @@
                         <table class="table table-sm" style="font-size:10.5px;">
                             <thead style="background:#0a132b; color:#fff;">
                                 <tr>
-                                    <th>Code</th>
-                                    <th>Account / Partner / Journal</th>
-                                    <t t-if="doc.report_type in ('profit_loss', 'balance_sheet')">
+                                    <th t-if="not is_aged">Code</th>
+                                    <th t-out="'Partner' if is_aged else 'Account / Partner / Journal'"/>
+                                    <t t-if="is_aged">
+                                        <th class="text-end">Not Due</th>
+                                        <th class="text-end">1–30</th>
+                                        <th class="text-end">31–60</th>
+                                        <th class="text-end">61–90</th>
+                                        <th class="text-end">90+</th>
+                                        <th class="text-end">Total</th>
+                                    </t>
+                                    <t t-elif="is_statement">
                                         <th class="text-end">Balance</th>
                                     </t>
                                     <t t-else="">
@@ -52,13 +62,21 @@
                             <tbody>
                                 <t t-foreach="doc.line_ids" t-as="line">
                                     <tr t-if="line.line_type == 'section'" style="background:#eaf2ff; color:#0a132b; font-weight:700;">
-                                        <td t-att-colspan="2 + (1 if doc.report_type in ('profit_loss', 'balance_sheet') else 4) + (2 if doc.comparison != 'none' else 0)"
+                                        <td t-att-colspan="(1 if is_aged else 2) + (6 if is_aged else 1 if is_statement else 4) + (2 if doc.comparison != 'none' else 0)"
                                             class="py-2" t-out="line.name"/>
                                     </tr>
                                     <tr t-else="" t-att-style="'font-weight:700; border-top:1px solid #8aafe0;' if line.is_total else ''">
-                                        <td t-out="line.code or ''"/>
+                                        <td t-if="not is_aged" t-out="line.code or ''"/>
                                         <td t-out="line.name"/>
-                                        <t t-if="doc.report_type in ('profit_loss', 'balance_sheet')">
+                                        <t t-if="is_aged">
+                                            <td class="text-end"><span t-out="line.bucket_current" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                            <td class="text-end"><span t-out="line.bucket_1_30" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                            <td class="text-end"><span t-out="line.bucket_31_60" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                            <td class="text-end"><span t-out="line.bucket_61_90" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                            <td class="text-end"><span t-out="line.bucket_older" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                            <td class="text-end"><span t-out="line.ending_balance" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
+                                        </t>
+                                        <t t-elif="is_statement">
                                             <td class="text-end"><span t-out="line.balance" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/></td>
                                         </t>
                                         <t t-else="">

@@ -5,12 +5,16 @@ from odoo.exceptions import ValidationError
 
 
 REPORT_TYPES = [
-    ("profit_loss", "Profit & Loss"),
     ("balance_sheet", "Balance Sheet"),
-    ("trial_balance", "Trial Balance"),
+    ("profit_loss", "Profit & Loss"),
+    ("executive_summary", "Executive Summary"),
+    ("cash_flow", "Cash Flow Statement"),
     ("general_ledger", "General Ledger"),
+    ("trial_balance", "Trial Balance"),
+    ("journal_ledger", "Journal Audit"),
     ("partner_ledger", "Partner Ledger"),
-    ("journal_ledger", "Journal Ledger"),
+    ("aged_receivable", "Aged Receivable"),
+    ("aged_payable", "Aged Payable"),
 ]
 
 COMPARISON_TYPES = [
@@ -190,85 +194,203 @@ class DctAccountReportWizard(models.TransientModel):
         return rows
 
     @staticmethod
-    def _section(name):
+    def _section(
+        name,
+        *,
+        balance=0.0,
+        level=0,
+        line_key=False,
+        parent_key=False,
+        foldable=True,
+        show_amount=False,
+        style_class="section",
+    ):
         return {
             "line_type": "section",
             "name": name,
+            "balance": balance,
+            "ending_balance": balance,
             "is_total": True,
+            "hierarchy_level": level,
+            "line_key": line_key,
+            "parent_key": parent_key,
+            "foldable": foldable,
+            "show_amount": show_amount,
+            "style_class": style_class,
         }
 
     @staticmethod
-    def _total(name, balance, **values):
+    def _total(
+        name,
+        balance,
+        *,
+        level=0,
+        parent_key=False,
+        style_class="subtotal",
+        **values,
+    ):
         return {
             "line_type": "total",
             "name": name,
             "balance": balance,
             "ending_balance": balance,
             "is_total": True,
+            "hierarchy_level": level,
+            "parent_key": parent_key,
+            "show_amount": True,
+            "style_class": style_class,
             **values,
         }
+
+    @staticmethod
+    def _with_hierarchy(rows, level, parent_key):
+        for row in rows:
+            row.update({
+                "hierarchy_level": level,
+                "parent_key": parent_key,
+                "show_amount": True,
+                "style_class": "normal",
+            })
+        return rows
 
     @staticmethod
     def _rows_total(rows, key="balance"):
         return sum(row.get(key, 0.0) for row in rows)
 
+    def _account_type_balance(self, domain, account_types, sign=1.0):
+        totals = self._read_account_totals(domain, account_types)
+        return sign * sum(values["balance"] for values in totals.values())
+
     def _profit_loss_lines(self):
         domain = self._base_domain(self.date_from, self.date_to)
-        revenue_rows = self._account_rows(domain, ("income", "income_other"), sign=-1.0)
-        cost_rows = self._account_rows(domain, ("expense_direct_cost",))
-        expense_rows = self._account_rows(
-            domain,
-            ("expense", "expense_other", "expense_depreciation"),
+        income_rows = self._with_hierarchy(
+            self._account_rows(domain, ("income",), sign=-1.0),
+            1,
+            "income",
         )
-        revenue = self._rows_total(revenue_rows)
+        cost_rows = self._with_hierarchy(
+            self._account_rows(domain, ("expense_direct_cost",)),
+            1,
+            "cost_sales",
+        )
+        expense_rows = self._with_hierarchy(self._account_rows(
+            domain,
+            ("expense", "expense_depreciation"),
+        ), 1, "expense")
+        other_income_rows = self._with_hierarchy(
+            self._account_rows(domain, ("income_other",), sign=-1.0),
+            1,
+            "other_income",
+        )
+        other_expense_rows = self._with_hierarchy(
+            self._account_rows(domain, ("expense_other",)),
+            1,
+            "other_expense",
+        )
+        income = self._rows_total(income_rows)
         cost = self._rows_total(cost_rows)
         expenses = self._rows_total(expense_rows)
-        gross_profit = revenue - cost
-        net_profit = gross_profit - expenses
+        other_income = self._rows_total(other_income_rows)
+        other_expense = self._rows_total(other_expense_rows)
+        gross_profit = income - cost
+        net_operating_income = gross_profit - expenses
+        net_other_income = other_income - other_expense
+        net_income = net_operating_income + net_other_income
         return [
-            self._section(_("Revenue")),
-            *revenue_rows,
-            self._total(_("Total Revenue"), revenue),
-            self._section(_("Cost of Revenue")),
+            self._section(
+                _("Income"),
+                balance=income,
+                line_key="income",
+                show_amount=True,
+            ),
+            *income_rows,
+            self._section(
+                _("Cost of Sales"),
+                balance=cost,
+                line_key="cost_sales",
+                show_amount=True,
+            ),
             *cost_rows,
-            self._total(_("Total Cost of Revenue"), cost),
-            self._total(_("Gross Profit"), gross_profit),
-            self._section(_("Operating Expenses")),
+            self._total(
+                _("Gross Profit"),
+                gross_profit,
+                style_class="grand",
+            ),
+            self._section(
+                _("Expense"),
+                balance=expenses,
+                line_key="expense",
+                show_amount=True,
+            ),
             *expense_rows,
-            self._total(_("Total Operating Expenses"), expenses),
-            self._total(_("Net Profit / Loss"), net_profit),
+            self._total(
+                _("Net Operating Income"),
+                net_operating_income,
+                style_class="grand",
+            ),
+            self._section(
+                _("Other Income"),
+                balance=other_income,
+                line_key="other_income",
+                show_amount=True,
+            ),
+            *other_income_rows,
+            self._section(
+                _("Other Expense"),
+                balance=other_expense,
+                line_key="other_expense",
+                show_amount=True,
+            ),
+            *other_expense_rows,
+            self._total(
+                _("Net Other Income"),
+                net_other_income,
+                style_class="grand",
+            ),
+            self._total(_("Net Income"), net_income, style_class="grand"),
         ]
 
     def _balance_sheet_lines(self):
         domain = self._base_domain(date_to=self.date_to)
-        current_asset_rows = self._account_rows(
-            domain,
-            ("asset_receivable", "asset_cash", "asset_current", "asset_prepayments"),
+        def account_rows(account_types, sign, level, parent_key):
+            return self._with_hierarchy(
+                self._account_rows(domain, account_types, sign=sign),
+                level,
+                parent_key,
+            )
+
+        cash_rows = account_rows(("asset_cash",), 1.0, 3, "assets_cash")
+        receivable_rows = account_rows(("asset_receivable",), 1.0, 3, "assets_receivable")
+        current_other_rows = account_rows(("asset_current",), 1.0, 3, "assets_other_current")
+        prepayment_rows = account_rows(("asset_prepayments",), 1.0, 3, "assets_prepayments")
+        fixed_asset_rows = account_rows(("asset_fixed",), 1.0, 2, "assets_fixed")
+        non_current_rows = account_rows(("asset_non_current",), 1.0, 2, "assets_non_current")
+
+        payable_rows = account_rows(("liability_payable",), -1.0, 3, "liabilities_payable")
+        credit_card_rows = account_rows(("liability_credit_card",), -1.0, 3, "liabilities_card")
+        current_other_liability_rows = account_rows(
+            ("liability_current",), -1.0, 3, "liabilities_other_current"
         )
-        non_current_asset_rows = self._account_rows(
-            domain,
-            ("asset_non_current", "asset_fixed"),
+        non_current_liability_rows = account_rows(
+            ("liability_non_current",), -1.0, 2, "liabilities_non_current"
         )
-        current_liability_rows = self._account_rows(
-            domain,
-            ("liability_payable", "liability_credit_card", "liability_current"),
-            sign=-1.0,
-        )
-        non_current_liability_rows = self._account_rows(
-            domain,
-            ("liability_non_current",),
-            sign=-1.0,
-        )
-        equity_rows = self._account_rows(
-            domain,
-            ("equity", "equity_unaffected"),
-            sign=-1.0,
+        equity_rows = account_rows(
+            ("equity", "equity_unaffected"), -1.0, 2, "equity"
         )
 
-        current_assets = self._rows_total(current_asset_rows)
-        non_current_assets = self._rows_total(non_current_asset_rows)
+        cash = self._rows_total(cash_rows)
+        receivables = self._rows_total(receivable_rows)
+        other_current_assets = self._rows_total(current_other_rows)
+        prepayments = self._rows_total(prepayment_rows)
+        fixed_assets = self._rows_total(fixed_asset_rows)
+        other_non_current_assets = self._rows_total(non_current_rows)
+        current_assets = cash + receivables + other_current_assets + prepayments
+        non_current_assets = fixed_assets + other_non_current_assets
         total_assets = current_assets + non_current_assets
-        current_liabilities = self._rows_total(current_liability_rows)
+        payables = self._rows_total(payable_rows)
+        credit_cards = self._rows_total(credit_card_rows)
+        other_current_liabilities = self._rows_total(current_other_liability_rows)
+        current_liabilities = payables + credit_cards + other_current_liabilities
         non_current_liabilities = self._rows_total(non_current_liability_rows)
         total_liabilities = current_liabilities + non_current_liabilities
         equity = self._rows_total(equity_rows)
@@ -287,25 +409,352 @@ class DctAccountReportWizard(models.TransientModel):
         total_liabilities_equity = total_liabilities + total_equity
 
         return [
-            self._section(_("Current Assets")),
-            *current_asset_rows,
-            self._total(_("Total Current Assets"), current_assets),
-            self._section(_("Non-current Assets")),
-            *non_current_asset_rows,
-            self._total(_("Total Non-current Assets"), non_current_assets),
-            self._total(_("TOTAL ASSETS"), total_assets),
-            self._section(_("Current Liabilities")),
-            *current_liability_rows,
-            self._total(_("Total Current Liabilities"), current_liabilities),
-            self._section(_("Non-current Liabilities")),
+            self._section(
+                _("Assets"), line_key="assets", style_class="primary"
+            ),
+            self._section(
+                _("Current Assets"), level=1, line_key="assets_current", parent_key="assets"
+            ),
+            self._section(
+                _("Bank and Cash"), level=2, line_key="assets_cash", parent_key="assets_current"
+            ),
+            *cash_rows,
+            self._total(_("Total Bank and Cash"), cash, level=2, parent_key="assets_cash"),
+            self._section(
+                _("Accounts Receivable"),
+                level=2,
+                line_key="assets_receivable",
+                parent_key="assets_current",
+            ),
+            *receivable_rows,
+            self._total(
+                _("Total Accounts Receivable"),
+                receivables,
+                level=2,
+                parent_key="assets_receivable",
+            ),
+            self._section(
+                _("Other Current Assets"),
+                level=2,
+                line_key="assets_other_current",
+                parent_key="assets_current",
+            ),
+            *current_other_rows,
+            self._total(
+                _("Total Other Current Assets"),
+                other_current_assets,
+                level=2,
+                parent_key="assets_other_current",
+            ),
+            self._section(
+                _("Prepayments"),
+                level=2,
+                line_key="assets_prepayments",
+                parent_key="assets_current",
+            ),
+            *prepayment_rows,
+            self._total(
+                _("Total Prepayments"),
+                prepayments,
+                level=2,
+                parent_key="assets_prepayments",
+            ),
+            self._total(
+                _("Total Current Assets"), current_assets, level=1, parent_key="assets_current"
+            ),
+            self._section(
+                _("Fixed Assets"), level=1, line_key="assets_fixed", parent_key="assets"
+            ),
+            *fixed_asset_rows,
+            self._total(
+                _("Total Fixed Assets"), fixed_assets, level=1, parent_key="assets_fixed"
+            ),
+            self._section(
+                _("Other Assets"),
+                level=1,
+                line_key="assets_non_current",
+                parent_key="assets",
+            ),
+            *non_current_rows,
+            self._total(
+                _("Total Other Assets"),
+                other_non_current_assets,
+                level=1,
+                parent_key="assets_non_current",
+            ),
+            self._total(_("Total Assets"), total_assets, style_class="grand"),
+            self._section(
+                _("Liabilities & Equity"),
+                line_key="liabilities_equity",
+                style_class="primary",
+            ),
+            self._section(
+                _("Current Liabilities"),
+                level=1,
+                line_key="liabilities_current",
+                parent_key="liabilities_equity",
+            ),
+            self._section(
+                _("Accounts Payable"),
+                level=2,
+                line_key="liabilities_payable",
+                parent_key="liabilities_current",
+            ),
+            *payable_rows,
+            self._total(
+                _("Total Accounts Payable"),
+                payables,
+                level=2,
+                parent_key="liabilities_payable",
+            ),
+            self._section(
+                _("Credit Cards"),
+                level=2,
+                line_key="liabilities_card",
+                parent_key="liabilities_current",
+            ),
+            *credit_card_rows,
+            self._total(
+                _("Total Credit Cards"),
+                credit_cards,
+                level=2,
+                parent_key="liabilities_card",
+            ),
+            self._section(
+                _("Other Current Liabilities"),
+                level=2,
+                line_key="liabilities_other_current",
+                parent_key="liabilities_current",
+            ),
+            *current_other_liability_rows,
+            self._total(
+                _("Total Other Current Liabilities"),
+                other_current_liabilities,
+                level=2,
+                parent_key="liabilities_other_current",
+            ),
+            self._total(
+                _("Total Current Liabilities"),
+                current_liabilities,
+                level=1,
+                parent_key="liabilities_current",
+            ),
+            self._section(
+                _("Long-term Liabilities"),
+                level=1,
+                line_key="liabilities_non_current",
+                parent_key="liabilities_equity",
+            ),
             *non_current_liability_rows,
-            self._total(_("Total Non-current Liabilities"), non_current_liabilities),
-            self._total(_("TOTAL LIABILITIES"), total_liabilities),
-            self._section(_("Equity")),
+            self._total(
+                _("Total Long-term Liabilities"),
+                non_current_liabilities,
+                level=1,
+                parent_key="liabilities_non_current",
+            ),
+            self._total(_("Total Liabilities"), total_liabilities),
+            self._section(
+                _("Equity"),
+                level=1,
+                line_key="equity",
+                parent_key="liabilities_equity",
+            ),
             *equity_rows,
-            self._total(_("Current Period Earnings"), current_earnings),
-            self._total(_("TOTAL EQUITY"), total_equity),
-            self._total(_("TOTAL LIABILITIES & EQUITY"), total_liabilities_equity),
+            self._total(
+                _("Current Year Unallocated Earnings"),
+                current_earnings,
+                level=2,
+                parent_key="equity",
+            ),
+            self._total(_("Total Equity"), total_equity, level=1, parent_key="equity"),
+            self._total(
+                _("Total Liabilities & Equity"),
+                total_liabilities_equity,
+                style_class="grand",
+            ),
+        ]
+
+    def _executive_summary_lines(self):
+        period_domain = self._base_domain(self.date_from, self.date_to)
+        position_domain = self._base_domain(date_to=self.date_to)
+
+        revenue = self._account_type_balance(
+            period_domain,
+            ("income", "income_other"),
+            sign=-1.0,
+        )
+        direct_cost = self._account_type_balance(
+            period_domain,
+            ("expense_direct_cost",),
+        )
+        operating_expenses = self._account_type_balance(
+            period_domain,
+            ("expense", "expense_other", "expense_depreciation"),
+        )
+        gross_profit = revenue - direct_cost
+        net_profit = gross_profit - operating_expenses
+
+        cash = self._account_type_balance(position_domain, ("asset_cash",))
+        receivables = self._account_type_balance(position_domain, ("asset_receivable",))
+        payables = self._account_type_balance(
+            position_domain,
+            ("liability_payable",),
+            sign=-1.0,
+        )
+        current_assets = self._account_type_balance(
+            position_domain,
+            ("asset_receivable", "asset_cash", "asset_current", "asset_prepayments"),
+        )
+        current_liabilities = self._account_type_balance(
+            position_domain,
+            ("liability_payable", "liability_credit_card", "liability_current"),
+            sign=-1.0,
+        )
+
+        return [
+            self._section(_("Performance")),
+            self._total(_("Revenue"), revenue),
+            self._total(_("Gross Profit"), gross_profit),
+            self._total(_("Operating Expenses"), operating_expenses),
+            self._total(_("Net Income"), net_profit),
+            self._section(_("Financial Position")),
+            self._total(_("Cash and Bank"), cash),
+            self._total(_("Receivables"), receivables),
+            self._total(_("Payables"), payables),
+            self._total(_("Working Capital"), current_assets - current_liabilities),
+        ]
+
+    def _cash_flow_lines(self):
+        opening_domain = self._base_domain(
+            date_to=self.date_from - relativedelta(days=1),
+        )
+        period_domain = self._base_domain(self.date_from, self.date_to)
+        cash_types = ("asset_cash",)
+        opening = self._read_account_totals(opening_domain, cash_types)
+        period = self._read_account_totals(period_domain, cash_types)
+        account_ids = set(opening) | set(period)
+
+        rows = []
+        accounts = self.env["account.account"].browse(account_ids).with_company(self.company_id)
+        for account in sorted(accounts, key=lambda item: (item.code or "", item.name or "")):
+            opening_balance = opening.get(account.id, {}).get("balance", 0.0)
+            cash_in = period.get(account.id, {}).get("debit", 0.0)
+            cash_out = period.get(account.id, {}).get("credit", 0.0)
+            movement = period.get(account.id, {}).get("balance", 0.0)
+            ending_balance = opening_balance + movement
+            if not self.show_zero and all(
+                self.currency_id.is_zero(value)
+                for value in (opening_balance, cash_in, cash_out, ending_balance)
+            ):
+                continue
+            rows.append({
+                "line_type": "account",
+                "code": account.code,
+                "name": account.name,
+                "account_id": account.id,
+                "opening_balance": opening_balance,
+                "period_debit": cash_in,
+                "period_credit": cash_out,
+                "debit": cash_in,
+                "credit": cash_out,
+                "balance": movement,
+                "ending_balance": ending_balance,
+                "can_drilldown": True,
+            })
+
+        return [
+            self._section(_("Cash and Bank Accounts")),
+            *rows,
+            self._total(
+                _("Net Cash and Cash Equivalents"),
+                self._rows_total(rows),
+                opening_balance=self._rows_total(rows, "opening_balance"),
+                period_debit=self._rows_total(rows, "period_debit"),
+                period_credit=self._rows_total(rows, "period_credit"),
+                ending_balance=self._rows_total(rows, "ending_balance"),
+            ),
+        ]
+
+    def _aged_partner_lines(self, account_type, sign=1.0):
+        base_domain = self._base_domain(date_to=self.date_to) + [
+            ("account_id.account_type", "=", account_type),
+            ("amount_residual", "!=", 0.0),
+        ]
+        date_30 = self.date_to - relativedelta(days=30)
+        date_60 = self.date_to - relativedelta(days=60)
+        date_90 = self.date_to - relativedelta(days=90)
+        buckets = [
+            (
+                "bucket_current",
+                ["|", ("date_maturity", "=", False), ("date_maturity", ">=", self.date_to)],
+            ),
+            (
+                "bucket_1_30",
+                [("date_maturity", "<", self.date_to), ("date_maturity", ">=", date_30)],
+            ),
+            (
+                "bucket_31_60",
+                [("date_maturity", "<", date_30), ("date_maturity", ">=", date_60)],
+            ),
+            (
+                "bucket_61_90",
+                [("date_maturity", "<", date_60), ("date_maturity", ">=", date_90)],
+            ),
+            ("bucket_older", [("date_maturity", "<", date_90)]),
+        ]
+        partner_values = {}
+        for field_name, bucket_domain in buckets:
+            grouped = self.env["account.move.line"]._read_group(
+                base_domain + bucket_domain,
+                ["partner_id"],
+                ["amount_residual:sum"],
+            )
+            for partner, residual in grouped:
+                key = partner.id if partner else 0
+                values = partner_values.setdefault(key, {
+                    "partner": partner,
+                    "bucket_current": 0.0,
+                    "bucket_1_30": 0.0,
+                    "bucket_31_60": 0.0,
+                    "bucket_61_90": 0.0,
+                    "bucket_older": 0.0,
+                })
+                values[field_name] = sign * (residual or 0.0)
+
+        rows = []
+        for values in sorted(
+            partner_values.values(),
+            key=lambda item: item["partner"].display_name if item["partner"] else "",
+        ):
+            total = sum(values[field_name] for field_name, _domain in buckets)
+            if not self.show_zero and self.currency_id.is_zero(total):
+                continue
+            partner = values["partner"]
+            rows.append({
+                "line_type": "account",
+                "name": partner.display_name if partner else _("Unassigned"),
+                "partner_id": partner.id if partner else False,
+                "balance": total,
+                "ending_balance": total,
+                "bucket_current": values["bucket_current"],
+                "bucket_1_30": values["bucket_1_30"],
+                "bucket_31_60": values["bucket_31_60"],
+                "bucket_61_90": values["bucket_61_90"],
+                "bucket_older": values["bucket_older"],
+                "can_drilldown": True,
+            })
+
+        return [
+            *rows,
+            self._total(
+                _("TOTAL"),
+                self._rows_total(rows),
+                bucket_current=self._rows_total(rows, "bucket_current"),
+                bucket_1_30=self._rows_total(rows, "bucket_1_30"),
+                bucket_31_60=self._rows_total(rows, "bucket_31_60"),
+                bucket_61_90=self._rows_total(rows, "bucket_61_90"),
+                bucket_older=self._rows_total(rows, "bucket_older"),
+            ),
         ]
 
     def _ledger_account_lines(self):
@@ -458,6 +907,8 @@ class DctAccountReportWizard(models.TransientModel):
         generators = {
             "profit_loss": self._profit_loss_lines,
             "balance_sheet": self._balance_sheet_lines,
+            "executive_summary": self._executive_summary_lines,
+            "cash_flow": self._cash_flow_lines,
             "trial_balance": self._ledger_account_lines,
             "general_ledger": self._ledger_account_lines,
             "partner_ledger": lambda: self._grouped_ledger_lines(
@@ -468,6 +919,11 @@ class DctAccountReportWizard(models.TransientModel):
             "journal_ledger": lambda: self._grouped_ledger_lines(
                 "journal_id",
                 "journal_id",
+            ),
+            "aged_receivable": lambda: self._aged_partner_lines("asset_receivable"),
+            "aged_payable": lambda: self._aged_partner_lines(
+                "liability_payable",
+                sign=-1.0,
             ),
         }
         return generators[self.report_type]()
@@ -502,7 +958,7 @@ class DctAccountReportWizard(models.TransientModel):
         )
 
     def _comparison_metric(self, values):
-        if self.report_type in ("profit_loss", "balance_sheet"):
+        if self.report_type in ("profit_loss", "balance_sheet", "executive_summary"):
             return values.get("balance", 0.0)
         return values.get("ending_balance", 0.0)
 
@@ -570,6 +1026,8 @@ class DctAccountReportWizard(models.TransientModel):
         comparison = options.get("comparison", "none")
         if comparison not in comparison_types:
             comparison = "none"
+        if report_type in ("aged_receivable", "aged_payable"):
+            comparison = "none"
         target_move = options.get("target_move", "posted")
         if target_move not in ("posted", "all"):
             target_move = "posted"
@@ -607,16 +1065,18 @@ class DctAccountReportWizard(models.TransientModel):
             wizard = self.create(values)
         wizard._generate_lines()
 
-        current_section = False
         lines = []
         for line in wizard.line_ids.sorted("sequence"):
-            if line.line_type == "section":
-                current_section = f"section-{line.id}"
             lines.append({
                 "id": line.id,
                 "sequence": line.sequence,
                 "line_type": line.line_type,
-                "section_key": current_section,
+                "line_key": line.line_key or f"line-{line.id}",
+                "parent_key": line.parent_key or "",
+                "level": line.hierarchy_level,
+                "foldable": line.foldable,
+                "show_amount": line.show_amount,
+                "style_class": line.style_class or "normal",
                 "code": line.code or "",
                 "name": line.name,
                 "opening_balance": line.opening_balance,
@@ -626,15 +1086,30 @@ class DctAccountReportWizard(models.TransientModel):
                 "ending_balance": line.ending_balance,
                 "comparison_balance": line.comparison_balance,
                 "variance": line.variance,
+                "bucket_current": line.bucket_current,
+                "bucket_1_30": line.bucket_1_30,
+                "bucket_31_60": line.bucket_31_60,
+                "bucket_61_90": line.bucket_61_90,
+                "bucket_older": line.bucket_older,
                 "can_drilldown": line.can_drilldown,
                 "is_total": line.is_total,
             })
+
+        unposted_domain = [
+            ("company_id", "=", wizard.company_id.id),
+            ("account_id", "!=", False),
+            ("parent_state", "=", "draft"),
+            ("date", "<=", wizard.date_to),
+        ]
+        if wizard.report_type not in ("balance_sheet", "aged_receivable", "aged_payable"):
+            unposted_domain.append(("date", ">=", wizard.date_from))
 
         return {
             "wizard_id": wizard.id,
             "report_type": wizard.report_type,
             "report_name": wizard.report_name,
             "company_name": wizard.company_id.display_name,
+            "company_country_code": wizard.company_id.country_id.code or "",
             "date_from": fields.Date.to_string(wizard.date_from),
             "date_to": fields.Date.to_string(wizard.date_to),
             "target_move": wizard.target_move,
@@ -646,6 +1121,9 @@ class DctAccountReportWizard(models.TransientModel):
             "comparison_date_to": fields.Date.to_string(wizard.comparison_date_to)
                 if wizard.comparison_date_to else "",
             "generated_at": fields.Datetime.to_string(wizard.generated_at),
+            "has_unposted_entries": bool(
+                self.env["account.move.line"].search_count(unposted_domain, limit=1)
+            ),
             "currency": {
                 "name": wizard.currency_id.name,
                 "symbol": wizard.currency_id.symbol,
@@ -703,6 +1181,22 @@ class DctAccountReportLine(models.TransientModel):
     )
     code = fields.Char()
     name = fields.Char(required=True)
+    hierarchy_level = fields.Integer(default=0, readonly=True)
+    line_key = fields.Char(readonly=True)
+    parent_key = fields.Char(readonly=True)
+    foldable = fields.Boolean(readonly=True)
+    show_amount = fields.Boolean(default=True, readonly=True)
+    style_class = fields.Selection(
+        [
+            ("normal", "Normal"),
+            ("section", "Section"),
+            ("primary", "Primary Section"),
+            ("subtotal", "Subtotal"),
+            ("grand", "Grand Total"),
+        ],
+        default="normal",
+        readonly=True,
+    )
     account_id = fields.Many2one("account.account", readonly=True)
     partner_id = fields.Many2one("res.partner", readonly=True)
     journal_id = fields.Many2one("account.journal", readonly=True)
@@ -716,16 +1210,31 @@ class DctAccountReportLine(models.TransientModel):
     ending_balance = fields.Monetary(currency_field="currency_id", readonly=True)
     comparison_balance = fields.Monetary(currency_field="currency_id", readonly=True)
     variance = fields.Monetary(currency_field="currency_id", readonly=True)
+    bucket_current = fields.Monetary(currency_field="currency_id", readonly=True)
+    bucket_1_30 = fields.Monetary(currency_field="currency_id", readonly=True)
+    bucket_31_60 = fields.Monetary(currency_field="currency_id", readonly=True)
+    bucket_61_90 = fields.Monetary(currency_field="currency_id", readonly=True)
+    bucket_older = fields.Monetary(currency_field="currency_id", readonly=True)
     is_total = fields.Boolean(readonly=True)
     can_drilldown = fields.Boolean(readonly=True)
 
     def action_open_journal_items(self):
         self.ensure_one()
         wizard = self.wizard_id
-        if wizard.report_type == "balance_sheet":
+        if wizard.report_type in ("balance_sheet", "aged_receivable", "aged_payable"):
             domain = wizard._base_domain(date_to=wizard.date_to)
         else:
             domain = wizard._base_domain(wizard.date_from, wizard.date_to)
+        if wizard.report_type == "aged_receivable":
+            domain.extend([
+                ("account_id.account_type", "=", "asset_receivable"),
+                ("amount_residual", "!=", 0.0),
+            ])
+        elif wizard.report_type == "aged_payable":
+            domain.extend([
+                ("account_id.account_type", "=", "liability_payable"),
+                ("amount_residual", "!=", 0.0),
+            ])
         if self.account_id:
             domain.append(("account_id", "=", self.account_id.id))
         if self.partner_id:

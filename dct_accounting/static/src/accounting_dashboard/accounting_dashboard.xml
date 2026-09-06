@@ -13,7 +13,7 @@
                         <img t-att-src="state.data.company.logo_url" t-att-alt="state.data.company.name + ' logo'" class="dcta_logo"/>
                         <span class="dcta_brand_divider"/>
                         <div>
-                            <p class="dcta_eyebrow">Accounting command center</p>
+                            <p class="dcta_eyebrow">Accounting</p>
                             <h1><t t-esc="state.data.company.name"/></h1>
                             <p class="dcta_period_caption"><t t-esc="state.data.period.label"/> · Updated <t t-esc="state.data.updated_at"/></p>
                         </div>

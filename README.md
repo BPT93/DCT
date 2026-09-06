@@ -1,35 +1,52 @@
 # DCT Odoo 19 Community add-ons
 
-This repository contains two separately installable Odoo 19 Community modules,
-styled with the official DCT navy (`#0A132B`) and electric blue (`#1577FF`).
+This repository contains two integrated Odoo 19 Community modules plus a
+vendored, attributed OCA feature stack. Custom screens use the official DCT
+navy (`#0A132B`) and electric blue (`#1577FF`), while operational Odoo screens
+retain the native interface.
 
 ## Modules
 
-- `dct_dashboard` — responsive executive dashboard. It depends only on `web`
+- `dct_dashboard` — responsive Enterprise-style home and executive dashboard,
+  backed by OCA responsive navigation, native backend dark mode, and expandable
+  dialogs.
+  It depends only on `web`
   and automatically shows data for Accounting, Sales, Purchase, and Inventory
   when those applications are installed and readable by the current user. It
   also provides the DCT app launcher, a persistent light/dark appearance,
-  company-aware branding, backend palette, navbar, and login theme.
-- `dct_accounting` — dedicated accounting workspace built on Odoo Community's
-  `account` module, with period KPIs, cash balance, profit trend, receivable and
-  payable aging, overdue invoices, recent activity, and navigation shortcuts.
-  Its app menu is restricted to Accounting read-only users and above because it
-  summarizes general-ledger balances. It also provides interactive Profit &
-  Loss, Balance Sheet, Trial Balance, General Ledger, Partner Ledger, and
-  Journal Ledger reports with drill-down plus PDF/XLSX export. Its dashboard
-  uses the active company's Odoo logo and the same saved light/dark preference.
+  company-aware branding, and login theme while leaving Odoo's native backend
+  views and navigation unchanged.
+- `dct_accounting` — Odoo's native Accounting application enhanced with OCA
+  financial and aged reports, VAT/tax reports, assets and depreciation, bank
+  statement imports, reconciliation, partner statements, recurring entries,
+  journal controls, MIS dashboards, configurable reports, and budgets. The
+  add-on keeps the standard Odoo UI and organizes the additional tools inside
+  the native Reporting and Configuration hierarchy.
+- `oca_addons` — pinned Odoo 19 Community dependencies with upstream licenses,
+  documentation, and source attribution. See [the vendor inventory](oca_addons/README.md).
 
 ## Installation
 
-1. Add this repository directory to Odoo's `addons_path`.
-2. Restart Odoo and update the Apps list.
-3. Install **DCT Dashboard** and/or **DCT Accounting** from Apps.
+1. Install the Python requirements with `pip install -r requirements-oca.txt`.
+2. Add both this repository and its `oca_addons` directory to Odoo's
+   `addons_path`.
+3. Restart Odoo and update the Apps list.
+4. Upgrade or install **DCT Dashboard** and **DCT Accounting** from Apps.
 
 For command-line updates:
 
 ```bash
-./odoo-bin -d DATABASE -u dct_dashboard,dct_accounting --stop-after-init
+./odoo-bin \
+  --addons-path=/path/to/odoo/addons,/path/to/DCT/oca_addons,/path/to/DCT \
+  -d DATABASE -u dct_dashboard,dct_accounting --stop-after-init
 ```
 
-Each module is independent: removing one does not remove the other. The
-executive dashboard also works without the accounting module installed.
+The DCT modules remain independently installable, but their declared OCA
+dependencies are installed automatically. Online bank-provider connectors in
+`oca_addons` remain optional and require provider credentials.
+
+## Licensing
+
+The integrated distribution is provided under AGPL-3. Every vendored OCA module
+retains its own declared license, attribution, and documentation. No Odoo
+Enterprise source code, assets, or branding are included.

@@ -5,7 +5,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
-import { getPreferredTheme, saveTheme } from "@dct_dashboard/theme/theme";
+import { getPreferredTheme } from "@dct_dashboard/theme/theme";
 
 
 export class DctDashboard extends Component {
@@ -16,6 +16,7 @@ export class DctDashboard extends Component {
         this.orm = useService("orm");
         this.action = useService("action");
         this.notification = useService("notification");
+        this.colorScheme = useService("color_scheme");
         this.state = useState({
             period: "month",
             theme: getPreferredTheme(),
@@ -49,8 +50,8 @@ export class DctDashboard extends Component {
         return this.loadData();
     }
 
-    toggleTheme() {
-        this.state.theme = saveTheme(this.state.theme === "dark" ? "light" : "dark");
+    async toggleTheme() {
+        await this.colorScheme.switchColorScheme();
     }
 
     async openAction(xmlid) {

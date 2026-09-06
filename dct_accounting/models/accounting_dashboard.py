@@ -241,7 +241,12 @@ class DctAccountingDashboard(models.AbstractModel):
         definitions = [
             (_("Customer Invoices"), "account.action_move_out_invoice", "fa-file-text-o"),
             (_("Vendor Bills"), "account.action_move_in_invoice", "fa-file-o"),
+            (_("Customer Payments"), "account.action_account_payments", "fa-credit-card"),
+            (_("Vendor Payments"), "account.action_account_payments_payable", "fa-money"),
             (_("Journal Entries"), "account.action_move_journal_line", "fa-book"),
+            (_("Journal Items"), "account.action_account_moves_all", "fa-list"),
+            (_("Accounting Dashboard"), "account.open_account_journal_dashboard_kanban", "fa-dashboard"),
+            (_("Chart of Accounts"), "account.action_account_form", "fa-sitemap"),
             (_("Profit & Loss"), "dct_accounting.action_dct_profit_loss_interactive", "fa-line-chart"),
             (_("Balance Sheet"), "dct_accounting.action_dct_balance_sheet_interactive", "fa-balance-scale"),
             (_("Trial Balance"), "dct_accounting.action_dct_trial_balance_interactive", "fa-list-alt"),

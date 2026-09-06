@@ -49,25 +49,33 @@
                             <field name="is_total" column_invisible="True"/>
                             <field name="can_drilldown" column_invisible="True"/>
                             <field name="currency_id" column_invisible="True"/>
-                            <field name="code" string="Code" optional="show"/>
+                            <field name="code" string="Code" optional="show"
+                                   column_invisible="parent.report_type in ('aged_receivable', 'aged_payable')"/>
                             <field name="name" string="Account / Partner / Journal"/>
                             <field name="opening_balance" string="Opening" widget="monetary"
-                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet')"/>
+                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet', 'executive_summary', 'aged_receivable', 'aged_payable')"/>
                             <field name="period_debit" string="Debit" widget="monetary"
-                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet')"/>
+                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet', 'executive_summary', 'aged_receivable', 'aged_payable')"/>
                             <field name="period_credit" string="Credit" widget="monetary"
-                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet')"/>
-                            <field name="debit" widget="monetary"
-                                   column_invisible="parent.report_type not in ('profit_loss', 'balance_sheet')" optional="hide"/>
-                            <field name="credit" widget="monetary"
-                                   column_invisible="parent.report_type not in ('profit_loss', 'balance_sheet')" optional="hide"/>
-                            <field name="balance" string="Balance" widget="monetary"/>
+                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet', 'executive_summary', 'aged_receivable', 'aged_payable')"/>
+                            <field name="bucket_current" string="Not Due" widget="monetary"
+                                   column_invisible="parent.report_type not in ('aged_receivable', 'aged_payable')"/>
+                            <field name="bucket_1_30" string="1–30" widget="monetary"
+                                   column_invisible="parent.report_type not in ('aged_receivable', 'aged_payable')"/>
+                            <field name="bucket_31_60" string="31–60" widget="monetary"
+                                   column_invisible="parent.report_type not in ('aged_receivable', 'aged_payable')"/>
+                            <field name="bucket_61_90" string="61–90" widget="monetary"
+                                   column_invisible="parent.report_type not in ('aged_receivable', 'aged_payable')"/>
+                            <field name="bucket_older" string="90+" widget="monetary"
+                                   column_invisible="parent.report_type not in ('aged_receivable', 'aged_payable')"/>
+                            <field name="balance" string="Balance" widget="monetary"
+                                   column_invisible="parent.report_type not in ('profit_loss', 'balance_sheet', 'executive_summary')"/>
                             <field name="ending_balance" string="Ending" widget="monetary"
-                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet')"/>
+                                   column_invisible="parent.report_type in ('profit_loss', 'balance_sheet', 'executive_summary')"/>
                             <field name="comparison_balance" string="Comparison" widget="monetary"
-                                   column_invisible="parent.comparison == 'none'"/>
+                                   column_invisible="parent.comparison == 'none' or parent.report_type in ('aged_receivable', 'aged_payable')"/>
                             <field name="variance" string="Variance" widget="monetary"
-                                   column_invisible="parent.comparison == 'none'"/>
+                                   column_invisible="parent.comparison == 'none' or parent.report_type in ('aged_receivable', 'aged_payable')"/>
                             <button name="action_open_journal_items" type="object" icon="fa-external-link"
                                     title="Open Journal Items" invisible="not can_drilldown"/>
                         </list>
@@ -159,10 +167,34 @@
         <field name="context">{'report_type': 'partner_ledger'}</field>
     </record>
     <record id="action_dct_journal_ledger_interactive" model="ir.actions.client">
-        <field name="name">Journal Ledger</field>
+        <field name="name">Journal Audit</field>
         <field name="tag">dct_accounting.report</field>
         <field name="target">current</field>
         <field name="context">{'report_type': 'journal_ledger'}</field>
+    </record>
+    <record id="action_dct_executive_summary_interactive" model="ir.actions.client">
+        <field name="name">Executive Summary</field>
+        <field name="tag">dct_accounting.report</field>
+        <field name="target">current</field>
+        <field name="context">{'report_type': 'executive_summary'}</field>
+    </record>
+    <record id="action_dct_cash_flow_interactive" model="ir.actions.client">
+        <field name="name">Cash Flow Statement</field>
+        <field name="tag">dct_accounting.report</field>
+        <field name="target">current</field>
+        <field name="context">{'report_type': 'cash_flow'}</field>
+    </record>
+    <record id="action_dct_aged_receivable_interactive" model="ir.actions.client">
+        <field name="name">Aged Receivable</field>
+        <field name="tag">dct_accounting.report</field>
+        <field name="target">current</field>
+        <field name="context">{'report_type': 'aged_receivable'}</field>
+    </record>
+    <record id="action_dct_aged_payable_interactive" model="ir.actions.client">
+        <field name="name">Aged Payable</field>
+        <field name="tag">dct_accounting.report</field>
+        <field name="target">current</field>
+        <field name="context">{'report_type': 'aged_payable'}</field>
     </record>
 </odoo>
 

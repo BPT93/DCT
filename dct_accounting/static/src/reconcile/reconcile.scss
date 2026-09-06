@@ -1,0 +1,495 @@
+// Reconciliation is a dense, two-pane workflow. Keep these rules scoped to the
+// OCA view so regular Odoo kanban, form, and list screens remain untouched.
+.o_account_reconcile_oca {
+    display: flex;
+    flex-flow: row nowrap;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    color: var(--dct-ink, #212529);
+    background: var(--dct-canvas, #f4f5f6);
+
+    .o_account_reconcile_oca_selector {
+        flex: 0 0 clamp(19rem, 29vw, 25rem);
+        width: auto;
+        min-width: 0;
+        height: 100%;
+        padding: 0.75rem;
+        overflow: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+        border-right: 1px solid var(--dct-line, #dee2e6);
+        background: var(--dct-canvas, #f4f5f6);
+        align-content: flex-start;
+
+        &.o_kanban_renderer.o_kanban_ungrouped {
+            .o_kanban_record {
+                position: relative;
+                width: 100%;
+                min-width: 0;
+                margin: 0 0 0.5rem;
+                padding: 0.85rem 0.9rem;
+                overflow: visible;
+                cursor: pointer;
+                border: 1px solid var(--dct-line, #dee2e6) !important;
+                border-radius: 0.45rem !important;
+                background: var(--dct-surface, #fff);
+                box-shadow: 0 1px 2px rgba(10, 19, 43, 0.06) !important;
+                transition:
+                    border-color 120ms ease,
+                    box-shadow 120ms ease,
+                    transform 120ms ease;
+
+                > div {
+                    min-width: 0;
+                    border-right: 0;
+                }
+
+                .row {
+                    align-items: center;
+                    margin: 0;
+                }
+
+                .o_field_widget,
+                .o_field_many2one,
+                .o_field_char {
+                    max-width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                &:hover {
+                    border-color: rgba(113, 75, 103, 0.46) !important;
+                    box-shadow: 0 4px 12px rgba(10, 19, 43, 0.1) !important;
+                    transform: translateY(-1px);
+                }
+
+                &:focus-visible {
+                    outline: 3px solid rgba(113, 75, 103, 0.22);
+                    outline-offset: 1px;
+                }
+
+                &.o_kanban_record_reconcile_oca_selected {
+                    border-color: rgba(113, 75, 103, 0.56) !important;
+                    background: rgba(113, 75, 103, 0.08);
+                    box-shadow:
+                        inset 4px 0 0 #714b67,
+                        0 4px 12px rgba(10, 19, 43, 0.1) !important;
+                }
+
+                .badge {
+                    max-width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    vertical-align: middle;
+                }
+
+                .o_reconcile_create_statement {
+                    top: -1.35rem;
+                    right: 0.25rem;
+                    z-index: 3;
+                    height: auto;
+                    opacity: 0;
+                }
+            }
+        }
+    }
+
+    .dct_reconcile_global_balance {
+        position: sticky;
+        top: -0.75rem;
+        z-index: 4;
+        width: auto !important;
+        min-height: 3.5rem;
+        margin: -0.75rem -0.75rem 0.75rem !important;
+        padding: 0.8rem 1rem;
+        border-bottom: 1px solid var(--dct-line, #dee2e6);
+        background: var(--dct-surface, #fff);
+        box-shadow: 0 2px 6px rgba(10, 19, 43, 0.06);
+
+        > span {
+            min-width: 0;
+            font-size: 1rem !important;
+        }
+
+        > span:last-child {
+            margin-left: 0.75rem;
+            color: #714b67;
+            white-space: nowrap;
+        }
+    }
+
+    .dct_reconcile_aggregate_header {
+        width: auto !important;
+        margin: 0.85rem 0 0.4rem !important;
+        padding: 0.35rem 0.15rem;
+        border-bottom: 1px solid var(--dct-line, #dee2e6);
+
+        > span {
+            min-width: 0;
+            font-size: 0.8rem !important;
+            letter-spacing: 0.035em;
+            text-transform: uppercase;
+        }
+
+        .btn-link {
+            padding: 0;
+            color: #017e84;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+    }
+
+    .o_account_reconcile_oca_info {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+        height: 100%;
+        overflow: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+        background: var(--dct-surface, #fff);
+
+        .o_form_view,
+        .o_form_renderer {
+            min-width: 0;
+            min-height: 100%;
+            background: transparent;
+        }
+
+        .o_form_renderer > form {
+            min-width: 0;
+            padding: 0 1.25rem 1.5rem;
+        }
+
+        .o_form_statusbar.o_account_reconcile_oca_statusbar {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            width: auto;
+            min-height: 3.6rem;
+            height: auto;
+            margin: 0 -1.25rem 1rem;
+            padding: 0.65rem 1.25rem;
+            border-bottom: 1px solid var(--dct-line, #dee2e6);
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 2px 6px rgba(10, 19, 43, 0.06);
+            backdrop-filter: blur(8px);
+
+            .o_statusbar_buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.45rem;
+                width: 100%;
+
+                .btn {
+                    min-height: 2.2rem;
+                    margin: 0 !important;
+                    white-space: nowrap;
+                }
+            }
+        }
+
+        .o_notebook {
+            margin-top: 1.15rem;
+
+            .nav-tabs {
+                gap: 0.15rem;
+                padding: 0 0.25rem;
+                border-bottom-color: var(--dct-line, #dee2e6);
+            }
+
+            .nav-link {
+                min-height: 2.65rem;
+                padding: 0.65rem 0.9rem;
+                color: var(--dct-muted, #6c757d);
+                border-radius: 0.4rem 0.4rem 0 0;
+
+                &.active {
+                    color: #714b67;
+                    font-weight: 600;
+                }
+            }
+
+            .tab-content {
+                min-width: 0;
+                padding-top: 0.9rem;
+            }
+        }
+    }
+
+    .o_field_account_reconcile_oca_data {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0 1rem;
+        overflow-x: auto;
+        border: 1px solid var(--dct-line, #dee2e6);
+        border-radius: 0.45rem;
+        background: var(--dct-surface, #fff);
+        scrollbar-gutter: stable;
+
+        .o_reconcile_widget_table {
+            min-width: 46rem;
+            margin: 0;
+            font-variant-numeric: tabular-nums;
+
+            thead {
+                color: #495057;
+                background: #f4f5f6;
+            }
+
+            th,
+            td {
+                padding: 0.65rem 0.7rem;
+                vertical-align: middle;
+                border-color: var(--dct-line, #dee2e6);
+            }
+
+            th {
+                font-size: 0.75rem;
+                font-weight: 600;
+                letter-spacing: 0.025em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            .o_reconcile_widget_line {
+                transition: background-color 100ms ease;
+
+                &:hover {
+                    background: rgba(113, 75, 103, 0.055);
+                }
+
+                &.selected {
+                    background: rgba(113, 75, 103, 0.12);
+                    box-shadow: inset 3px 0 0 #714b67;
+                }
+
+                &.liquidity {
+                    background-color: rgba(1, 126, 132, 0.055);
+                }
+            }
+
+            .dct_reconcile_line_actions {
+                width: 2.75rem;
+            }
+
+            .dct_reconcile_open_balance {
+                font-weight: 600;
+            }
+
+            .dct_reconcile_remove_line {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 2rem;
+                height: 2rem;
+                padding: 0;
+                border-radius: 50%;
+            }
+        }
+    }
+
+    .o_field_widget.o_field_account_reconcile_oca_match {
+        display: block;
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid var(--dct-line, #dee2e6);
+        border-radius: 0.45rem;
+        background: var(--dct-surface, #fff);
+
+        .o_list_renderer {
+            min-width: 0;
+            overflow: auto;
+        }
+
+        .o_list_table {
+            min-width: 46rem;
+            margin-bottom: 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .o_field_account_reconcile_oca_move_line_selected {
+            color: var(--dct-ink, #212529);
+            background: rgba(1, 126, 132, 0.12) !important;
+            box-shadow: inset 3px 0 0 #017e84;
+        }
+    }
+
+    .dct_reconcile_empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 24rem;
+        padding: 3rem 1.5rem;
+        color: var(--dct-muted, #6c757d);
+        text-align: center;
+
+        .dct_reconcile_empty_icon {
+            margin-bottom: 1rem;
+            color: #017e84;
+            font-size: 3rem;
+        }
+
+        h3 {
+            margin-bottom: 0.35rem;
+            color: var(--dct-ink, #212529);
+            font-size: 1.25rem;
+        }
+
+        p {
+            margin: 0;
+        }
+    }
+}
+
+:root[data-dct-theme="dark"] .o_account_reconcile_oca {
+    .o_account_reconcile_oca_selector,
+    .o_account_reconcile_oca_info,
+    .o_account_reconcile_oca_selector.o_kanban_renderer.o_kanban_ungrouped
+        .o_kanban_record,
+    .dct_reconcile_global_balance,
+    .o_field_account_reconcile_oca_data,
+    .o_field_widget.o_field_account_reconcile_oca_match {
+        background: var(--dct-surface, #252525);
+    }
+
+    .o_account_reconcile_oca_selector.o_kanban_renderer.o_kanban_ungrouped
+        .o_kanban_record {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+
+        &:hover {
+            border-color: rgba(202, 165, 191, 0.58) !important;
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.28) !important;
+        }
+
+        &.o_kanban_record_reconcile_oca_selected {
+            border-color: rgba(202, 165, 191, 0.58) !important;
+            background: rgba(202, 165, 191, 0.12);
+            box-shadow:
+                inset 4px 0 0 #ca9dbf,
+                0 5px 14px rgba(0, 0, 0, 0.28) !important;
+        }
+    }
+
+    .dct_reconcile_global_balance > span:last-child,
+    .o_account_reconcile_oca_info .o_notebook .nav-link.active {
+        color: #ca9dbf;
+    }
+
+    .o_account_reconcile_oca_info
+        .o_form_statusbar.o_account_reconcile_oca_statusbar {
+        background: rgba(37, 37, 37, 0.96);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.24);
+    }
+
+    .o_field_account_reconcile_oca_data .o_reconcile_widget_table {
+        thead {
+            color: #ced4da;
+            background: #303030;
+        }
+
+        .o_reconcile_widget_line:hover {
+            background: rgba(202, 165, 191, 0.09);
+        }
+
+        .o_reconcile_widget_line.selected {
+            background: rgba(202, 165, 191, 0.16);
+            box-shadow: inset 3px 0 0 #ca9dbf;
+        }
+
+        .o_reconcile_widget_line.liquidity {
+            background-color: rgba(50, 190, 196, 0.1);
+        }
+    }
+
+    .o_field_widget.o_field_account_reconcile_oca_match
+        .o_field_account_reconcile_oca_move_line_selected {
+        color: var(--dct-ink, #f1f3f5);
+        background: rgba(50, 190, 196, 0.15) !important;
+        box-shadow: inset 3px 0 0 #32bec4;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .o_account_reconcile_oca {
+        display: block;
+        overflow: auto;
+
+        .o_account_reconcile_oca_selector {
+            width: 100%;
+            height: auto;
+            max-height: 21rem;
+            border-right: 0;
+            border-bottom: 1px solid var(--dct-line, #dee2e6);
+        }
+
+        .o_account_reconcile_oca_info {
+            width: 100%;
+            height: auto;
+            min-height: 32rem;
+            overflow: visible;
+        }
+
+        .o_account_reconcile_oca_info
+            .o_form_statusbar.o_account_reconcile_oca_statusbar {
+            top: 0;
+        }
+    }
+}
+
+@media (max-width: 575.98px) {
+    .o_account_reconcile_oca {
+        .o_account_reconcile_oca_selector {
+            max-height: 17rem;
+            padding: 0.5rem;
+        }
+
+        .dct_reconcile_global_balance {
+            top: -0.5rem;
+            margin: -0.5rem -0.5rem 0.5rem !important;
+            padding: 0.7rem 0.75rem;
+        }
+
+        .o_account_reconcile_oca_info .o_form_renderer > form {
+            padding-right: 0.75rem;
+            padding-left: 0.75rem;
+        }
+
+        .o_account_reconcile_oca_info
+            .o_form_statusbar.o_account_reconcile_oca_statusbar {
+            margin-right: -0.75rem;
+            margin-left: -0.75rem;
+            padding: 0.55rem 0.75rem;
+
+            .o_statusbar_buttons .btn {
+                flex: 1 1 auto;
+            }
+        }
+
+        .o_account_reconcile_oca_info .o_notebook {
+            .nav-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+
+            .nav-link {
+                white-space: nowrap;
+            }
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_account_reconcile_oca {
+        .o_account_reconcile_oca_selector.o_kanban_renderer.o_kanban_ungrouped
+            .o_kanban_record,
+        .o_reconcile_widget_line {
+            transition: none;
+        }
+    }
+}

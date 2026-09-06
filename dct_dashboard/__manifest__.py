@@ -1,11 +1,16 @@
 {
     "name": "DCT Dashboard",
     "summary": "Branded executive dashboard for Odoo Community",
-    "version": "19.0.1.0.0",
+    "version": "19.0.2.1.0",
     "category": "Productivity/Dashboard",
     "author": "Digital Creativity Technologies",
-    "license": "LGPL-3",
-    "depends": ["web"],
+    "license": "AGPL-3",
+    "depends": [
+        "web",
+        "web_responsive",
+        "web_dark_mode",
+        "web_dialog_size",
+    ],
     "data": [
         "views/home_action.xml",
         "views/login_templates.xml",
@@ -13,7 +18,7 @@
     ],
     "assets": {
         "web._assets_primary_variables": [
-            "dct_dashboard/static/src/scss/variables.scss",
+            ("prepend", "dct_dashboard/static/src/scss/variables.scss"),
         ],
         "web.assets_backend": [
             "dct_dashboard/static/src/scss/theme.scss",

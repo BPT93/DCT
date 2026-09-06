@@ -8,12 +8,16 @@ import { Component, onWillStart, useState } from "@odoo/owl";
 
 
 const REPORT_TYPES = [
-    ["profit_loss", "Profit & Loss"],
     ["balance_sheet", "Balance Sheet"],
-    ["trial_balance", "Trial Balance"],
+    ["profit_loss", "Profit & Loss"],
+    ["executive_summary", "Executive Summary"],
+    ["cash_flow", "Cash Flow Statement"],
     ["general_ledger", "General Ledger"],
+    ["trial_balance", "Trial Balance"],
+    ["journal_ledger", "Journal Audit"],
     ["partner_ledger", "Partner Ledger"],
-    ["journal_ledger", "Journal Ledger"],
+    ["aged_receivable", "Aged Receivable"],
+    ["aged_payable", "Aged Payable"],
 ];
 
 function toISO(date) {
@@ -48,7 +52,7 @@ export class DctInteractiveReport extends Component {
             loading: true,
             dateOpen: false,
             journalOpen: false,
-            lineSearch: "",
+            optionsOpen: false,
             collapsed: {},
             periodPreset: "month",
             options: {
@@ -77,6 +81,7 @@ export class DctInteractiveReport extends Component {
             "applyFilters",
             "resetFilters",
             "toggleJournals",
+            "toggleOptions",
             "onPeriodPresetChange",
             "onReportTypeChange",
             "onDateFromChange",
@@ -99,15 +104,37 @@ export class DctInteractiveReport extends Component {
     }
 
     get isStatement() {
-        return ["profit_loss", "balance_sheet"].includes(this.state.data.report_type);
+        return ["profit_loss", "balance_sheet", "executive_summary"].includes(
+            this.state.data.report_type
+        );
+    }
+
+    get isAgedReport() {
+        return ["aged_receivable", "aged_payable"].includes(this.state.data.report_type);
+    }
+
+    get isCashFlow() {
+        return this.state.data.report_type === "cash_flow";
+    }
+
+    get isAsOfReport() {
+        return ["balance_sheet", "aged_receivable", "aged_payable"].includes(
+            this.state.data.report_type
+        );
+    }
+
+    get supportsComparison() {
+        return !this.isAgedReport;
     }
 
     get hasComparison() {
-        return this.state.data.comparison && this.state.data.comparison !== "none";
+        return this.supportsComparison &&
+            this.state.data.comparison &&
+            this.state.data.comparison !== "none";
     }
 
     get periodLabel() {
-        if (this.state.data.report_type === "balance_sheet") {
+        if (this.isAsOfReport) {
             return `${_t("As of")} ${this.formatDate(this.state.options.date_to)}`;
         }
         return `${this.formatDate(this.state.options.date_from)} – ${this.formatDate(this.state.options.date_to)}`;
@@ -140,36 +167,49 @@ export class DctInteractiveReport extends Component {
         return _t("%s Journals", count);
     }
 
+    get lineNameLabel() {
+        if (this.isAgedReport || this.state.data.report_type === "partner_ledger") {
+            return _t("Partner");
+        }
+        if (this.state.data.report_type === "journal_ledger") {
+            return _t("Journal");
+        }
+        return _t("Account");
+    }
+
+    get reportVariantLabel() {
+        const country = this.state.data.company_country_code;
+        const suffix = country ? ` (${country})` : "";
+        return `${_t("Report:")} ${this.state.data.report_name || _t("Financial Report")}${suffix}`;
+    }
+
+    get currencyLabel() {
+        const currency = this.state.data.currency || {};
+        return `${_t("In")} ${currency.symbol || currency.name || ""}`.trim();
+    }
+
+    get periodColumnLabel() {
+        return this.periodLabel;
+    }
+
     get sectionKeys() {
         return this.state.data.lines
-            .filter((line) => line.line_type === "section")
-            .map((line) => line.section_key);
+            .filter((line) => line.foldable && line.line_key)
+            .map((line) => line.line_key);
     }
 
     get visibleLines() {
-        const query = this.state.lineSearch.trim().toLocaleLowerCase();
         const lines = this.state.data.lines;
-        const matchingSections = new Set();
-        if (query) {
-            for (const line of lines) {
-                if (`${line.code} ${line.name}`.toLocaleLowerCase().includes(query)) {
-                    matchingSections.add(line.section_key);
-                }
-            }
-        }
+        const byKey = new Map(lines.map((line) => [line.line_key, line]));
         return lines.filter((line) => {
-            if (
-                line.line_type === "account" &&
-                line.section_key &&
-                this.state.collapsed[line.section_key]
-            ) {
-                return false;
+            let parentKey = line.parent_key;
+            while (parentKey) {
+                if (this.state.collapsed[parentKey]) {
+                    return false;
+                }
+                parentKey = byKey.get(parentKey)?.parent_key;
             }
-            if (!query) {
-                return true;
-            }
-            const matches = `${line.code} ${line.name}`.toLocaleLowerCase().includes(query);
-            return matches || (line.line_type === "section" && matchingSections.has(line.section_key));
+            return true;
         });
     }
 
@@ -205,6 +245,7 @@ export class DctInteractiveReport extends Component {
     async applyFilters() {
         this.state.dateOpen = false;
         this.state.journalOpen = false;
+        this.state.optionsOpen = false;
         await this.loadReport();
     }
 
@@ -225,6 +266,13 @@ export class DctInteractiveReport extends Component {
     toggleJournals() {
         this.state.journalOpen = !this.state.journalOpen;
         this.state.dateOpen = false;
+        this.state.optionsOpen = false;
+    }
+
+    toggleOptions() {
+        this.state.optionsOpen = !this.state.optionsOpen;
+        this.state.dateOpen = false;
+        this.state.journalOpen = false;
     }
 
     async onPeriodPresetChange(event) {
@@ -233,6 +281,7 @@ export class DctInteractiveReport extends Component {
             this.state.periodPreset = "custom";
             this.state.dateOpen = true;
             this.state.journalOpen = false;
+            this.state.optionsOpen = false;
             return;
         }
         await this.setPeriod(preset);
@@ -265,6 +314,9 @@ export class DctInteractiveReport extends Component {
     async onReportTypeChange(event) {
         this.state.options.report_type = event.target.value;
         this.state.options.wizard_id = false;
+        if (["aged_receivable", "aged_payable"].includes(event.target.value)) {
+            this.state.options.comparison = "none";
+        }
         this.state.collapsed = {};
         await this.loadReport();
     }
@@ -308,8 +360,8 @@ export class DctInteractiveReport extends Component {
         this.state.options.journal_ids = [];
     }
 
-    toggleSection(sectionKey) {
-        this.state.collapsed[sectionKey] = !this.state.collapsed[sectionKey];
+    toggleSection(lineKey) {
+        this.state.collapsed[lineKey] = !this.state.collapsed[lineKey];
     }
 
     unfoldAll() {
@@ -329,26 +381,17 @@ export class DctInteractiveReport extends Component {
     }
 
     formatCurrency(value) {
-        if (!value) {
-            return "—";
-        }
         const currency = this.state.data.currency;
         try {
             return new Intl.NumberFormat(undefined, {
-                style: "currency",
-                currency: currency.name,
-                currencyDisplay: "symbol",
                 minimumFractionDigits: currency.decimal_places,
                 maximumFractionDigits: currency.decimal_places,
             }).format(value);
         } catch {
-            const amount = new Intl.NumberFormat(undefined, {
+            return new Intl.NumberFormat(undefined, {
                 minimumFractionDigits: currency.decimal_places || 2,
                 maximumFractionDigits: currency.decimal_places || 2,
             }).format(value);
-            return currency.position === "after"
-                ? `${amount} ${currency.symbol || currency.name}`
-                : `${currency.symbol || currency.name} ${amount}`;
         }
     }
 

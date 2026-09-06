@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t
+        t-name="dct_accounting.ReconcileRenderer"
+        t-inherit="account_reconcile_oca.ReconcileRenderer"
+        t-inherit-mode="extension"
+    >
+        <xpath
+            expr="//div[@t-if='env.parentController.journalId']"
+            position="attributes"
+        >
+            <attribute
+                name="class"
+                add="dct_reconcile_global_balance"
+                separator=" "
+            />
+        </xpath>
+        <xpath expr="//div[span[@t-esc='aggregate.name']]" position="attributes">
+            <attribute
+                name="class"
+                add="dct_reconcile_aggregate_header"
+                separator=" "
+            />
+        </xpath>
+    </t>
+
+    <t
+        t-name="dct_accounting.ReconcileController"
+        t-inherit="account_reconcile_oca.ReconcileController"
+        t-inherit-mode="extension"
+    >
+        <xpath
+            expr="//div[hasclass('o_account_reconcile_oca_info')]"
+            position="inside"
+        >
+            <div
+                t-if="!state.selectedRecordId"
+                class="dct_reconcile_empty"
+                role="status"
+            >
+                <span class="fa fa-check-circle-o dct_reconcile_empty_icon" />
+                <h3>Nothing to reconcile</h3>
+                <p>There are no open items in the current selection.</p>
+            </div>
+        </xpath>
+    </t>
+
+    <t
+        t-name="dct_accounting.ReconcileDataWidget"
+        t-inherit="account_reconcile_oca.ReconcileDataWidget"
+        t-inherit-mode="extension"
+    >
+        <xpath expr="//thead" position="replace">
+            <thead>
+                <tr>
+                    <th scope="col">Account</th>
+                    <th scope="col">Partner</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Label</th>
+                    <th scope="col" class="text-end" t-if="foreignCurrency">
+                        Amount in currency
+                    </th>
+                    <th scope="col" class="text-end">Debit</th>
+                    <th scope="col" class="text-end">Credit</th>
+                    <th
+                        scope="col"
+                        class="dct_reconcile_line_actions"
+                        t-if="!props.record.data.is_reconciled"
+                    >
+                        <span class="visually-hidden">Actions</span>
+                    </th>
+                </tr>
+            </thead>
+        </xpath>
+        <xpath
+            expr="//tr[hasclass('text-muted')]/td[1]"
+            position="attributes"
+        >
+            <attribute name="t-att-colspan">foreignCurrency ? 5 : 4</attribute>
+            <attribute name="class" add="dct_reconcile_open_balance" separator=" " />
+        </xpath>
+        <xpath
+            expr="//button[contains(@class, 'fa-trash-o')]"
+            position="attributes"
+        >
+            <attribute
+                name="class"
+                add="btn-sm btn-outline-danger dct_reconcile_remove_line"
+                separator=" "
+            />
+            <attribute name="title">Remove line</attribute>
+            <attribute name="aria-label">Remove line</attribute>
+        </xpath>
+        <xpath
+            expr="//td[button[contains(@class, 'fa-trash-o')]]"
+            position="attributes"
+        >
+            <attribute name="t-if">!props.record.data.is_reconciled</attribute>
+        </xpath>
+        <xpath
+            expr="//tr[hasclass('text-muted')]/td[last()]"
+            position="attributes"
+        >
+            <attribute name="t-if">!props.record.data.is_reconciled</attribute>
+        </xpath>
+    </t>
+</templates>

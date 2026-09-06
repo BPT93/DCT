@@ -1,47 +1,323 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="action_dct_accounting_dashboard" model="ir.actions.client">
-        <field name="name">Accounting Overview</field>
-        <field name="tag">dct_accounting.Dashboard</field>
+    <!-- Keep the Community application on Odoo's native Accounting UI. -->
+    <record id="account.menu_finance" model="ir.ui.menu">
+        <field name="name">Accounting</field>
     </record>
 
+    <!-- The standard journal dashboard stays the Accounting home screen. This
+         client action exposes the complementary executive overview from the
+         dashboard command bar and Reporting menu. -->
+    <record id="action_dct_accounting_overview" model="ir.actions.client">
+        <field name="name">Financial Overview</field>
+        <field name="tag">dct_accounting.Dashboard</field>
+        <field name="path">financial-overview</field>
+    </record>
     <menuitem
-        id="menu_dct_accounting_root"
-        name="DCT Accounting"
-        sequence="6"
+        id="menu_dct_accounting_overview"
+        name="Financial Overview"
+        parent="account.account_reports_management_menu"
+        action="action_dct_accounting_overview"
+        sequence="5"
         groups="account.group_account_readonly"
-        web_icon="dct_accounting,static/description/icon.png"
+    />
+
+    <!-- Add semantic hooks and journal-type icons to the native dashboard.
+         The journal data and all actions remain Odoo/OCA-owned. -->
+    <record id="account_journal_dashboard_enterprise_style" model="ir.ui.view">
+        <field name="name">account.journal.dashboard.enterprise.style</field>
+        <field name="model">account.journal</field>
+        <field
+            name="inherit_id"
+            ref="account.account_journal_dashboard_kanban_view"
+        />
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute
+                    name="class"
+                    add="dcta_enterprise_dashboard"
+                    separator=" "
+                />
+            </xpath>
+            <xpath expr="//t[@t-name='JournalTop']/span[1]" position="attributes">
+                <attribute
+                    name="class"
+                    add="dcta_journal_card_header"
+                    separator=" "
+                />
+            </xpath>
+            <xpath expr="//t[@t-name='JournalTop']/span[1]/a[1]" position="before">
+                <span
+                    t-attf-class="dcta_journal_icon dcta_journal_icon_#{journal_type}"
+                    aria-hidden="true"
+                >
+                    <i
+                        t-if="journal_type == 'bank'"
+                        class="fa fa-bank"
+                        title="Bank journal"
+                    />
+                    <i
+                        t-elif="journal_type == 'cash'"
+                        class="fa fa-money"
+                        title="Cash journal"
+                    />
+                    <i
+                        t-elif="journal_type == 'credit'"
+                        class="fa fa-credit-card"
+                        title="Credit card journal"
+                    />
+                    <i
+                        t-elif="journal_type == 'sale'"
+                        class="fa fa-file-text-o"
+                        title="Sales journal"
+                    />
+                    <i
+                        t-elif="journal_type == 'purchase'"
+                        class="fa fa-shopping-cart"
+                        title="Purchase journal"
+                    />
+                    <i t-else="" class="fa fa-book" title="General journal" />
+                </span>
+            </xpath>
+            <xpath
+                expr="//t[@t-name='card']/div[contains(@t-att-class, 'container-fluid')]"
+                position="attributes"
+            >
+                <attribute
+                    name="class"
+                    add="dcta_journal_card_body"
+                    separator=" "
+                />
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Preserve historical XML IDs during upgrades without showing duplicate
+         DCT dashboards or report entries. -->
+    <record id="menu_dct_accounting_root" model="ir.ui.menu">
+        <field name="name">DCT Accounting (Legacy)</field>
+        <field name="active" eval="False"/>
+    </record>
+    <record id="menu_dct_trial_balance" model="ir.ui.menu">
+        <field name="name">Trial Balance (Legacy)</field>
+        <field name="active" eval="False"/>
+    </record>
+    <record id="menu_dct_general_ledger" model="ir.ui.menu">
+        <field name="name">General Ledger (Legacy)</field>
+        <field name="active" eval="False"/>
+    </record>
+    <record id="menu_dct_partner_ledger" model="ir.ui.menu">
+        <field name="name">Partner Ledger (Legacy)</field>
+        <field name="active" eval="False"/>
+    </record>
+    <record id="menu_dct_journal_ledger" model="ir.ui.menu">
+        <field name="name">Journal Ledger (Legacy)</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Odoo 19-style report groups: Financial, Audit, Partner, Tax, Management. -->
+    <record id="account.account_reports_legal_statements_menu" model="ir.ui.menu">
+        <field name="name">Financial Reports</field>
+        <field name="sequence" eval="10"/>
+    </record>
+    <menuitem
+        id="menu_dct_balance_sheet"
+        name="Balance Sheet"
+        parent="account.account_reports_legal_statements_menu"
+        action="action_dct_balance_sheet_interactive"
+        sequence="10"
+        groups="account.group_account_readonly"
+    />
+    <menuitem
+        id="menu_dct_profit_loss"
+        name="Profit &amp; Loss"
+        parent="account.account_reports_legal_statements_menu"
+        action="action_dct_profit_loss_interactive"
+        sequence="20"
+        groups="account.group_account_readonly"
+    />
+    <menuitem
+        id="menu_dct_executive_summary"
+        name="Executive Summary"
+        parent="account.account_reports_legal_statements_menu"
+        action="action_dct_executive_summary_interactive"
+        sequence="30"
+        groups="account.group_account_readonly"
+    />
+    <menuitem
+        id="menu_dct_cash_flow"
+        name="Cash Flow Statement"
+        parent="account.account_reports_legal_statements_menu"
+        action="action_dct_cash_flow_interactive"
+        sequence="40"
+        groups="account.group_account_readonly"
     />
 
     <menuitem
-        id="menu_dct_accounting_dashboard"
-        name="Dashboard"
-        parent="menu_dct_accounting_root"
-        action="action_dct_accounting_dashboard"
-        sequence="1"
+        id="menu_dct_audit_reports"
+        name="Audit"
+        parent="account.menu_finance_reports"
+        sequence="20"
+        groups="account.group_account_readonly"
     />
+    <menuitem
+        id="menu_dct_general_ledger_interactive"
+        name="General Ledger"
+        parent="menu_dct_audit_reports"
+        action="action_dct_general_ledger_interactive"
+        sequence="10"
+        groups="account.group_account_readonly"
+    />
+    <menuitem
+        id="menu_dct_trial_balance_interactive"
+        name="Trial Balance"
+        parent="menu_dct_audit_reports"
+        action="action_dct_trial_balance_interactive"
+        sequence="20"
+        groups="account.group_account_readonly"
+    />
+    <menuitem
+        id="menu_dct_journal_audit_interactive"
+        name="Journal Audit"
+        parent="menu_dct_audit_reports"
+        action="action_dct_journal_ledger_interactive"
+        sequence="30"
+        groups="account.group_account_readonly"
+    />
+    <record id="account_financial_report.menu_oca_reports" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+    <record id="account_financial_report.menu_general_ledger_wizard" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+    <record id="account_financial_report.menu_trial_balance_wizard" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+    <record id="account_financial_report.menu_journal_ledger_wizard" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
 
-    <menuitem id="menu_dct_accounting_customers" name="Customers" parent="menu_dct_accounting_root" sequence="10"/>
-    <menuitem id="menu_dct_customer_invoices" name="Invoices" parent="menu_dct_accounting_customers" action="account.action_move_out_invoice" sequence="10"/>
-    <menuitem id="menu_dct_customer_payments" name="Payments" parent="menu_dct_accounting_customers" action="account.action_account_payments" sequence="20"/>
+    <record id="account.account_reports_partners_reports_menu" model="ir.ui.menu">
+        <field name="name">Partner Reports</field>
+        <field name="sequence" eval="30"/>
+    </record>
+    <menuitem
+        id="menu_dct_partner_ledger_interactive"
+        name="Partner Ledger"
+        parent="account.account_reports_partners_reports_menu"
+        action="action_dct_partner_ledger_interactive"
+        sequence="10"
+        groups="account.group_account_readonly"
+    />
+    <menuitem
+        id="menu_dct_aged_receivable"
+        name="Aged Receivable"
+        parent="account.account_reports_partners_reports_menu"
+        action="action_dct_aged_receivable_interactive"
+        sequence="20"
+        groups="account.group_account_readonly"
+    />
+    <menuitem
+        id="menu_dct_aged_payable"
+        name="Aged Payable"
+        parent="account.account_reports_partners_reports_menu"
+        action="action_dct_aged_payable_interactive"
+        sequence="30"
+        groups="account.group_account_readonly"
+    />
+    <record id="account_financial_report.menu_open_items_wizard" model="ir.ui.menu">
+        <field name="parent_id" ref="account.account_reports_partners_reports_menu"/>
+        <field name="sequence" eval="40"/>
+    </record>
+    <record id="account_financial_report.menu_aged_partner_balance_wizard" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
 
-    <menuitem id="menu_dct_accounting_vendors" name="Vendors" parent="menu_dct_accounting_root" sequence="20"/>
-    <menuitem id="menu_dct_vendor_bills" name="Bills" parent="menu_dct_accounting_vendors" action="account.action_move_in_invoice" sequence="10"/>
-    <menuitem id="menu_dct_vendor_payments" name="Payments" parent="menu_dct_accounting_vendors" action="account.action_account_payments_payable" sequence="20"/>
+    <record id="account.account_reports_taxes_and_fiscal_menu" model="ir.ui.menu">
+        <field name="name">Taxes &amp; Fiscal</field>
+        <field name="sequence" eval="40"/>
+    </record>
+    <record id="account_financial_report.menu_vat_report_wizard" model="ir.ui.menu">
+        <field name="name">Tax Report</field>
+        <field name="parent_id" ref="account.account_reports_taxes_and_fiscal_menu"/>
+        <field name="sequence" eval="10"/>
+    </record>
+    <record id="account_tax_balance.menu_tax_balances" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+    <record id="account_tax_balance.menu_action_open_tax_balances" model="ir.ui.menu">
+        <field name="name">Tax Balance</field>
+        <field name="parent_id" ref="account.account_reports_taxes_and_fiscal_menu"/>
+        <field name="sequence" eval="20"/>
+    </record>
 
-    <menuitem id="menu_dct_accounting_entries" name="Accounting" parent="menu_dct_accounting_root" sequence="30" groups="account.group_account_readonly"/>
-    <menuitem id="menu_dct_journal_overview" name="Journals Overview" parent="menu_dct_accounting_entries" action="account.open_account_journal_dashboard_kanban" sequence="10"/>
-    <menuitem id="menu_dct_journal_items" name="Journal Items" parent="menu_dct_accounting_entries" action="account.action_move_journal_line" sequence="20"/>
-    <menuitem id="menu_dct_chart_of_accounts" name="Chart of Accounts" parent="menu_dct_accounting_entries" action="account.action_account_form" sequence="30"/>
-    <menuitem id="menu_dct_journals" name="Journals" parent="menu_dct_accounting_entries" action="account.action_account_journal_form" sequence="40" groups="account.group_account_manager"/>
+    <record id="account.account_reports_management_menu" model="ir.ui.menu">
+        <field name="sequence" eval="50"/>
+    </record>
+    <record id="account.menu_action_account_invoice_report_all" model="ir.ui.menu">
+        <field name="sequence" eval="10"/>
+    </record>
+    <record id="account.menu_action_analytic_reporting" model="ir.ui.menu">
+        <field name="sequence" eval="20"/>
+    </record>
+    <record id="mis_builder.mis_report_finance_menu" model="ir.ui.menu">
+        <field name="name">Budget &amp; MIS Reports</field>
+        <field name="parent_id" ref="account.account_reports_management_menu"/>
+        <field name="sequence" eval="30"/>
+    </record>
+    <record id="account_asset_management.account_asset_report_menu" model="ir.ui.menu">
+        <field name="name">Assets</field>
+        <field name="parent_id" ref="account.account_audit_menu"/>
+        <field name="sequence" eval="40"/>
+    </record>
+    <record id="account_asset_management.wiz_account_asset_report_menu" model="ir.ui.menu">
+        <field name="name">Depreciation Schedule</field>
+        <field name="sequence" eval="10"/>
+    </record>
 
-    <menuitem id="menu_dct_accounting_reports" name="Reporting" parent="menu_dct_accounting_root" sequence="40"/>
-    <menuitem id="menu_dct_profit_loss" name="Profit &amp; Loss" parent="menu_dct_accounting_reports" action="action_dct_profit_loss_interactive" sequence="10"/>
-    <menuitem id="menu_dct_balance_sheet" name="Balance Sheet" parent="menu_dct_accounting_reports" action="action_dct_balance_sheet_interactive" sequence="20"/>
-    <menuitem id="menu_dct_trial_balance" name="Trial Balance" parent="menu_dct_accounting_reports" action="action_dct_trial_balance_interactive" sequence="30"/>
-    <menuitem id="menu_dct_general_ledger" name="General Ledger" parent="menu_dct_accounting_reports" action="action_dct_general_ledger_interactive" sequence="40"/>
-    <menuitem id="menu_dct_partner_ledger" name="Partner Ledger" parent="menu_dct_accounting_reports" action="action_dct_partner_ledger_interactive" sequence="50"/>
-    <menuitem id="menu_dct_journal_ledger" name="Journal Ledger" parent="menu_dct_accounting_reports" action="action_dct_journal_ledger_interactive" sequence="60"/>
+    <!-- Enterprise-style ownership: asset records belong to Accounting while
+         the depreciation schedule belongs to Review, not a top-level Assets tab. -->
+    <record id="account_asset_management.menu_finance_assets" model="ir.ui.menu">
+        <field name="parent_id" ref="account.menu_finance_entries"/>
+        <field name="sequence" eval="20"/>
+    </record>
+
+    <!-- Normalize the Accounting and Configuration dropdown sequences. -->
+    <record id="account.account_transactions_menu" model="ir.ui.menu">
+        <field name="sequence" eval="10"/>
+    </record>
+    <record id="account_lock_date_update.account_update_lock_date_menu" model="ir.ui.menu">
+        <field name="sequence" eval="30"/>
+    </record>
+    <record id="account_move_template.account_move_template_run_menu" model="ir.ui.menu">
+        <field name="sequence" eval="40"/>
+    </record>
+    <record id="account_usability.menu_accounting_bank_and_cash" model="ir.ui.menu">
+        <field name="sequence" eval="50"/>
+    </record>
+    <record id="account_reconcile_oca.account_account_reconcile_menu" model="ir.ui.menu">
+        <field name="sequence" eval="60"/>
+    </record>
+    <record id="account_statement_import_file.account_statement_import_menu" model="ir.ui.menu">
+        <field name="sequence" eval="70"/>
+    </record>
+    <record id="account.account_closing_menu" model="ir.ui.menu">
+        <field name="sequence" eval="80"/>
+    </record>
+
+    <record id="account.menu_action_account_form" model="ir.ui.menu"><field name="sequence" eval="10"/></record>
+    <record id="account.menu_action_tax_form" model="ir.ui.menu"><field name="sequence" eval="20"/></record>
+    <record id="account.menu_action_account_journal_form" model="ir.ui.menu"><field name="sequence" eval="30"/></record>
+    <record id="account.menu_action_currency_form" model="ir.ui.menu"><field name="sequence" eval="40"/></record>
+    <record id="account.menu_action_account_fiscal_position_form" model="ir.ui.menu"><field name="sequence" eval="50"/></record>
+    <record id="account.menu_action_tax_group" model="ir.ui.menu"><field name="sequence" eval="60"/></record>
+    <record id="account.menu_action_rounding_form_view" model="ir.ui.menu"><field name="sequence" eval="70"/></record>
+    <record id="account.menu_action_account_journal_group_list" model="ir.ui.menu"><field name="sequence" eval="80"/></record>
+    <record id="account_usability.account_tag_menu" model="ir.ui.menu"><field name="sequence" eval="90"/></record>
+    <record id="account_usability.account_group_menu" model="ir.ui.menu"><field name="sequence" eval="100"/></record>
+    <record id="account_reconcile_oca.menu_account_reconcile_model" model="ir.ui.menu"><field name="sequence" eval="110"/></record>
+    <record id="account_statement_import_sheet_file.menu_statement_import_sheet_mapping" model="ir.ui.menu"><field name="sequence" eval="120"/></record>
+    <record id="account_statement_import_online.online_bank_statement_provider_menu" model="ir.ui.menu"><field name="sequence" eval="130"/></record>
+    <record id="account_move_template.account_move_template_menu" model="ir.ui.menu"><field name="sequence" eval="140"/></record>
 </odoo>
-
-

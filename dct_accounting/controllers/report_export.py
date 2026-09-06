@@ -58,9 +58,18 @@ class DctAccountReportExport(http.Controller):
         })
         money_format = workbook.add_format({"num_format": "#,##0.00;[Red]-#,##0.00"})
 
-        is_statement = wizard.report_type in ("profit_loss", "balance_sheet")
-        headers = ["Code", "Account / Partner / Journal"]
-        if is_statement:
+        is_statement = wizard.report_type in (
+            "profit_loss",
+            "balance_sheet",
+            "executive_summary",
+        )
+        is_aged = wizard.report_type in ("aged_receivable", "aged_payable")
+        headers = ([] if is_aged else ["Code"]) + [
+            "Partner" if is_aged else "Account / Partner / Journal"
+        ]
+        if is_aged:
+            headers.extend(["Not Due", "1–30", "31–60", "61–90", "90+", "Total"])
+        elif is_statement:
             headers.append("Balance")
         else:
             headers.extend(["Opening", "Debit", "Credit", "Ending"])
@@ -92,9 +101,18 @@ class DctAccountReportExport(http.Controller):
                 continue
             name_format = total_format if line.is_total else None
             number_format = total_format if line.is_total else money_format
-            worksheet.write(row_index, 0, line.code or "", name_format)
-            worksheet.write(row_index, 1, line.name, name_format)
-            values = [line.balance] if is_statement else [
+            name_column = 0 if is_aged else 1
+            if not is_aged:
+                worksheet.write(row_index, 0, line.code or "", name_format)
+            worksheet.write(row_index, name_column, line.name, name_format)
+            values = [
+                line.bucket_current,
+                line.bucket_1_30,
+                line.bucket_31_60,
+                line.bucket_61_90,
+                line.bucket_older,
+                line.ending_balance,
+            ] if is_aged else [line.balance] if is_statement else [
                 line.opening_balance,
                 line.period_debit,
                 line.period_credit,
@@ -102,13 +120,17 @@ class DctAccountReportExport(http.Controller):
             ]
             if wizard.comparison != "none":
                 values.extend([line.comparison_balance, line.variance])
-            for column, value in enumerate(values, start=2):
+            for column, value in enumerate(values, start=name_column + 1):
                 worksheet.write_number(row_index, column, value, number_format)
 
-        worksheet.freeze_panes(6, 2)
-        worksheet.set_column("A:A", 16)
-        worksheet.set_column("B:B", 42)
-        worksheet.set_column(2, last_column, 18)
+        worksheet.freeze_panes(6, 1 if is_aged else 2)
+        if is_aged:
+            worksheet.set_column("A:A", 42)
+            worksheet.set_column(1, last_column, 18)
+        else:
+            worksheet.set_column("A:A", 16)
+            worksheet.set_column("B:B", 42)
+            worksheet.set_column(2, last_column, 18)
         worksheet.autofilter(
             5,
             0,

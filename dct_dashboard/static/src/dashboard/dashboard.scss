@@ -1,18 +1,15 @@
-$dct-navy: #0a132b;
-$dct-blue: #1577ff;
-$dct-cyan: #2bb9ff;
-$dct-bg: #f3f6fb;
-$dct-border: #e3e9f2;
-$dct-muted: #64748b;
+$dct-navy: #212529;
+$dct-blue: #714b67;
+$dct-cyan: #017e84;
+$dct-bg: #f4f5f7;
+$dct-border: #dedee3;
+$dct-muted: #6c757d;
 
 .o_dct_dashboard {
     height: 100%;
     overflow: auto;
     color: $dct-navy;
-    background:
-        radial-gradient(circle at 92% 4%, rgba(21, 119, 255, 0.09), transparent 25rem),
-        $dct-bg;
-    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    background: $dct-bg;
 
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -36,30 +33,21 @@ $dct-muted: #64748b;
     }
 
     .dct_hero {
-        min-height: 148px;
-        padding: 2rem clamp(1.25rem, 4vw, 3.5rem);
+        min-height: 88px;
+        padding: 1rem clamp(1.25rem, 3vw, 2.5rem);
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 2rem;
-        color: #fff;
-        background:
-            linear-gradient(115deg, rgba(21, 119, 255, 0.19), transparent 45%),
-            $dct-navy;
+        color: $dct-navy;
+        border-bottom: 1px solid $dct-border;
+        background: rgba(255, 255, 255, 0.96);
         position: relative;
-        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(20, 20, 30, 0.08);
     }
 
     .dct_hero::after {
-        content: "";
-        position: absolute;
-        inset-inline-end: -80px;
-        top: -145px;
-        width: 360px;
-        height: 360px;
-        border: 52px solid rgba(21, 119, 255, 0.16);
-        border-radius: 50%;
-        pointer-events: none;
+        display: none;
     }
 
     .dct_hero_brand,
@@ -70,23 +58,23 @@ $dct-muted: #64748b;
         align-items: center;
     }
 
-    .dct_hero_brand { gap: 1.35rem; }
-    .dct_hero_actions { gap: 0.75rem; }
+    .dct_hero_brand { gap: 0.9rem; }
+    .dct_hero_actions { gap: 0.6rem; }
 
     .dct_logo {
-        width: clamp(130px, 16vw, 205px);
-        height: 74px;
+        width: 54px;
+        height: 54px;
         object-fit: contain;
-        padding: 0.55rem 0.7rem;
+        padding: 0.3rem;
+        border: 1px solid $dct-border;
         background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 10px 32px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
     }
 
     .dct_brand_divider {
         width: 1px;
-        align-self: stretch;
-        background: rgba(255, 255, 255, 0.2);
+        height: 42px;
+        background: $dct-border;
     }
 
     .dct_eyebrow {
@@ -98,20 +86,21 @@ $dct-muted: #64748b;
         text-transform: uppercase;
     }
 
-    .dct_hero .dct_eyebrow { color: #78b2ff; }
+    .dct_hero .dct_eyebrow { color: $dct-muted; letter-spacing: 0.08em; }
 
     .dct_hero h1 {
         margin: 0;
         max-width: 610px;
-        font-size: clamp(1.35rem, 2.4vw, 2rem);
-        font-weight: 750;
+        color: $dct-navy;
+        font-size: 1.2rem;
+        font-weight: 650;
         line-height: 1.2;
     }
 
     .dct_period_caption {
-        margin: 0.45rem 0 0;
-        color: rgba(255, 255, 255, 0.62);
-        font-size: 0.82rem;
+        margin: 0.3rem 0 0;
+        color: $dct-muted;
+        font-size: 0.76rem;
     }
 
     .dct_period_picker {
@@ -120,16 +109,15 @@ $dct-muted: #64748b;
         align-items: center;
         gap: 0.6rem;
         padding: 0 0.8rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.09);
-        backdrop-filter: blur(8px);
+        border: 1px solid $dct-border;
+        border-radius: 7px;
+        background: #fff;
     }
 
     .dct_period_picker select {
         border: 0;
         outline: 0;
-        color: #fff;
+        color: $dct-navy;
         background: transparent;
         font-weight: 650;
         cursor: pointer;
@@ -147,20 +135,20 @@ $dct-muted: #64748b;
     }
 
     .dct_theme_toggle {
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: rgba(255, 255, 255, 0.09);
-        backdrop-filter: blur(8px);
+        color: $dct-muted;
+        border: 1px solid $dct-border;
+        background: #fff;
     }
 
-    .dct_theme_toggle:hover { background: rgba(255, 255, 255, 0.17); }
+    .dct_theme_toggle:hover { color: $dct-blue; border-color: #c8b8c4; background: #f4f0f3; }
 
     .dct_refresh {
         border: 0;
         background: $dct-blue;
-        box-shadow: 0 6px 16px rgba(21, 119, 255, 0.32);
+        box-shadow: none;
     }
 
-    .dct_refresh:hover { background: #0f68e7; }
+    .dct_refresh:hover { background: #5f3f57; }
     .dct_refresh:disabled { opacity: 0.65; }
 
     .dct_error_banner {
@@ -187,9 +175,9 @@ $dct-muted: #64748b;
     .dct_metric_card,
     .dct_panel {
         border: 1px solid $dct-border;
-        border-radius: 15px;
+        border-radius: 8px;
         background: #fff;
-        box-shadow: 0 8px 28px rgba(10, 19, 43, 0.045);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
     }
 
     .dct_metric_card {
@@ -197,12 +185,12 @@ $dct-muted: #64748b;
         padding: 1.15rem 1.25rem;
         position: relative;
         overflow: hidden;
-        transition: transform 160ms ease, box-shadow 160ms ease;
+        transition: border-color 120ms ease, background-color 120ms ease;
     }
 
     .dct_metric_card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 32px rgba(10, 19, 43, 0.08);
+        border-color: #c8b8c4;
+        background: #fcfafb;
     }
 
     .dct_metric_card::after {
@@ -213,7 +201,7 @@ $dct-muted: #64748b;
         width: 110px;
         height: 110px;
         border-radius: 50%;
-        background: rgba(21, 119, 255, 0.055);
+        background: rgba(113, 75, 103, 0.055);
     }
 
     .dct_metric_topline {
@@ -229,7 +217,7 @@ $dct-muted: #64748b;
         place-items: center;
         border-radius: 10px;
         color: $dct-blue;
-        background: #eaf2ff;
+        background: #f0e9ee;
         font-size: 1rem;
     }
 
@@ -347,7 +335,7 @@ $dct-muted: #64748b;
         width: 100%;
         min-height: 3px;
         border-radius: 8px 8px 2px 2px;
-        background: linear-gradient(180deg, #3b91ff, $dct-blue 65%, #0b5ecc);
+        background: linear-gradient(180deg, #9b748f, $dct-blue 65%, #5f3f57);
         box-shadow: 0 6px 15px rgba(21, 119, 255, 0.18);
         transition: height 350ms ease;
     }
@@ -439,7 +427,7 @@ $dct-muted: #64748b;
     }
 
     .dct_table tbody tr { cursor: pointer; transition: background 120ms ease; }
-    .dct_table tbody tr:hover { background: #f7faff; }
+    .dct_table tbody tr:hover { background: #f7f5f7; }
     .dct_table tbody tr:last-child td { border-bottom: 0; }
     .dct_table td strong { color: $dct-navy; }
 
@@ -480,7 +468,7 @@ $dct-muted: #64748b;
         transition: border-color 120ms ease, background 120ms ease;
     }
 
-    .dct_shortcut:hover { border-color: #bad6ff; background: #eef5ff; }
+    .dct_shortcut:hover { border-color: #c8b8c4; background: #f4f0f3; }
     .dct_shortcut > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; color: #fff; background: $dct-blue; }
     .dct_shortcut > i { color: #a2aec0; font-size: 0.7rem; }
     .dct_shortcut strong { font-size: 0.78rem; }
@@ -493,7 +481,7 @@ $dct-muted: #64748b;
         gap: 0.65rem;
         border-radius: 10px;
         color: rgba(255, 255, 255, 0.72);
-        background: $dct-navy;
+        background: $dct-blue;
     }
 
     .dct_brand_note p { margin: 0; font-size: 0.7rem; }
@@ -516,9 +504,22 @@ $dct-muted: #64748b;
 
     &.dct-theme-dark {
         color: #e5eefb;
-        background:
-            radial-gradient(circle at 92% 4%, rgba(43, 185, 255, 0.11), transparent 25rem),
-            #08111f;
+        background: #191919;
+
+        .dct_hero {
+            color: #edf4fc;
+            border-bottom-color: #2c3b4e;
+            background: #101c2e;
+        }
+
+        .dct_hero h1 { color: #f5f9ff; }
+        .dct_hero .dct_eyebrow,
+        .dct_period_caption { color: #9aabc0; }
+        .dct_brand_divider { background: #354960; }
+        .dct_period_picker,
+        .dct_theme_toggle { color: #dce8f6; border-color: #354960; background: #172438; }
+        .dct_period_picker select { color: #edf4fc; }
+        .dct_period_picker option { color: #edf4fc; background: #172438; }
 
         .dct_loading_state,
         .dct_metric_label,
