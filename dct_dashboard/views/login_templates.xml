@@ -8,6 +8,9 @@
             <attribute name="t-attf-class" add="o_dct_login_card" separator=" "/>
             <attribute name="style">max-width: 430px;</attribute>
         </xpath>
+        <xpath expr="//form[hasclass('oe_login_form')]" position="attributes">
+            <attribute name="t-attf-class">oe_login_form</attribute>
+        </xpath>
         <xpath expr="//img[contains(@t-attf-src, '/web/binary/company_logo')]" position="replace">
             <img src="/dct_dashboard/static/src/img/dct_logo.png" alt="DCT" class="o_dct_login_logo"/>
         </xpath>
