@@ -1,7 +1,7 @@
 {
     "name": "DCT Dashboard",
     "summary": "Branded executive dashboard for Odoo Community",
-    "version": "19.0.2.3.5",
+    "version": "19.0.2.3.6",
     "category": "Productivity/Dashboard",
     "author": "Digital Creativity Technologies",
     "license": "AGPL-3",
