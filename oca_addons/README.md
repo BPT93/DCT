@@ -16,6 +16,8 @@ code or branding.
   budgets
 - Chart updates, recurring journal-entry templates, journal lock dates, posting
   metadata, and Accounting usability menus
+- Employee payslips, batch payroll, salary structures and rules, contribution
+  reports, and payroll-to-accounting journal entries
 
 Online bank connectors are included but are not installed automatically because
 each provider requires its own account, credentials, and service terms.
@@ -32,6 +34,8 @@ each provider requires its own account, credentials, and service terms.
 | `OCA/reporting-engine` | `b730d603317691d9608a8a3c5710286d9dbc81f1` |
 | `OCA/server-ux` | `8e5120600987969156c2a59c1ad86bec37318966` |
 | `OCA/web` | `8ac7fdbf692f16c98dfcc626e01d37c66124ef1b` |
+| `OCA/payroll` (`payroll`, 19.0 branch) | `fc8e1983f50887897bc29df730c093c597411be6` |
+| `OCA/payroll` (`payroll_account`, reviewed PR 269) | `73fc9d33f8ff9d241ee3e2469acd30a70c3218d1` |
 
 Every copied module retains its upstream authorship, copyright headers,
 manifest license, documentation, and source files. Repository license texts are

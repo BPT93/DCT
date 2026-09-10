@@ -133,8 +133,60 @@
 
 .o_dct_report_options,
 .o_dct_journal_filter,
+.o_dct_account_filter,
+.o_dct_partner_filter,
 .o_dct_period_filter {
     position: relative;
+}
+
+.o_dct_choice_popover {
+    width: 25rem;
+    max-width: calc(100vw - 2rem);
+}
+
+.o_dct_choice_search {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: -0.15rem -0.15rem 0.45rem;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--dct-report-border);
+    border-radius: var(--bs-border-radius);
+    color: var(--bs-secondary-color);
+
+    input {
+        flex: 1 1 auto;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        color: var(--bs-body-color);
+        background: transparent;
+    }
+}
+
+.o_dct_choice_options {
+    max-height: 18rem;
+    overflow: auto;
+
+    label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+        padding: 0.4rem 0.25rem;
+        border-radius: var(--bs-border-radius-sm);
+        font-size: 0.8125rem;
+
+        &:hover {
+            background: var(--dct-report-chip);
+        }
+    }
+
+    p {
+        margin: 0;
+        padding: 0.4rem 0.25rem;
+        color: var(--bs-secondary-color);
+    }
 }
 
 .o_dct_options_button {
@@ -225,6 +277,12 @@
         gap: 0.5rem;
         margin: 0;
     }
+}
+
+.o_dct_fold_actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
 }
 
 .o_dct_unposted_alert {
@@ -404,6 +462,11 @@
 
 .o_dct_report_table tr.o_dct-style-section td {
     font-weight: 600;
+}
+
+.o_dct_report_table tr.is-entry td {
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
 }
 
 .o_dct_report_table tr.o_dct-style-primary td {

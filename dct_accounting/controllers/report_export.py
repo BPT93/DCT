@@ -34,7 +34,7 @@ class DctAccountReportExport(http.Controller):
             "bold": True,
             "font_size": 18,
             "font_color": "#FFFFFF",
-            "bg_color": "#0A132B",
+            "bg_color": "#714B67",
             "align": "left",
             "valign": "vcenter",
         })
@@ -42,21 +42,31 @@ class DctAccountReportExport(http.Controller):
         header_format = workbook.add_format({
             "bold": True,
             "font_color": "#FFFFFF",
-            "bg_color": "#1577FF",
+            "bg_color": "#714B67",
             "border": 0,
         })
         section_format = workbook.add_format({
             "bold": True,
-            "font_color": "#0A132B",
-            "bg_color": "#EAF2FF",
+            "font_color": "#342A32",
+            "bg_color": "#F0E9EE",
+        })
+        section_money_format = workbook.add_format({
+            "bold": True,
+            "font_color": "#342A32",
+            "bg_color": "#F0E9EE",
+            "num_format": "#,##0.00;[Red]-#,##0.00",
         })
         total_format = workbook.add_format({
             "bold": True,
             "top": 1,
-            "top_color": "#8AAFE0",
+            "top_color": "#C8B8C4",
             "num_format": "#,##0.00;[Red]-#,##0.00",
         })
         money_format = workbook.add_format({"num_format": "#,##0.00;[Red]-#,##0.00"})
+        entry_name_format = workbook.add_format({
+            "indent": 1,
+            "font_color": "#5F6072",
+        })
 
         is_statement = wizard.report_type in (
             "profit_loss",
@@ -77,19 +87,38 @@ class DctAccountReportExport(http.Controller):
             headers.extend([wizard.comparison_label, "Variance"])
 
         last_column = len(headers) - 1
-        worksheet.merge_range(0, 0, 1, last_column, f"DCT | {report_label}", title_format)
+        worksheet.merge_range(0, 0, 1, last_column, report_label, title_format)
         worksheet.write("A3", wizard.company_id.display_name, meta_format)
         worksheet.write(
             "A4",
-            f"{wizard.date_from.isoformat()} — {wizard.date_to.isoformat()} | "
-            f"{dict(wizard._fields['target_move']._description_selection(request.env))[wizard.target_move]}",
+            (
+                f"As of {wizard.date_to.isoformat()}"
+                if wizard.report_type in ("balance_sheet", "aged_receivable", "aged_payable")
+                else f"{wizard.date_from.isoformat()} — {wizard.date_to.isoformat()}"
+            )
+            + " | "
+            + dict(wizard._fields["target_move"]._description_selection(request.env))[
+                wizard.target_move
+            ],
             meta_format,
         )
+        scope = []
+        if wizard.journal_ids:
+            scope.append("Journals: " + ", ".join(wizard.journal_ids.mapped("code")))
+        if wizard.account_ids:
+            scope.append(
+                "Accounts: "
+                + ", ".join(account.code or account.name for account in wizard.account_ids)
+            )
+        if wizard.partner_ids:
+            scope.append("Partners: " + ", ".join(wizard.partner_ids.mapped("display_name")))
+        if scope:
+            worksheet.write("A5", " | ".join(scope), meta_format)
         for column, label in enumerate(headers):
             worksheet.write(5, column, label, header_format)
 
         for row_index, line in enumerate(wizard.line_ids, start=6):
-            if line.line_type == "section":
+            if line.line_type == "section" and not line.show_amount:
                 worksheet.merge_range(
                     row_index,
                     0,
@@ -99,8 +128,15 @@ class DctAccountReportExport(http.Controller):
                     section_format,
                 )
                 continue
-            name_format = total_format if line.is_total else None
-            number_format = total_format if line.is_total else money_format
+            if line.line_type == "section":
+                name_format = section_format
+                number_format = section_money_format
+            elif line.is_total:
+                name_format = total_format
+                number_format = total_format
+            else:
+                name_format = entry_name_format if line.line_type == "entry" else None
+                number_format = money_format
             name_column = 0 if is_aged else 1
             if not is_aged:
                 worksheet.write(row_index, 0, line.code or "", name_format)
@@ -139,7 +175,7 @@ class DctAccountReportExport(http.Controller):
         )
         workbook.close()
 
-        filename = osutil.clean_filename(f"DCT {report_label} {wizard.date_to}.xlsx")
+        filename = osutil.clean_filename(f"{report_label} {wizard.date_to}.xlsx")
         return request.make_response(
             output.getvalue(),
             headers=[

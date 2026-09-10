@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_payslip_view_list_dct_totals" model="ir.ui.view">
+        <field name="name">hr.payslip.list.dct.totals</field>
+        <field name="model">hr.payslip</field>
+        <field name="inherit_id" ref="payroll.hr_payslip_view_tree"/>
+        <field name="priority">80</field>
+        <field name="arch" type="xml">
+            <field name="date_to" position="after">
+                <field name="department_id" optional="hide"/>
+                <field name="gross_pay" optional="show" sum="Total Gross"/>
+                <field name="net_pay" optional="show" sum="Total Net"/>
+                <field name="currency_id" column_invisible="True"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="hr_payslip_view_form_dct_totals" model="ir.ui.view">
+        <field name="name">hr.payslip.form.dct.totals</field>
+        <field name="model">hr.payslip</field>
+        <field name="inherit_id" ref="payroll.hr_payslip_view_form"/>
+        <field name="priority">80</field>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='accounting']" position="inside">
+                <field name="currency_id" invisible="1"/>
+                <field name="gross_pay" readonly="1"/>
+                <field name="net_pay" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_payslip_view_search_dct_analysis" model="ir.ui.view">
+        <field name="name">hr.payslip.search.dct.analysis</field>
+        <field name="model">hr.payslip</field>
+        <field name="inherit_id" ref="payroll.hr_payslip_view_search"/>
+        <field name="priority">80</field>
+        <field name="arch" type="xml">
+            <field name="employee_id" position="after">
+                <field name="department_id"/>
+            </field>
+            <filter name="employee_id" position="after">
+                <filter
+                    string="Department"
+                    name="department_id"
+                    context="{'group_by': 'department_id'}"
+                />
+            </filter>
+        </field>
+    </record>
+
+    <record id="view_dct_payroll_analysis_graph" model="ir.ui.view">
+        <field name="name">hr.payslip.dct.analysis.graph</field>
+        <field name="model">hr.payslip</field>
+        <field name="priority">5</field>
+        <field name="arch" type="xml">
+            <graph string="Payroll Analysis" type="line" sample="1">
+                <field name="date_to" interval="month"/>
+                <field name="gross_pay" type="measure"/>
+                <field name="employer_cost" type="measure"/>
+                <field name="paid_time_off_days" type="measure"/>
+                <field name="unpaid_time_off_days" type="measure"/>
+                <field name="net_pay" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_dct_payroll_analysis_pivot" model="ir.ui.view">
+        <field name="name">hr.payslip.dct.analysis.pivot</field>
+        <field name="model">hr.payslip</field>
+        <field name="priority">5</field>
+        <field name="arch" type="xml">
+            <pivot string="Payroll Analysis" sample="1">
+                <field name="department_id" type="row"/>
+                <field name="employee_id" type="row"/>
+                <field name="date_to" interval="month" type="col"/>
+                <field name="basic_wage" type="measure"/>
+                <field name="gross_pay" type="measure"/>
+                <field name="net_pay" type="measure"/>
+                <field name="employer_cost" type="measure"/>
+                <field name="paid_time_off_days" type="measure"/>
+                <field name="unpaid_time_off_days" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_dct_payroll_analysis" model="ir.actions.act_window">
+        <field name="name">Payroll Analysis</field>
+        <field name="res_model">hr.payslip</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="search_view_id" ref="payroll.hr_payslip_view_search"/>
+        <field name="context">{
+            'search_default_done': 1,
+            'search_default_last_365_days': 1,
+            'graph_measure': 'net_pay',
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No completed payroll to analyze</p>
+            <p>Complete employee payslips to compare gross and net payroll by month, department, and employee.</p>
+        </field>
+    </record>
+
+    <record id="view_dct_headcount_graph" model="ir.ui.view">
+        <field name="name">hr.employee.headcount.graph</field>
+        <field name="model">hr.employee</field>
+        <field name="priority">5</field>
+        <field name="arch" type="xml">
+            <graph string="Headcount" type="bar" sample="1">
+                <field name="department_id"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_dct_headcount_pivot" model="ir.ui.view">
+        <field name="name">hr.employee.headcount.pivot</field>
+        <field name="model">hr.employee</field>
+        <field name="priority">5</field>
+        <field name="arch" type="xml">
+            <pivot string="Headcount" sample="1">
+                <field name="department_id" type="row"/>
+                <field name="job_id" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_dct_headcount_analysis" model="ir.actions.act_window">
+        <field name="name">Headcount</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No employees to analyze</p>
+            <p>Employee headcount can be compared by department and job position.</p>
+        </field>
+    </record>
+</odoo>

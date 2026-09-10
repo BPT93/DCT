@@ -2,7 +2,13 @@
 <templates xml:space="preserve">
     <t t-name="dct_accounting.Dashboard">
         <div t-att-class="'o_dct_accounting dct-theme-' + state.theme">
-            <div t-if="!state.data" class="dcta_loading_state">
+            <div t-if="!state.data and state.error" class="dcta_loading_state">
+                <i class="fa fa-exclamation-circle fa-2x" aria-hidden="true"/>
+                <p>The accounting dashboard could not be loaded.</p>
+                <button type="button" class="btn btn-primary" t-on-click="loadData">Retry</button>
+            </div>
+
+            <div t-elif="!state.data" class="dcta_loading_state">
                 <span class="dcta_spinner"/>
                 <p>Preparing your financial workspace…</p>
             </div>
@@ -19,7 +25,8 @@
                         </div>
                     </div>
                     <div class="dcta_hero_actions">
-                        <button class="dcta_theme_toggle"
+                        <button type="button"
+                                class="dcta_theme_toggle"
                                 t-on-click="toggleTheme"
                                 t-att-title="state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
                                 t-att-aria-label="state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
@@ -33,7 +40,7 @@
                                 <option value="year">This year</option>
                             </select>
                         </label>
-                        <button class="dcta_refresh" t-on-click="loadData" t-att-disabled="state.loading" title="Refresh dashboard">
+                        <button type="button" class="dcta_refresh" t-on-click="loadData" t-att-disabled="state.loading" title="Refresh dashboard" aria-label="Refresh dashboard">
                             <i t-att-class="'fa fa-refresh ' + (state.loading ? 'fa-spin' : '')"/>
                         </button>
                     </div>
@@ -118,7 +125,7 @@
                         <article class="dcta_panel dcta_overdue_panel">
                             <div class="dcta_panel_header">
                                 <div><p class="dcta_eyebrow">Collection focus</p><h3>Overdue customer invoices</h3></div>
-                                <button class="dcta_text_action" t-on-click="() => this.openAction('account.action_move_out_invoice')">View all <i class="fa fa-arrow-right"/></button>
+                                <button type="button" class="dcta_text_action" t-on-click="() => this.openAction('account.action_move_out_invoice')">View all <i class="fa fa-arrow-right"/></button>
                             </div>
                             <div t-if="state.data.overdue_invoices.length" class="dcta_table_wrap">
                                 <table class="dcta_table">
@@ -139,7 +146,7 @@
                         <aside class="dcta_panel dcta_shortcuts_panel">
                             <div class="dcta_panel_header"><div><p class="dcta_eyebrow">Daily work</p><h3>Quick access</h3></div></div>
                             <div class="dcta_shortcut_list">
-                                <button t-foreach="state.data.shortcuts" t-as="shortcut" t-key="shortcut.xmlid" t-on-click="() => this.openAction(shortcut.xmlid)" class="dcta_shortcut">
+                                <button type="button" t-foreach="state.data.shortcuts" t-as="shortcut" t-key="shortcut.xmlid" t-on-click="() => this.openAction(shortcut.xmlid)" class="dcta_shortcut">
                                     <span><i t-att-class="'fa ' + shortcut.icon"/></span><strong><t t-esc="shortcut.label"/></strong><i class="fa fa-chevron-right"/>
                                 </button>
                             </div>
@@ -149,7 +156,7 @@
                     <section class="dcta_panel dcta_activity_panel">
                         <div class="dcta_panel_header"><div><p class="dcta_eyebrow">Ledger activity</p><h3>Recent posted entries</h3></div></div>
                         <div class="dcta_activity_grid">
-                            <button t-foreach="state.data.recent_entries" t-as="entry" t-key="entry.id" t-on-click="() => this.openMove(entry.id)" class="dcta_activity_item">
+                            <button type="button" t-foreach="state.data.recent_entries" t-as="entry" t-key="entry.id" t-on-click="() => this.openMove(entry.id)" class="dcta_activity_item">
                                 <span class="dcta_entry_icon"><i class="fa fa-book"/></span>
                                 <span class="dcta_entry_text"><strong><t t-esc="entry.name"/></strong><small><t t-esc="entry.label"/></small></span>
                                 <span class="dcta_entry_amount"><strong><t t-esc="formatCurrency(entry.amount)"/></strong><small><t t-esc="entry.date"/></small></span>

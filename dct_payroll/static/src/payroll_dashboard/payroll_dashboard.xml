@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="dct_payroll.Dashboard">
+        <div class="o_dct_payroll_enterprise h-100 overflow-auto">
+            <div t-if="!state.data and state.error" class="dctp_enterprise_loading">
+                <i class="fa fa-exclamation-circle fa-3x" aria-hidden="true"/>
+                <p>The payroll dashboard could not be loaded.</p>
+                <button type="button" class="btn btn-primary" t-on-click="loadData">Retry</button>
+            </div>
+
+            <div t-elif="!state.data" class="dctp_enterprise_loading">
+                <i class="fa fa-spinner fa-spin fa-3x"/>
+                <p>Preparing payroll…</p>
+            </div>
+
+            <div t-else="" class="container-fluid p-3 p-xl-4">
+                <header class="dctp_enterprise_header">
+                    <div class="dctp_enterprise_company">
+                        <img t-att-src="state.data.company.logo_url"
+                             t-att-alt="state.data.company.name + ' logo'"/>
+                        <div>
+                            <p>Payroll</p>
+                            <h1>Payroll Dashboard</h1>
+                            <span><t t-esc="state.data.company.name"/> · Updated <t t-esc="state.data.updated_at"/></span>
+                        </div>
+                    </div>
+                    <div class="dctp_enterprise_header_actions">
+                        <button type="button" class="btn btn-outline-secondary" t-on-click="loadData" t-att-disabled="state.loading">
+                            <i t-att-class="'fa fa-refresh me-1 ' + (state.loading ? 'fa-spin' : '')"/>
+                            Refresh
+                        </button>
+                        <button type="button"
+                                t-if="state.data.is_manager"
+                                class="btn btn-primary"
+                                t-on-click="() => this.openAction('payroll.hr_payslip_run_action')">
+                            <i class="fa fa-plus me-1"/> New Pay Run
+                        </button>
+                    </div>
+                </header>
+
+                <div class="row g-3 dctp_enterprise_layout">
+                    <div class="col-12 col-xl-7">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <section class="card dctp_enterprise_card dctp_enterprise_half">
+                                    <header class="card-header">
+                                        <div>
+                                            <p class="dctp_card_eyebrow">Attention required</p>
+                                            <h2>Warnings</h2>
+                                        </div>
+                                        <span class="badge rounded-pill text-bg-warning">
+                                            <t t-esc="state.data.warnings.length"/>
+                                        </span>
+                                    </header>
+                                    <div t-if="state.data.warnings.length" class="list-group list-group-flush dctp_warning_list">
+                                        <button type="button"
+                                                t-foreach="state.data.warnings"
+                                                t-as="warning"
+                                                t-key="warning.id"
+                                                class="list-group-item list-group-item-action"
+                                                t-on-click="() => this.openAction(warning.action)">
+                                            <span t-att-class="'dctp_warning_icon is-' + warning.tone">
+                                                <i t-att-class="'fa ' + warning.icon"/>
+                                            </span>
+                                            <span class="dctp_warning_label"><t t-esc="warning.label"/></span>
+                                            <strong><t t-esc="warning.count"/></strong>
+                                            <i class="fa fa-chevron-right"/>
+                                        </button>
+                                    </div>
+                                    <div t-else="" class="dctp_enterprise_empty">
+                                        <i class="fa fa-check-circle"/>
+                                        <strong>You're all caught up</strong>
+                                        <span>No payroll warning needs attention.</span>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <section class="card dctp_enterprise_card dctp_enterprise_half">
+                                    <header class="card-header">
+                                        <div>
+                                            <p class="dctp_card_eyebrow">Recent activity</p>
+                                        <h2>Pay Runs</h2>
+                                        </div>
+                                        <button type="button" class="btn btn-link"
+                                                t-on-click="() => this.openAction('payroll.hr_payslip_run_action')">All</button>
+                                    </header>
+                                    <div t-if="state.data.batches.length" class="list-group list-group-flush dctp_batch_list">
+                                        <button type="button"
+                                                t-foreach="state.data.batches"
+                                                t-as="batch"
+                                                t-key="batch.id"
+                                                class="list-group-item list-group-item-action"
+                                                t-on-click="() => this.openBatch(batch.id)">
+                                            <span t-att-class="'badge rounded-pill ' + batchTone(batch.state)">
+                                                <t t-esc="batch.state_label"/>
+                                            </span>
+                                            <span class="dctp_batch_name">
+                                                <strong><t t-esc="batch.name"/></strong>
+                                                <small><t t-esc="batch.date"/> · <t t-esc="batch.payslip_count"/> Payslips</small>
+                                            </span>
+                                            <i class="fa fa-chevron-right"/>
+                                        </button>
+                                    </div>
+                                    <div t-else="" class="dctp_enterprise_empty">
+                                        <i class="fa fa-files-o"/>
+                                        <strong>No recent pay runs</strong>
+                                        <span>Create a pay run to process several employee payslips.</span>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <section class="card dctp_enterprise_card dctp_stat_card">
+                                    <header class="card-header">
+                                        <div>
+                                            <p class="dctp_card_eyebrow">Payroll analytics</p>
+                                            <h2><t t-esc="state.data.statistics.employer_cost.title"/></h2>
+                                        </div>
+                                        <button type="button" class="dctp_period_toggle" t-on-click="toggleStatsPeriod">
+                                            <span t-att-class="state.statsPeriod === 'yearly' ? 'active' : ''">Annually</span>
+                                            <i t-att-class="'fa ' + (state.statsPeriod === 'monthly' ? 'fa-toggle-on' : 'fa-toggle-off')"/>
+                                            <span t-att-class="state.statsPeriod === 'monthly' ? 'active' : ''">Monthly</span>
+                                        </button>
+                                    </header>
+                                    <div class="card-body">
+                                        <div class="dctp_chart_legend">
+                                            <span><i class="is-gross"/>Gross</span>
+                                            <span><i class="is-net"/>Net</span>
+                                        </div>
+                                        <div class="dctp_enterprise_chart">
+                                            <div t-foreach="employerBars" t-as="bar" t-key="bar.label" class="dctp_chart_column">
+                                                <div class="dctp_chart_track">
+                                                    <span class="dctp_chart_bar is-gross"
+                                                          t-att-style="'height:' + bar.grossHeight + '%'"
+                                                          t-att-title="'Gross: ' + formatCurrency(bar.gross)"/>
+                                                    <span class="dctp_chart_bar is-net"
+                                                          t-att-style="'height:' + bar.netHeight + '%'"
+                                                          t-att-title="'Net: ' + formatCurrency(bar.net)"/>
+                                                </div>
+                                                <small><t t-esc="bar.label"/></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <section class="card dctp_enterprise_card dctp_stat_card">
+                                    <header class="card-header">
+                                        <div>
+                                            <p class="dctp_card_eyebrow">Workforce</p>
+                                            <h2><t t-esc="state.data.statistics.employee_trends.title"/></h2>
+                                        </div>
+                                        <button type="button" class="dctp_period_toggle" t-on-click="toggleStatsPeriod">
+                                            <span t-att-class="state.statsPeriod === 'yearly' ? 'active' : ''">Annually</span>
+                                            <i t-att-class="'fa ' + (state.statsPeriod === 'monthly' ? 'fa-toggle-on' : 'fa-toggle-off')"/>
+                                            <span t-att-class="state.statsPeriod === 'monthly' ? 'active' : ''">Monthly</span>
+                                        </button>
+                                    </header>
+                                    <div class="card-body">
+                                        <div class="dctp_enterprise_chart is-employees">
+                                            <div t-foreach="employeeBars" t-as="bar" t-key="bar.label" class="dctp_chart_column">
+                                                <div class="dctp_chart_track">
+                                                    <span class="dctp_chart_value"><t t-esc="bar.value"/></span>
+                                                    <span class="dctp_chart_bar is-employee" t-att-style="'height:' + bar.height + '%'"/>
+                                                </div>
+                                                <small><t t-esc="bar.label"/></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-5">
+                        <section class="card dctp_enterprise_card dctp_todo_card">
+                            <header class="dctp_todo_tabs">
+                                <div class="dctp_todo_tab_scroller">
+                                    <button type="button"
+                                            t-foreach="state.data.notes"
+                                            t-as="note"
+                                            t-key="note.id"
+                                            t-att-class="'dctp_todo_tab ' + (note.id === state.activeNoteId ? 'active' : '')"
+                                            t-on-click="() => this.selectNote(note)">
+                                        <t t-esc="note.name"/>
+                                    </button>
+                                </div>
+                                <button type="button" class="dctp_todo_add" t-on-click="createNote" title="Create a payroll note" aria-label="Create a payroll note">
+                                    <i class="fa fa-plus"/>
+                                </button>
+                            </header>
+
+                            <div t-if="activeNote" class="dctp_todo_editor">
+                                <div class="dctp_todo_title_row">
+                                    <input class="form-control" t-model="state.noteName" placeholder="Note title"/>
+                                    <button type="button" class="btn btn-outline-danger" t-on-click="deleteNote" title="Delete note" aria-label="Delete note">
+                                        <i class="fa fa-trash"/>
+                                    </button>
+                                </div>
+                                <textarea class="form-control"
+                                          t-model="state.noteMemo"
+                                          placeholder="Write payroll reminders, checks, and handover notes here…"/>
+                                <footer>
+                                    <span><i class="fa fa-building-o me-1"/>Shared with payroll users in this company</span>
+                                    <button type="button" class="btn btn-primary" t-on-click="saveNote" t-att-disabled="state.savingNote">
+                                        <i t-att-class="'fa me-1 ' + (state.savingNote ? 'fa-spinner fa-spin' : 'fa-save')"/>
+                                        Save
+                                    </button>
+                                </footer>
+                            </div>
+                            <div t-else="" class="dctp_enterprise_empty dctp_todo_empty">
+                                <i class="fa fa-sticky-note-o"/>
+                                <strong>No payroll notes</strong>
+                                <span>Create a note for payroll reminders and handovers.</span>
+                                <button type="button" class="btn btn-primary" t-on-click="createNote">Create Note</button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

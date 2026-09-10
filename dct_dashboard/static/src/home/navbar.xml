@@ -4,7 +4,8 @@
        t-inherit="web.NavBar"
        t-inherit-mode="extension">
         <xpath expr="//t[@t-call='web.NavBar.AppsMenu']" position="replace">
-            <button class="o_dct_home_toggle o_menu_toggle border-0"
+            <button type="button"
+                    class="o_dct_home_toggle o_menu_toggle border-0"
                     data-hotkey="h"
                     title="DCT Home"
                     aria-label="DCT Home"

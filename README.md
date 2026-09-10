@@ -1,6 +1,6 @@
 # DCT Odoo 19 Community add-ons
 
-This repository contains two integrated Odoo 19 Community modules plus a
+This repository contains three integrated Odoo 19 Community modules plus a
 vendored, attributed OCA feature stack. Custom screens use the official DCT
 navy (`#0A132B`) and electric blue (`#1577FF`), while operational Odoo screens
 retain the native interface.
@@ -22,6 +22,12 @@ retain the native interface.
   journal controls, MIS dashboards, configurable reports, and budgets. The
   add-on keeps the standard Odoo UI and organizes the additional tools inside
   the native Reporting and Configuration hierarchy.
+- `dct_payroll` — a complete Community payroll application with employee
+  payslips, batch runs, worked days and inputs, salary structures and rules,
+  contribution registers, printable payslips, payroll journal entries,
+  department analysis, and a responsive DCT payroll overview. Salary and tax
+  formulas remain localization-specific and are configured through standard
+  salary rules instead of being hard-coded.
 - `oca_addons` — pinned Odoo 19 Community dependencies with upstream licenses,
   documentation, and source attribution. See [the vendor inventory](oca_addons/README.md).
 
@@ -31,14 +37,15 @@ retain the native interface.
 2. Add both this repository and its `oca_addons` directory to Odoo's
    `addons_path`.
 3. Restart Odoo and update the Apps list.
-4. Upgrade or install **DCT Dashboard** and **DCT Accounting** from Apps.
+4. Upgrade or install **DCT Dashboard**, **DCT Accounting**, and **DCT
+   Payroll** from Apps.
 
 For command-line updates:
 
 ```bash
 ./odoo-bin \
   --addons-path=/path/to/odoo/addons,/path/to/DCT/oca_addons,/path/to/DCT \
-  -d DATABASE -u dct_dashboard,dct_accounting --stop-after-init
+  -d DATABASE -u dct_dashboard,dct_accounting,dct_payroll --stop-after-init
 ```
 
 The DCT modules remain independently installable, but their declared OCA

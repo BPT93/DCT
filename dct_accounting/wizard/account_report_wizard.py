@@ -23,6 +23,20 @@ COMPARISON_TYPES = [
     ("previous_year", "Previous Year"),
 ]
 
+AS_OF_REPORT_TYPES = {"balance_sheet", "aged_receivable", "aged_payable"}
+COMPARISON_REPORT_TYPES = {
+    "balance_sheet",
+    "profit_loss",
+    "executive_summary",
+    "cash_flow",
+    "trial_balance",
+}
+PARTNER_FILTER_REPORT_TYPES = {
+    "partner_ledger",
+    "aged_receivable",
+    "aged_payable",
+}
+
 
 class DctAccountReportWizard(models.TransientModel):
     _name = "dct.account.report.wizard"
@@ -103,11 +117,31 @@ class DctAccountReportWizard(models.TransientModel):
     def _onchange_company_id(self):
         self.journal_ids = False
         self.account_ids = False
+        self.partner_ids = False
         self.line_ids = False
+
+    @api.onchange("report_type")
+    def _onchange_report_type(self):
+        if self.report_type not in PARTNER_FILTER_REPORT_TYPES:
+            self.partner_ids = False
+        if self.report_type not in COMPARISON_REPORT_TYPES:
+            self.comparison = "none"
 
     def _check_dates(self):
         self.ensure_one()
-        if self.date_from and self.date_to and self.date_from > self.date_to:
+        if (
+            self.report_type in AS_OF_REPORT_TYPES
+            and self.date_from
+            and self.date_to
+            and self.date_from > self.date_to
+        ):
+            self.date_from = self.date_to
+        if (
+            self.report_type not in AS_OF_REPORT_TYPES
+            and self.date_from
+            and self.date_to
+            and self.date_from > self.date_to
+        ):
             raise ValidationError(_("The start date must be before the end date."))
 
     def _base_domain(self, date_from=None, date_to=None):
@@ -204,6 +238,7 @@ class DctAccountReportWizard(models.TransientModel):
         foldable=True,
         show_amount=False,
         style_class="section",
+        **values,
     ):
         return {
             "line_type": "section",
@@ -217,6 +252,7 @@ class DctAccountReportWizard(models.TransientModel):
             "foldable": foldable,
             "show_amount": show_amount,
             "style_class": style_class,
+            **values,
         }
 
     @staticmethod
@@ -675,10 +711,24 @@ class DctAccountReportWizard(models.TransientModel):
             ),
         ]
 
+    def _residual_at_date(self, move_line):
+        self.ensure_one()
+        residual = move_line.balance
+        residual -= sum(
+            partial.amount
+            for partial in move_line.matched_credit_ids
+            if partial.max_date and partial.max_date <= self.date_to
+        )
+        residual += sum(
+            partial.amount
+            for partial in move_line.matched_debit_ids
+            if partial.max_date and partial.max_date <= self.date_to
+        )
+        return residual
+
     def _aged_partner_lines(self, account_type, sign=1.0):
         base_domain = self._base_domain(date_to=self.date_to) + [
             ("account_id.account_type", "=", account_type),
-            ("amount_residual", "!=", 0.0),
         ]
         date_30 = self.date_to - relativedelta(days=30)
         date_60 = self.date_to - relativedelta(days=60)
@@ -703,23 +753,35 @@ class DctAccountReportWizard(models.TransientModel):
             ("bucket_older", [("date_maturity", "<", date_90)]),
         ]
         partner_values = {}
-        for field_name, bucket_domain in buckets:
-            grouped = self.env["account.move.line"]._read_group(
-                base_domain + bucket_domain,
-                ["partner_id"],
-                ["amount_residual:sum"],
-            )
-            for partner, residual in grouped:
-                key = partner.id if partner else 0
-                values = partner_values.setdefault(key, {
-                    "partner": partner,
-                    "bucket_current": 0.0,
-                    "bucket_1_30": 0.0,
-                    "bucket_31_60": 0.0,
-                    "bucket_61_90": 0.0,
-                    "bucket_older": 0.0,
-                })
-                values[field_name] = sign * (residual or 0.0)
+        move_lines = self.env["account.move.line"].search(base_domain)
+        for move_line in move_lines:
+            # Rebuild the residual at the report date. Using the current residual
+            # alone drops invoices that were paid after a historical cutoff.
+            residual = self._residual_at_date(move_line)
+            if self.currency_id.is_zero(residual):
+                continue
+            partner = move_line.partner_id
+            key = partner.id if partner else 0
+            values = partner_values.setdefault(key, {
+                "partner": partner,
+                "bucket_current": 0.0,
+                "bucket_1_30": 0.0,
+                "bucket_31_60": 0.0,
+                "bucket_61_90": 0.0,
+                "bucket_older": 0.0,
+            })
+            maturity = move_line.date_maturity or move_line.date
+            if maturity >= self.date_to:
+                bucket_name = "bucket_current"
+            elif maturity >= date_30:
+                bucket_name = "bucket_1_30"
+            elif maturity >= date_60:
+                bucket_name = "bucket_31_60"
+            elif maturity >= date_90:
+                bucket_name = "bucket_61_90"
+            else:
+                bucket_name = "bucket_older"
+            values[bucket_name] += sign * residual
 
         rows = []
         for values in sorted(
@@ -901,6 +963,146 @@ class DctAccountReportWizard(models.TransientModel):
             ),
         ]
 
+    def _detailed_ledger_lines(self, groupby, relation_field, account_types=None):
+        """Return foldable groups followed by their underlying journal items."""
+        opening_domain = self._base_domain(date_to=self.date_from - relativedelta(days=1))
+        period_domain = self._base_domain(self.date_from, self.date_to)
+        if account_types:
+            account_filter = [("account_id.account_type", "in", tuple(account_types))]
+            opening_domain += account_filter
+            period_domain += account_filter
+
+        opening = {
+            (record.id if record else 0): {
+                "record": record,
+                "balance": balance or 0.0,
+            }
+            for record, balance in self.env["account.move.line"]._read_group(
+                opening_domain,
+                [groupby],
+                ["balance:sum"],
+            )
+        }
+        period_by_key = {}
+        for move_line in self.env["account.move.line"].search(
+            period_domain,
+            order="date, id",
+        ):
+            record = move_line[groupby]
+            key = record.id if record else 0
+            period_by_key.setdefault(key, {"record": record, "lines": []})["lines"].append(
+                move_line
+            )
+
+        keys = set(opening) | set(period_by_key)
+        if self.show_zero and groupby == "account_id":
+            records = self.account_ids or self.env["account.account"].search([
+                ("company_ids", "in", [self.company_id.id]),
+            ])
+            for record in records:
+                opening.setdefault(record.id, {"record": record, "balance": 0.0})
+                keys.add(record.id)
+        elif self.show_zero and groupby == "partner_id" and self.partner_ids:
+            for record in self.partner_ids:
+                opening.setdefault(record.id, {"record": record, "balance": 0.0})
+                keys.add(record.id)
+        elif self.show_zero and groupby == "journal_id":
+            records = self.journal_ids or self.env["account.journal"].search([
+                ("company_id", "=", self.company_id.id),
+                ("active", "=", True),
+            ])
+            for record in records:
+                opening.setdefault(record.id, {"record": record, "balance": 0.0})
+                keys.add(record.id)
+
+        rows = []
+        summary_rows = []
+        for key in sorted(
+            keys,
+            key=lambda item: (
+                (period_by_key.get(item) or opening.get(item))["record"].display_name
+                if (period_by_key.get(item) or opening.get(item))["record"]
+                else "",
+            ),
+        ):
+            record = (period_by_key.get(key) or opening.get(key))["record"]
+            move_lines = period_by_key.get(key, {}).get("lines", [])
+            opening_balance = opening.get(key, {}).get("balance", 0.0)
+            debit = sum(move_line.debit for move_line in move_lines)
+            credit = sum(move_line.credit for move_line in move_lines)
+            movement = sum(move_line.balance for move_line in move_lines)
+            ending_balance = opening_balance + movement
+            if not self.show_zero and all(
+                self.currency_id.is_zero(value)
+                for value in (opening_balance, debit, credit, ending_balance)
+            ):
+                continue
+
+            line_key = f"{groupby}-{key or 'unassigned'}"
+            relation_values = {relation_field: record.id if record else False}
+            code = record.code if groupby in ("account_id", "journal_id") and record else False
+            section = self._section(
+                record.display_name if record else _("Unassigned"),
+                balance=movement,
+                line_key=line_key,
+                foldable=True,
+                show_amount=True,
+                style_class="section",
+                code=code,
+                opening_balance=opening_balance,
+                period_debit=debit,
+                period_credit=credit,
+                debit=debit,
+                credit=credit,
+                ending_balance=ending_balance,
+                can_drilldown=True,
+                **relation_values,
+            )
+            rows.append(section)
+            summary_rows.append(section)
+
+            running_balance = opening_balance
+            for move_line in move_lines:
+                balance_before = running_balance
+                running_balance += move_line.balance
+                label_parts = [move_line.move_id.name, move_line.name]
+                if groupby != "partner_id" and move_line.partner_id:
+                    label_parts.append(move_line.partner_id.display_name)
+                entry_name = " — ".join(
+                    part for part in label_parts if part and part != "/"
+                ) or _("Journal Item")
+                rows.append({
+                    "line_type": "entry",
+                    "line_key": f"entry-{move_line.id}",
+                    "parent_key": line_key,
+                    "hierarchy_level": 1,
+                    "code": fields.Date.to_string(move_line.date),
+                    "name": entry_name,
+                    "move_line_id": move_line.id,
+                    "opening_balance": balance_before,
+                    "period_debit": move_line.debit,
+                    "period_credit": move_line.credit,
+                    "debit": move_line.debit,
+                    "credit": move_line.credit,
+                    "balance": move_line.balance,
+                    "ending_balance": running_balance,
+                    "show_amount": True,
+                    "style_class": "normal",
+                    "can_drilldown": True,
+                })
+
+        return [
+            *rows,
+            self._total(
+                _("TOTAL"),
+                self._rows_total(summary_rows),
+                opening_balance=self._rows_total(summary_rows, "opening_balance"),
+                period_debit=self._rows_total(summary_rows, "period_debit"),
+                period_credit=self._rows_total(summary_rows, "period_credit"),
+                ending_balance=self._rows_total(summary_rows, "ending_balance"),
+            ),
+        ]
+
     def _report_line_values(self):
         self.ensure_one()
         self._check_dates()
@@ -910,13 +1112,16 @@ class DctAccountReportWizard(models.TransientModel):
             "executive_summary": self._executive_summary_lines,
             "cash_flow": self._cash_flow_lines,
             "trial_balance": self._ledger_account_lines,
-            "general_ledger": self._ledger_account_lines,
-            "partner_ledger": lambda: self._grouped_ledger_lines(
+            "general_ledger": lambda: self._detailed_ledger_lines(
+                "account_id",
+                "account_id",
+            ),
+            "partner_ledger": lambda: self._detailed_ledger_lines(
                 "partner_id",
                 "partner_id",
                 ("asset_receivable", "liability_payable"),
             ),
-            "journal_ledger": lambda: self._grouped_ledger_lines(
+            "journal_ledger": lambda: self._detailed_ledger_lines(
                 "journal_id",
                 "journal_id",
             ),
@@ -983,6 +1188,8 @@ class DctAccountReportWizard(models.TransientModel):
 
     def _generate_lines(self):
         self.ensure_one()
+        if self.report_type not in COMPARISON_REPORT_TYPES and self.comparison != "none":
+            self.comparison = "none"
         values = self._report_line_values()
         comparison_from, comparison_to, comparison_label = self._comparison_period()
         comparison_by_key = {}
@@ -1026,7 +1233,7 @@ class DctAccountReportWizard(models.TransientModel):
         comparison = options.get("comparison", "none")
         if comparison not in comparison_types:
             comparison = "none"
-        if report_type in ("aged_receivable", "aged_payable"):
+        if report_type not in COMPARISON_REPORT_TYPES:
             comparison = "none"
         target_move = options.get("target_move", "posted")
         if target_move not in ("posted", "all"):
@@ -1034,6 +1241,8 @@ class DctAccountReportWizard(models.TransientModel):
 
         date_from = fields.Date.to_date(options.get("date_from")) or self._default_date_from()
         date_to = fields.Date.to_date(options.get("date_to")) or fields.Date.context_today(self)
+        if report_type in AS_OF_REPORT_TYPES and date_from > date_to:
+            date_from = date_to
         available_journals = self.env["account.journal"].search([
             ("company_id", "=", self.env.company.id),
             ("active", "=", True),
@@ -1046,6 +1255,43 @@ class DctAccountReportWizard(models.TransientModel):
         selected_journals = available_journals.filtered(
             lambda journal: journal.id in requested_journal_ids
         )
+        available_accounts = self.env["account.account"].search([
+            ("company_ids", "in", [self.env.company.id]),
+        ], order="code, name")
+        requested_account_ids = {
+            int(account_id)
+            for account_id in options.get("account_ids", [])
+            if str(account_id).isdigit()
+        }
+        selected_accounts = available_accounts.filtered(
+            lambda account: account.id in requested_account_ids
+        )
+        partner_groups = self.env["account.move.line"]._read_group(
+            [
+                ("company_id", "=", self.env.company.id),
+                ("partner_id", "!=", False),
+                (
+                    "account_id.account_type",
+                    "in",
+                    ("asset_receivable", "liability_payable"),
+                ),
+            ],
+            ["partner_id"],
+            [],
+        )
+        available_partners = self.env["res.partner"].browse(
+            [partner.id for (partner,) in partner_groups if partner]
+        ).sorted(lambda partner: partner.display_name)
+        requested_partner_ids = {
+            int(partner_id)
+            for partner_id in options.get("partner_ids", [])
+            if str(partner_id).isdigit()
+        }
+        selected_partners = available_partners.filtered(
+            lambda partner: partner.id in requested_partner_ids
+        )
+        if report_type not in PARTNER_FILTER_REPORT_TYPES:
+            selected_partners = self.env["res.partner"]
         values = {
             "report_type": report_type,
             "company_id": self.env.company.id,
@@ -1053,6 +1299,8 @@ class DctAccountReportWizard(models.TransientModel):
             "date_to": date_to,
             "target_move": target_move,
             "journal_ids": [Command.set(selected_journals.ids)],
+            "account_ids": [Command.set(selected_accounts.ids)],
+            "partner_ids": [Command.set(selected_partners.ids)],
             "show_zero": bool(options.get("show_zero")),
             "comparison": comparison,
         }
@@ -1103,6 +1351,12 @@ class DctAccountReportWizard(models.TransientModel):
         ]
         if wizard.report_type not in ("balance_sheet", "aged_receivable", "aged_payable"):
             unposted_domain.append(("date", ">=", wizard.date_from))
+        if wizard.journal_ids:
+            unposted_domain.append(("journal_id", "in", wizard.journal_ids.ids))
+        if wizard.account_ids:
+            unposted_domain.append(("account_id", "in", wizard.account_ids.ids))
+        if wizard.partner_ids:
+            unposted_domain.append(("partner_id", "in", wizard.partner_ids.ids))
 
         return {
             "wizard_id": wizard.id,
@@ -1138,6 +1392,23 @@ class DctAccountReportWizard(models.TransientModel):
                     "selected": journal in selected_journals,
                 }
                 for journal in available_journals
+            ],
+            "accounts": [
+                {
+                    "id": account.id,
+                    "name": account.name,
+                    "code": account.code or "",
+                    "selected": account in selected_accounts,
+                }
+                for account in available_accounts
+            ],
+            "partners": [
+                {
+                    "id": partner.id,
+                    "name": partner.display_name,
+                    "selected": partner in selected_partners,
+                }
+                for partner in available_partners
             ],
             "lines": lines,
         }
@@ -1175,7 +1446,12 @@ class DctAccountReportLine(models.TransientModel):
     )
     sequence = fields.Integer(default=10)
     line_type = fields.Selection(
-        [("section", "Section"), ("account", "Account"), ("total", "Total")],
+        [
+            ("section", "Section"),
+            ("account", "Account"),
+            ("entry", "Journal Item"),
+            ("total", "Total"),
+        ],
         required=True,
         default="account",
     )
@@ -1200,6 +1476,7 @@ class DctAccountReportLine(models.TransientModel):
     account_id = fields.Many2one("account.account", readonly=True)
     partner_id = fields.Many2one("res.partner", readonly=True)
     journal_id = fields.Many2one("account.journal", readonly=True)
+    move_line_id = fields.Many2one("account.move.line", readonly=True)
     currency_id = fields.Many2one(related="wizard_id.currency_id", readonly=True)
     opening_balance = fields.Monetary(currency_field="currency_id", readonly=True)
     period_debit = fields.Monetary(currency_field="currency_id", readonly=True)
@@ -1220,6 +1497,17 @@ class DctAccountReportLine(models.TransientModel):
 
     def action_open_journal_items(self):
         self.ensure_one()
+        if self.move_line_id:
+            return {
+                "type": "ir.actions.act_window",
+                "name": _("Journal Item — %s", self.name),
+                "res_model": "account.move.line",
+                "view_mode": "form",
+                "views": [(False, "form")],
+                "res_id": self.move_line_id.id,
+                "context": {"create": False},
+                "target": "current",
+            }
         wizard = self.wizard_id
         if wizard.report_type in ("balance_sheet", "aged_receivable", "aged_payable"):
             domain = wizard._base_domain(date_to=wizard.date_to)
@@ -1228,13 +1516,24 @@ class DctAccountReportLine(models.TransientModel):
         if wizard.report_type == "aged_receivable":
             domain.extend([
                 ("account_id.account_type", "=", "asset_receivable"),
-                ("amount_residual", "!=", 0.0),
             ])
         elif wizard.report_type == "aged_payable":
             domain.extend([
                 ("account_id.account_type", "=", "liability_payable"),
-                ("amount_residual", "!=", 0.0),
             ])
+        if wizard.report_type in ("aged_receivable", "aged_payable"):
+            candidates = self.env["account.move.line"].search(domain)
+            domain = [
+                (
+                    "id",
+                    "in",
+                    candidates.filtered(
+                        lambda move_line: not wizard.currency_id.is_zero(
+                            wizard._residual_at_date(move_line)
+                        )
+                    ).ids,
+                )
+            ]
         if self.account_id:
             domain.append(("account_id", "=", self.account_id.id))
         if self.partner_id:
@@ -1246,6 +1545,7 @@ class DctAccountReportLine(models.TransientModel):
             "name": _("Journal Items — %s", self.name),
             "res_model": "account.move.line",
             "view_mode": "list,form",
+            "views": [(False, "list"), (False, "form")],
             "domain": domain,
             "context": {"create": False},
             "target": "current",

@@ -4,8 +4,8 @@
         <main class="o_dct_interactive_report">
             <header class="o_control_panel o_dct_report_control_panel">
                 <div class="o_dct_report_identity">
-                    <button class="btn btn-primary" t-on-click="printPdf" t-att-disabled="state.loading">PDF</button>
-                    <button class="btn btn-secondary" t-on-click="exportXlsx" t-att-disabled="state.loading">XLSX</button>
+                    <button type="button" class="btn btn-primary" t-on-click="printPdf" t-att-disabled="state.loading">PDF</button>
+                    <button type="button" class="btn btn-secondary" t-on-click="exportXlsx" t-att-disabled="state.loading">XLSX</button>
                     <h1 t-esc="state.data.report_name || 'Financial Report'"/>
                     <button type="button" class="o_dct_title_settings" t-on-click="toggleOptions" title="Report options" aria-label="Report options">
                         <i class="fa fa-cog"/>
@@ -17,15 +17,23 @@
                         <i class="fa fa-calendar" aria-hidden="true"/>
                         <strong t-esc="periodLabel"/>
                         <select t-att-value="state.periodPreset" t-on-change="onPeriodPresetChange" aria-label="Period">
-                            <option value="month" t-att-selected="state.periodPreset === 'month'">This Month</option>
-                            <option value="quarter" t-att-selected="state.periodPreset === 'quarter'">This Quarter</option>
-                            <option value="year" t-att-selected="state.periodPreset === 'year'">This Year</option>
-                            <option value="last_month" t-att-selected="state.periodPreset === 'last_month'">Last Month</option>
-                            <option value="custom" t-att-selected="state.periodPreset === 'custom'">Custom Range</option>
+                            <t t-if="isAsOfReport">
+                                <option value="today" t-att-selected="state.periodPreset === 'today'">Today</option>
+                                <option value="last_month_end" t-att-selected="state.periodPreset === 'last_month_end'">End of Last Month</option>
+                                <option value="last_year_end" t-att-selected="state.periodPreset === 'last_year_end'">End of Last Year</option>
+                                <option value="custom" t-att-selected="state.periodPreset === 'custom'">Custom Date</option>
+                            </t>
+                            <t t-else="">
+                                <option value="month" t-att-selected="state.periodPreset === 'month'">This Month</option>
+                                <option value="quarter" t-att-selected="state.periodPreset === 'quarter'">This Quarter</option>
+                                <option value="year" t-att-selected="state.periodPreset === 'year'">This Year</option>
+                                <option value="last_month" t-att-selected="state.periodPreset === 'last_month'">Last Month</option>
+                                <option value="custom" t-att-selected="state.periodPreset === 'custom'">Custom Range</option>
+                            </t>
                         </select>
                         <div t-if="state.dateOpen" class="o_dct_filter_popover o_dct_date_popover">
                             <label t-if="!isAsOfReport">Date From<input type="date" t-att-value="state.options.date_from" t-on-change="onDateFromChange"/></label>
-                            <label>Date To<input type="date" t-att-value="state.options.date_to" t-on-change="onDateToChange"/></label>
+                            <label><t t-esc="isAsOfReport ? 'As of' : 'Date To'"/><input type="date" t-att-value="state.options.date_to" t-on-change="onDateToChange"/></label>
                             <button type="button" class="btn btn-primary" t-on-click.prevent="applyFilters">Update</button>
                         </div>
                     </div>
@@ -54,6 +62,60 @@
                             <p t-if="!state.data.journals.length">No journals available.</p>
                             <div class="o_dct_popover_actions">
                                 <button type="button" class="btn btn-secondary" t-on-click="clearJournals">Clear</button>
+                                <button type="button" class="btn btn-primary" t-on-click="applyFilters">Apply</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="o_dct_filter_chip o_dct_account_filter">
+                        <button type="button" class="o_dct_filter_button" t-on-click="toggleAccounts">
+                            <i class="fa fa-list-alt" aria-hidden="true"/>
+                            <strong t-esc="accountLabel"/>
+                        </button>
+                        <div t-if="state.accountOpen" class="o_dct_filter_popover o_dct_choice_popover">
+                            <div class="o_dct_choice_search">
+                                <i class="fa fa-search" aria-hidden="true"/>
+                                <input type="search" placeholder="Search accounts…"
+                                       t-att-value="state.accountQuery" t-on-input="onAccountQueryInput"/>
+                            </div>
+                            <div class="o_dct_choice_options">
+                                <label t-foreach="filteredAccounts" t-as="account" t-key="account.id">
+                                    <input type="checkbox"
+                                           t-att-checked="state.options.account_ids.includes(account.id)"
+                                           t-on-change="() => this.toggleAccount(account.id)"/>
+                                    <span><strong t-if="account.code" t-esc="account.code"/> <t t-esc="account.name"/></span>
+                                </label>
+                                <p t-if="!filteredAccounts.length">No matching accounts.</p>
+                            </div>
+                            <div class="o_dct_popover_actions">
+                                <button type="button" class="btn btn-secondary" t-on-click="clearAccounts">Clear</button>
+                                <button type="button" class="btn btn-primary" t-on-click="applyFilters">Apply</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div t-if="showPartnerFilter" class="o_dct_filter_chip o_dct_partner_filter">
+                        <button type="button" class="o_dct_filter_button" t-on-click="togglePartners">
+                            <i class="fa fa-users" aria-hidden="true"/>
+                            <strong t-esc="partnerLabel"/>
+                        </button>
+                        <div t-if="state.partnerOpen" class="o_dct_filter_popover o_dct_choice_popover">
+                            <div class="o_dct_choice_search">
+                                <i class="fa fa-search" aria-hidden="true"/>
+                                <input type="search" placeholder="Search partners…"
+                                       t-att-value="state.partnerQuery" t-on-input="onPartnerQueryInput"/>
+                            </div>
+                            <div class="o_dct_choice_options">
+                                <label t-foreach="filteredPartners" t-as="partner" t-key="partner.id">
+                                    <input type="checkbox"
+                                           t-att-checked="state.options.partner_ids.includes(partner.id)"
+                                           t-on-change="() => this.togglePartner(partner.id)"/>
+                                    <span t-esc="partner.name"/>
+                                </label>
+                                <p t-if="!filteredPartners.length">No matching partners.</p>
+                            </div>
+                            <div class="o_dct_popover_actions">
+                                <button type="button" class="btn btn-secondary" t-on-click="clearPartners">Clear</button>
                                 <button type="button" class="btn btn-primary" t-on-click="applyFilters">Apply</button>
                             </div>
                         </div>
@@ -89,8 +151,16 @@
                         <div t-if="state.optionsOpen" class="o_dct_filter_popover o_dct_options_popover">
                             <label>
                                 <input type="checkbox" t-att-checked="state.options.show_zero" t-on-change="onShowZeroChange"/>
-                                <span>Show zero-balance accounts</span>
+                                <span>Show zero-balance lines</span>
                             </label>
+                            <div t-if="sectionKeys.length" class="o_dct_fold_actions">
+                                <button type="button" class="btn btn-secondary" t-on-click="unfoldAll">
+                                    <i class="fa fa-expand"/> Unfold All
+                                </button>
+                                <button type="button" class="btn btn-secondary" t-on-click="foldAll">
+                                    <i class="fa fa-compress"/> Fold All
+                                </button>
+                            </div>
                             <button type="button" class="btn btn-secondary" t-on-click="resetFilters">
                                 <i class="fa fa-undo"/> Reset to defaults
                             </button>
@@ -155,13 +225,13 @@
                                     t-att-class="'is-' + line.line_type + ' o_dct-style-' + line.style_class">
                                     <td class="is-name">
                                         <div class="o_dct_line_name" t-att-style="'--dct-level:' + line.level">
-                                            <button t-if="line.foldable" class="o_dct_fold_toggle"
+                                            <button type="button" t-if="line.foldable" class="o_dct_fold_toggle"
                                                     t-on-click="() => this.toggleSection(line.line_key)"
                                                     t-att-title="state.collapsed[line.line_key] ? 'Unfold' : 'Fold'">
                                                 <i t-att-class="state.collapsed[line.line_key] ? 'fa fa-caret-right' : 'fa fa-caret-down'"/>
                                             </button>
                                             <span t-else="" class="o_dct_fold_spacer"/>
-                                            <button t-if="line.can_drilldown" class="o_dct_report_line_link"
+                                            <button type="button" t-if="line.can_drilldown" class="o_dct_report_line_link"
                                                     t-on-click="() => this.openLine(line)">
                                                 <span t-if="line.code" class="o_dct_account_code" t-esc="line.code"/>
                                                 <span t-esc="line.name"/>
@@ -199,7 +269,7 @@
                                             t-esc="formatCurrency(line.variance)"/>
                                     </t>
                                     <td class="is-info">
-                                        <button t-if="line.can_drilldown" t-on-click="() => this.openLine(line)" title="Open journal items" aria-label="Open journal items">
+                                        <button type="button" t-if="line.can_drilldown" t-on-click="() => this.openLine(line)" title="Open journal items" aria-label="Open journal items">
                                             <i class="fa fa-info-circle"/>
                                         </button>
                                     </td>

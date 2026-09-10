@@ -2,7 +2,13 @@
 <templates xml:space="preserve">
     <t t-name="dct_dashboard.Dashboard">
         <div t-att-class="'o_dct_dashboard dct-theme-' + state.theme">
-            <div t-if="!state.data" class="dct_loading_state">
+            <div t-if="!state.data and state.error" class="dct_loading_state">
+                <i class="fa fa-exclamation-circle fa-2x" aria-hidden="true"/>
+                <p>The dashboard could not be loaded.</p>
+                <button type="button" class="btn btn-primary" t-on-click="loadData">Retry</button>
+            </div>
+
+            <div t-elif="!state.data" class="dct_loading_state">
                 <span class="dct_spinner"/>
                 <p>Preparing your dashboard…</p>
             </div>
@@ -19,7 +25,8 @@
                         </div>
                     </div>
                     <div class="dct_hero_actions">
-                        <button class="dct_theme_toggle"
+                        <button type="button"
+                                class="dct_theme_toggle"
                                 t-on-click="toggleTheme"
                                 t-att-title="state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
                                 t-att-aria-label="state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
@@ -33,7 +40,7 @@
                                 <option value="year">This year</option>
                             </select>
                         </label>
-                        <button class="dct_refresh" t-on-click="loadData" t-att-disabled="state.loading" title="Refresh dashboard">
+                        <button type="button" class="dct_refresh" t-on-click="loadData" t-att-disabled="state.loading" title="Refresh dashboard" aria-label="Refresh dashboard">
                             <i t-att-class="'fa fa-refresh ' + (state.loading ? 'fa-spin' : '')"/>
                         </button>
                     </div>
@@ -155,7 +162,7 @@
                                 </div>
                             </div>
                             <div t-if="state.data.shortcuts.length" class="dct_shortcut_list">
-                                <button t-foreach="state.data.shortcuts" t-as="shortcut" t-key="shortcut.xmlid" t-on-click="() => this.openAction(shortcut.xmlid)" class="dct_shortcut">
+                                <button type="button" t-foreach="state.data.shortcuts" t-as="shortcut" t-key="shortcut.xmlid" t-on-click="() => this.openAction(shortcut.xmlid)" class="dct_shortcut">
                                     <span><i t-att-class="'fa ' + shortcut.icon"/></span>
                                     <strong><t t-esc="shortcut.label"/></strong>
                                     <i class="fa fa-chevron-right"/>

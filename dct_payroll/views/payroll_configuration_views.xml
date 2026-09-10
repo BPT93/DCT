@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_dct_payroll_input_type_list" model="ir.ui.view">
+        <field name="name">hr.rule.input.list.enterprise</field>
+        <field name="model">hr.rule.input</field>
+        <field name="arch" type="xml">
+            <list string="Other Input Types">
+                <field name="name" string="Description"/>
+                <field name="code"/>
+                <field name="input_id" string="Salary Rule"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_dct_payroll_input_type_form" model="ir.ui.view">
+        <field name="name">hr.rule.input.form.enterprise</field>
+        <field name="model">hr.rule.input</field>
+        <field name="arch" type="xml">
+            <form string="Other Input Type">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Description"/>
+                        <h1><field name="name" placeholder="e.g. Bonus"/></h1>
+                    </div>
+                    <group>
+                        <field name="code"/>
+                        <field name="input_id" string="Salary Rule" options="{'no_create': True}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dct_other_input_types" model="ir.actions.act_window">
+        <field name="name">Other Input Types</field>
+        <field name="res_model">hr.rule.input</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_dct_work_entry_types" model="ir.actions.act_window">
+        <field name="name">Work Entry Types</field>
+        <field name="res_model">hr.work.entry.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_dct_working_schedules" model="ir.actions.act_window">
+        <field name="name">Working Schedules</field>
+        <field name="res_model">resource.calendar</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_dct_time_off_types" model="ir.actions.act_window">
+        <field name="name">Time Off Types</field>
+        <field name="res_model">hr.leave.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_dct_time_off_to_report" model="ir.actions.act_window">
+        <field name="name">Time Off To Report</field>
+        <field name="res_model">hr.leave</field>
+        <field name="view_mode">list,calendar,form</field>
+        <field name="domain">[('state', '=', 'validate')]</field>
+        <field name="context">{'search_default_group_by_employee': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No approved time off to report</p>
+            <p>Approved time off is included when employee payslips are computed.</p>
+        </field>
+    </record>
+</odoo>

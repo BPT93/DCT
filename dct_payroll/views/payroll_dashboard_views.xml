@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="payroll.payroll_menu_root" model="ir.ui.menu">
+        <field name="name">Payroll</field>
+        <field name="web_icon">payroll,static/description/icon.png</field>
+    </record>
+
+    <record id="action_dct_payroll_overview" model="ir.actions.client">
+        <field name="name">Payroll Dashboard</field>
+        <field name="tag">dct_payroll.Dashboard</field>
+        <field name="path">payroll-overview</field>
+    </record>
+
+    <record id="action_dct_payslips_to_pay" model="ir.actions.act_window">
+        <field name="name">Payslips To Pay</field>
+        <field name="res_model">hr.payslip</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="payroll.hr_payslip_view_search"/>
+        <field name="domain">[('state', '=', 'done'), ('paid', '=', False)]</field>
+        <field name="context">{'search_default_done': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">All validated payslips are paid</p>
+            <p>Validated employee payslips waiting for payment appear here.</p>
+        </field>
+    </record>
+
+    <record id="action_dct_work_entry_analysis" model="ir.actions.act_window">
+        <field name="name">Work Entry Analysis</field>
+        <field name="res_model">hr.work.entry</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="context">{'search_default_group_by_employee': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No work entries to analyze</p>
+            <p>Work entries created for employees will be available here.</p>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_dct_payroll_overview"
+        name="Dashboard"
+        parent="payroll.payroll_menu_root"
+        action="action_dct_payroll_overview"
+        sequence="10"
+        groups="payroll.group_payroll_user"
+    />
+
+    <menuitem
+        id="menu_dct_payroll_contracts_root"
+        name="Contracts"
+        parent="payroll.payroll_menu_root"
+        sequence="20"
+        groups="payroll.group_payroll_user"
+    />
+    <menuitem
+        id="menu_dct_payroll_contracts"
+        name="Contracts"
+        parent="menu_dct_payroll_contracts_root"
+        action="hr.action_hr_version"
+        sequence="10"
+        groups="payroll.group_payroll_user"
+    />
+    <menuitem
+        id="menu_dct_payroll_employees"
+        name="Employees"
+        parent="menu_dct_payroll_contracts_root"
+        action="hr.open_view_employee_list_my"
+        sequence="20"
+        groups="payroll.group_payroll_user"
+    />
+
+    <menuitem
+        id="menu_dct_payroll_work_entries_root"
+        name="Work Entries"
+        parent="payroll.payroll_menu_root"
+        sequence="30"
+        groups="payroll.group_payroll_user"
+    />
+    <menuitem
+        id="menu_dct_payroll_work_entries"
+        name="All Work Entries"
+        parent="menu_dct_payroll_work_entries_root"
+        action="hr_work_entry.hr_work_entry_action"
+        sequence="10"
+        groups="payroll.group_payroll_user"
+    />
+    <menuitem
+        id="menu_dct_payroll_work_entry_conflicts"
+        name="Conflicts"
+        parent="menu_dct_payroll_work_entries_root"
+        action="hr_work_entry.hr_work_entry_action_conflict"
+        sequence="20"
+        groups="payroll.group_payroll_user"
+    />
+
+    <menuitem
+        id="menu_dct_payroll_time_off_root"
+        name="Time Off"
+        parent="payroll.payroll_menu_root"
+        sequence="40"
+        groups="payroll.group_payroll_user"
+    />
+    <menuitem
+        id="menu_dct_payroll_time_off_to_report"
+        name="Time Off To Report"
+        parent="menu_dct_payroll_time_off_root"
+        action="action_dct_time_off_to_report"
+        sequence="10"
+        groups="payroll.group_payroll_user"
+    />
+
+    <menuitem
+        id="menu_dct_payroll_payslips_root"
+        name="Payslips"
+        parent="payroll.payroll_menu_root"
+        sequence="50"
+        groups="payroll.group_payroll_user"
+    />
+    <menuitem
+        id="menu_dct_payroll_to_pay"
+        name="To Pay"
+        parent="menu_dct_payroll_payslips_root"
+        action="action_dct_payslips_to_pay"
+        sequence="10"
+        groups="payroll.group_payroll_user"
+    />
+    <record id="payroll.hr_payslip_menu" model="ir.ui.menu">
+        <field name="name">Payslips</field>
+        <field name="parent_id" ref="menu_dct_payroll_payslips_root"/>
+        <field name="sequence">20</field>
+    </record>
+    <record id="payroll.hr_payslip_run_menu" model="ir.ui.menu">
+        <field name="name">Pay Runs</field>
+        <field name="parent_id" ref="menu_dct_payroll_payslips_root"/>
+        <field name="sequence">30</field>
+    </record>
+
+    <menuitem
+        id="menu_dct_payroll_reporting"
+        name="Reporting"
+        parent="payroll.payroll_menu_root"
+        sequence="60"
+        groups="payroll.group_payroll_manager"
+    />
+    <menuitem
+        id="menu_dct_payroll_analysis"
+        name="Payroll"
+        parent="menu_dct_payroll_reporting"
+        action="action_dct_payroll_analysis"
+        sequence="10"
+        groups="payroll.group_payroll_manager"
+    />
+    <menuitem
+        id="menu_dct_headcount_analysis"
+        name="Headcount"
+        parent="menu_dct_payroll_reporting"
+        action="action_dct_headcount_analysis"
+        sequence="20"
+        groups="payroll.group_payroll_manager"
+    />
+    <menuitem
+        id="menu_dct_work_entry_analysis"
+        name="Work Entry Analysis"
+        parent="menu_dct_payroll_reporting"
+        action="action_dct_work_entry_analysis"
+        sequence="30"
+        groups="payroll.group_payroll_manager"
+    />
+
+    <record id="payroll.payroll_menu_configuration" model="ir.ui.menu">
+        <field name="sequence">100</field>
+    </record>
+    <menuitem
+        id="menu_dct_salary_configuration"
+        name="Salary"
+        parent="payroll.payroll_menu_configuration"
+        sequence="20"
+        groups="payroll.group_payroll_manager"
+    />
+    <record id="payroll.hr_payroll_structure_menu" model="ir.ui.menu">
+        <field name="name">Structures</field>
+        <field name="parent_id" ref="menu_dct_salary_configuration"/>
+        <field name="sequence">10</field>
+    </record>
+    <record id="payroll.menu_action_hr_salary_rule_form" model="ir.ui.menu">
+        <field name="name">Rules</field>
+        <field name="parent_id" ref="menu_dct_salary_configuration"/>
+        <field name="sequence">20</field>
+    </record>
+    <record id="payroll.menu_hr_salary_rule_category" model="ir.ui.menu">
+        <field name="name">Rule Categories</field>
+        <field name="parent_id" ref="menu_dct_salary_configuration"/>
+        <field name="sequence">40</field>
+    </record>
+    <record id="payroll.hr_contribution_register_menu" model="ir.ui.menu">
+        <field name="name">Contribution Registers</field>
+        <field name="parent_id" ref="menu_dct_salary_configuration"/>
+        <field name="sequence">50</field>
+    </record>
+    <menuitem
+        id="menu_dct_other_input_types"
+        name="Other Input Types"
+        parent="menu_dct_salary_configuration"
+        action="action_dct_other_input_types"
+        sequence="30"
+        groups="payroll.group_payroll_manager"
+    />
+
+    <menuitem
+        id="menu_dct_work_entry_configuration"
+        name="Work Entries"
+        parent="payroll.payroll_menu_configuration"
+        sequence="30"
+        groups="payroll.group_payroll_manager"
+    />
+    <menuitem
+        id="menu_dct_working_schedules"
+        name="Working Schedules"
+        parent="menu_dct_work_entry_configuration"
+        action="action_dct_working_schedules"
+        sequence="10"
+        groups="payroll.group_payroll_manager"
+    />
+    <menuitem
+        id="menu_dct_work_entry_types"
+        name="Work Entry Types"
+        parent="menu_dct_work_entry_configuration"
+        action="action_dct_work_entry_types"
+        sequence="20"
+        groups="payroll.group_payroll_manager"
+    />
+
+    <menuitem
+        id="menu_dct_time_off_configuration"
+        name="Time Off"
+        parent="payroll.payroll_menu_configuration"
+        sequence="40"
+        groups="payroll.group_payroll_manager"
+    />
+    <menuitem
+        id="menu_dct_time_off_types"
+        name="Time Off Types"
+        parent="menu_dct_time_off_configuration"
+        action="action_dct_time_off_types"
+        sequence="10"
+        groups="payroll.group_payroll_manager"
+    />
+</odoo>

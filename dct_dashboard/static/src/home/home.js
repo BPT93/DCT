@@ -1,13 +1,9 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
-import { Component, useState } from "@odoo/owl";
-import { imageUrl } from "@web/core/utils/urls";
-import { getPreferredTheme } from "@dct_dashboard/theme/theme";
+import { Component, onMounted, onWillUnmount } from "@odoo/owl";
 
 
 export class DctHome extends Component {
@@ -16,27 +12,41 @@ export class DctHome extends Component {
 
     setup() {
         this.menuService = useService("menu");
-        this.colorScheme = useService("color_scheme");
+        this.commandService = useService("command");
         this.menuService.setCurrentMenu(this.menuService.getMenu("root"));
-        this.state = useState({ theme: getPreferredTheme() });
         this.openApp = this.openApp.bind(this);
-        this.toggleTheme = this.toggleTheme.bind(this);
-    }
-
-    get companyName() {
-        return user.activeCompany?.name || _t("Company");
-    }
-
-    get companyLogoUrl() {
-        return imageUrl("res.company", user.activeCompany.id, "logo_web");
+        this.onGlobalKeydown = this.onGlobalKeydown.bind(this);
+        onMounted(() => document.addEventListener("keydown", this.onGlobalKeydown));
+        onWillUnmount(() => document.removeEventListener("keydown", this.onGlobalKeydown));
     }
 
     get allApps() {
         return this.menuService.getApps().filter((app) => this.getLaunchMenu(app));
     }
 
-    get apps() {
-        return this.allApps;
+    onGlobalKeydown(event) {
+        if (
+            event.defaultPrevented ||
+            event.isComposing ||
+            event.ctrlKey ||
+            event.altKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.code !== "Space" ||
+            this.isInteractiveTarget(event.target)
+        ) {
+            return;
+        }
+        event.preventDefault();
+        this.commandService.openMainPalette({ searchValue: "/" });
+    }
+
+    isInteractiveTarget(target) {
+        return target instanceof Element && Boolean(
+            target.closest(
+                "input, textarea, select, button, a, [contenteditable='true'], [role='textbox']"
+            )
+        );
     }
 
     getLaunchMenu(menu) {
@@ -67,10 +77,6 @@ export class DctHome extends Component {
         if (target) {
             await this.menuService.selectMenu(target);
         }
-    }
-
-    async toggleTheme() {
-        await this.colorScheme.switchColorScheme();
     }
 }
 

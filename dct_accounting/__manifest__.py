@@ -1,7 +1,7 @@
 {
     "name": "DCT Accounting",
     "summary": "Native Odoo accounting workspace with interactive Community reports",
-    "version": "19.0.2.5.0",
+    "version": "19.0.2.6.0",
     "category": "Accounting/Accounting",
     "author": "Digital Creativity Technologies",
     "license": "AGPL-3",

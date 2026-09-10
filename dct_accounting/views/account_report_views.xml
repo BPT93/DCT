@@ -4,7 +4,7 @@
         <field name="name">dct.account.report.wizard.form</field>
         <field name="model">dct.account.report.wizard</field>
         <field name="arch" type="xml">
-            <form string="DCT Financial Report" create="0" delete="0" class="o_dct_report_form">
+            <form string="Financial Report" create="0" delete="0" class="o_dct_report_form">
                 <header>
                     <button name="action_generate_report" type="object" string="Generate" icon="fa-refresh" class="btn-primary"/>
                     <button name="action_print_pdf" type="object" string="PDF" icon="fa-file-pdf-o" invisible="not line_count"/>
@@ -21,16 +21,18 @@
                     <group>
                         <group string="Period &amp; Scope">
                             <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
-                            <field name="date_from" invisible="report_type == 'balance_sheet'"/>
+                            <field name="date_from" invisible="report_type in ('balance_sheet', 'aged_receivable', 'aged_payable')"/>
                             <field name="date_to"/>
                             <field name="target_move" widget="radio" options="{'horizontal': true}"/>
                             <field name="show_zero"/>
                         </group>
                         <group string="Detailed Filters">
                             <field name="journal_ids" widget="many2many_tags" options="{'no_create': True}"/>
-                            <field name="account_ids" widget="many2many_tags" options="{'no_create': True}" invisible="report_type in ('partner_ledger', 'journal_ledger')"/>
-                            <field name="partner_ids" widget="many2many_tags" options="{'no_create': True}" invisible="report_type != 'partner_ledger'"/>
-                            <field name="comparison"/>
+                            <field name="account_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="partner_ids" widget="many2many_tags" options="{'no_create': True}"
+                                   invisible="report_type not in ('partner_ledger', 'aged_receivable', 'aged_payable')"/>
+                            <field name="comparison"
+                                   invisible="report_type not in ('balance_sheet', 'profit_loss', 'executive_summary', 'cash_flow', 'trial_balance')"/>
                             <field name="generated_at" invisible="not generated_at"/>
                             <field name="line_count" invisible="1"/>
                             <field name="report_name" invisible="1"/>
@@ -48,6 +50,7 @@
                             <field name="line_type" column_invisible="True"/>
                             <field name="is_total" column_invisible="True"/>
                             <field name="can_drilldown" column_invisible="True"/>
+                            <field name="move_line_id" column_invisible="True"/>
                             <field name="currency_id" column_invisible="True"/>
                             <field name="code" string="Code" optional="show"
                                    column_invisible="parent.report_type in ('aged_receivable', 'aged_payable')"/>
@@ -73,9 +76,9 @@
                             <field name="ending_balance" string="Ending" widget="monetary"
                                    column_invisible="parent.report_type in ('profit_loss', 'balance_sheet', 'executive_summary')"/>
                             <field name="comparison_balance" string="Comparison" widget="monetary"
-                                   column_invisible="parent.comparison == 'none' or parent.report_type in ('aged_receivable', 'aged_payable')"/>
+                                   column_invisible="parent.comparison == 'none' or parent.report_type not in ('balance_sheet', 'profit_loss', 'executive_summary', 'cash_flow', 'trial_balance')"/>
                             <field name="variance" string="Variance" widget="monetary"
-                                   column_invisible="parent.comparison == 'none' or parent.report_type in ('aged_receivable', 'aged_payable')"/>
+                                   column_invisible="parent.comparison == 'none' or parent.report_type not in ('balance_sheet', 'profit_loss', 'executive_summary', 'cash_flow', 'trial_balance')"/>
                             <button name="action_open_journal_items" type="object" icon="fa-external-link"
                                     title="Open Journal Items" invisible="not can_drilldown"/>
                         </list>

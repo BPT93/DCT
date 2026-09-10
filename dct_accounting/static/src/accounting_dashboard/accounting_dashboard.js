@@ -52,6 +52,7 @@ export class DctAccountingDashboard extends Component {
 
     async toggleTheme() {
         await this.colorScheme.switchColorScheme();
+        this.state.theme = getPreferredTheme();
     }
 
     async openAction(xmlid) {

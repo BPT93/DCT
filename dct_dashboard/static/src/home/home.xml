@@ -1,33 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="dct_dashboard.Home">
-        <main t-att-class="'o_dct_home dct-theme-' + state.theme">
-            <header class="o_dct_home_header">
-                <div class="o_dct_home_identity">
-                    <img t-att-src="companyLogoUrl" t-att-alt="companyName + ' logo'"/>
-                    <div>
-                        <h1><t t-esc="companyName"/></h1>
-                    </div>
-                </div>
-
-                <button class="o_dct_theme_toggle"
-                        t-on-click="toggleTheme"
-                        t-att-title="state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
-                        t-att-aria-label="state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
-                    <i t-att-class="'fa ' + (state.theme === 'dark' ? 'fa-sun-o' : 'fa-moon-o')"/>
-                </button>
-            </header>
-
+        <main class="o_dct_home">
             <section class="o_dct_apps_section" aria-label="Applications">
-                <div t-if="apps.length" class="o_dct_apps_grid">
-                    <button class="o_dct_app_card"
-                            t-foreach="apps"
+                <div t-if="allApps.length" class="o_dct_apps_grid">
+                    <button type="button"
+                            class="o_dct_app_card"
+                            t-foreach="allApps"
                             t-as="app"
                             t-key="app.id"
                             t-att-data-menu-xmlid="app.xmlid"
+                            t-att-title="app.name"
                             t-on-click="() => openApp(app)">
                         <span class="o_dct_app_icon_wrap">
-                            <img t-if="app.webIconData" t-att-src="app.webIconData" t-att-alt="app.name"/>
+                            <img t-if="app.webIconData" t-att-src="app.webIconData" alt=""/>
                             <span t-else="" class="o_dct_app_initials" t-esc="appInitials(app.name)"/>
                         </span>
                         <span class="o_dct_app_copy">
@@ -37,6 +23,7 @@
                 </div>
 
                 <div t-else="" class="o_dct_apps_empty">
+                    <i class="fa fa-th-large" title="No applications" aria-hidden="true"/>
                     <h3>No applications are available.</h3>
                 </div>
             </section>

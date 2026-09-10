@@ -1,10 +1,24 @@
+.o_web_client:has(.o_dct_home) {
+    background:
+        linear-gradient(
+            132deg,
+            transparent 0 18%,
+            rgba(255, 255, 255, 0.18) 18% 36%,
+            rgba(113, 75, 103, 0.035) 36% 53%,
+            rgba(255, 255, 255, 0.15) 53% 70%,
+            rgba(113, 75, 103, 0.03) 70% 85%,
+            transparent 85%
+        ),
+        linear-gradient(145deg, #ebe7f0 0%, #e1dbe8 52%, #eeebf2 100%);
+
+    .o_action_manager {
+        background: transparent;
+    }
+}
+
 .o_dct_home {
-    --dct-home-bg: #f4f5f6;
-    --dct-home-surface: var(--bs-body-bg);
-    --dct-home-text: var(--bs-body-color);
-    --dct-home-muted: var(--bs-secondary-color);
-    --dct-home-hover: var(--bs-secondary-bg);
-    --dct-home-line: var(--bs-border-color);
+    --dct-home-text: #2f2f33;
+    --dct-home-muted: #68636c;
 
     display: flex;
     flex: 1 1 auto;
@@ -12,11 +26,11 @@
     width: 100%;
     height: 100%;
     min-height: 0;
-    padding: 1.25rem 2rem 2rem;
+    padding: clamp(2rem, 7vh, 4.5rem) 2rem 3rem;
     overflow-x: hidden;
     overflow-y: auto;
     color: var(--dct-home-text);
-    background: var(--dct-home-bg);
+    background: transparent;
 
     *,
     *::before,
@@ -25,102 +39,51 @@
     }
 }
 
-.o_dct_home_header,
 .o_dct_apps_section {
     width: 100%;
-    max-width: 68rem;
+    max-width: 48rem;
     margin-inline: auto;
-}
-
-.o_dct_home_header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 4rem;
-    padding: 0.4rem 0.75rem 1rem;
-}
-
-.o_dct_home_identity {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    gap: 0.75rem;
-
-    img {
-        width: 3rem;
-        height: 3rem;
-        padding: 0.25rem;
-        border-radius: 0.65rem;
-        object-fit: contain;
-        background: #fff;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
-    }
-
-    h1 {
-        max-width: 24rem;
-        margin: 0;
-        overflow: hidden;
-        color: var(--dct-home-text);
-        font-size: 1rem;
-        font-weight: 600;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-}
-
-.o_dct_theme_toggle {
-    display: grid;
-    place-items: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    padding: 0;
-    border: 0;
-    border-radius: var(--bs-border-radius);
-    color: var(--dct-home-muted);
-    background: var(--dct-home-hover);
-
-    &:hover,
-    &:focus-visible {
-        outline: 0;
-        color: var(--bs-link-color);
-    }
 }
 
 .o_dct_apps_section {
     flex: 1 0 auto;
-    padding: 1rem 0.75rem;
+    padding: 0 0.75rem 1rem;
 }
 
 .o_dct_apps_grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
-    gap: 1.5rem 1rem;
+    grid-template-columns: repeat(6, minmax(0, 6.5rem));
+    justify-content: center;
+    gap: 1.65rem 1rem;
 }
 
 .o_dct_app_card {
     display: flex;
     align-items: center;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.55rem;
     min-width: 0;
-    min-height: 6.75rem;
-    padding: 0.5rem 0.25rem;
+    min-height: 6.35rem;
+    padding: 0.35rem 0.2rem;
     border: 0;
-    border-radius: 0.65rem;
+    border-radius: 0.5rem;
     color: var(--dct-home-text);
     text-align: center;
     background: transparent;
-    transition: background-color 120ms ease;
 
     &:hover,
     &:focus-visible {
         outline: 0;
-        background: var(--dct-home-hover);
+        background: rgba(255, 255, 255, 0.22);
 
         .o_dct_app_icon_wrap {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.14);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 16px rgba(65, 48, 68, 0.18);
         }
+    }
+
+    &:focus-visible {
+        box-shadow: 0 0 0 3px rgba(113, 75, 103, 0.18);
     }
 }
 
@@ -130,9 +93,9 @@
     width: 4rem;
     height: 4rem;
     overflow: hidden;
-    border-radius: 0.8rem;
+    border-radius: 0.32rem;
     background: #fff;
-    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.11);
+    box-shadow: 0 2px 8px rgba(65, 48, 68, 0.14);
     transition: transform 120ms ease, box-shadow 120ms ease;
 
     img {
@@ -143,7 +106,7 @@
 }
 
 .o_dct_app_initials {
-    color: var(--bs-link-color);
+    color: #714b67;
     font-size: 1.1rem;
     font-weight: 700;
 }
@@ -157,7 +120,7 @@
         overflow: hidden;
         color: var(--dct-home-text);
         font-size: 0.8125rem;
-        font-weight: 500;
+        font-weight: 400;
         line-height: 1.25;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -176,6 +139,16 @@
         font-size: 1rem;
         font-weight: 500;
     }
+
+    > .fa {
+        margin-bottom: 0.8rem;
+        font-size: 2rem;
+        opacity: 0.45;
+    }
+
+    .btn {
+        margin-top: 0.9rem;
+    }
 }
 
 .o_dct_home_toggle {
@@ -188,47 +161,65 @@
     padding: 0;
     border: 0;
     border-radius: 0 !important;
-    color: #374151;
+    color: #413a42;
     background: transparent;
 
     &:hover,
     &:focus-visible {
         outline: 0;
         color: #714b67;
-        background: #ece8eb;
+        background: rgba(255, 255, 255, 0.32);
     }
 }
 
 :root[data-dct-theme="dark"] .o_dct_home {
-    --dct-home-bg: #191919;
+    --dct-home-text: #f3f1f4;
+    --dct-home-muted: #c4bec6;
+}
+
+:root[data-dct-theme="dark"] .o_web_client:has(.o_dct_home) {
+    background:
+        linear-gradient(
+            132deg,
+            transparent 0 18%,
+            rgba(255, 255, 255, 0.035) 18% 36%,
+            rgba(0, 0, 0, 0.08) 36% 53%,
+            rgba(255, 255, 255, 0.025) 53% 70%,
+            rgba(0, 0, 0, 0.07) 70% 85%,
+            transparent 85%
+        ),
+        linear-gradient(145deg, #302b33 0%, #252127 54%, #302c32 100%);
 }
 
 :root[data-dct-theme="dark"] .o_dct_home_toggle {
-    color: #e9ecef;
+    color: #f0edf1;
 
     &:hover,
     &:focus-visible {
         color: #ffffff;
-        background: #3a3338;
+        background: rgba(255, 255, 255, 0.08);
     }
 }
 
 @media (max-width: 767.98px) {
     .o_dct_home {
-        padding: 0.75rem;
-    }
-
-    .o_dct_home_header {
-        padding-inline: 0.35rem;
+        padding: 1.5rem 0.75rem 2rem;
     }
 
     .o_dct_apps_section {
-        padding-inline: 0.25rem;
+        padding: 0 0.25rem 1rem;
     }
 
     .o_dct_apps_grid {
+        grid-template-columns: repeat(4, minmax(0, 5.75rem));
+        gap: 1.35rem 0.5rem;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .o_dct_apps_grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1rem 0.35rem;
+        gap-inline: 0.35rem;
     }
 
     .o_dct_app_icon_wrap {
@@ -238,7 +229,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .o_dct_app_card,
     .o_dct_app_icon_wrap {
         transition: none;
     }

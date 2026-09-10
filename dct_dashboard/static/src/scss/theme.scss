@@ -73,6 +73,14 @@
     }
 }
 
+/* The Enterprise launcher lets its background continue behind the navbar.
+   Keep the regular white application navbar everywhere else. */
+.o_web_client:has(.o_dct_home) .o_main_navbar {
+    border-bottom-color: transparent !important;
+    background: transparent !important;
+    box-shadow: none;
+}
+
 .o_action_manager > .o_action:has(> .o_dct_home),
 .o_action_manager > .o_action:has(> .o_dct_dashboard),
 .o_action_manager > .o_action:has(> .o_dct_accounting),
@@ -208,6 +216,12 @@
         .dropdown.show > .dropdown-toggle {
             background: #493e46 !important;
         }
+    }
+
+    .o_web_client:has(.o_dct_home) .o_main_navbar {
+        border-bottom-color: transparent !important;
+        background: transparent !important;
+        box-shadow: none;
     }
 
     .o_control_panel {

@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { fuzzyLookup } from "@web/core/utils/search";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 import { Component, onWillStart, useState } from "@odoo/owl";
 
@@ -46,23 +47,30 @@ export class DctInteractiveReport extends Component {
         this.notification = useService("notification");
         const actionContext = this.props.action.context || {};
         const reportType = actionContext.report_type || actionContext.default_report_type || "profit_loss";
+        const startsAsOf = ["balance_sheet", "aged_receivable", "aged_payable"].includes(reportType);
         const period = currentMonth();
         this.reportTypes = REPORT_TYPES;
         this.state = useState({
             loading: true,
             dateOpen: false,
             journalOpen: false,
+            accountOpen: false,
+            partnerOpen: false,
             optionsOpen: false,
+            accountQuery: "",
+            partnerQuery: "",
             collapsed: {},
-            periodPreset: "month",
+            periodPreset: startsAsOf ? "today" : "month",
             options: {
                 wizard_id: false,
                 report_type: reportType,
-                date_from: period.dateFrom,
+                date_from: startsAsOf ? period.dateTo : period.dateFrom,
                 date_to: period.dateTo,
                 target_move: "posted",
                 comparison: "none",
                 journal_ids: [],
+                account_ids: [],
+                partner_ids: [],
                 show_zero: false,
             },
             data: {
@@ -72,6 +80,8 @@ export class DctInteractiveReport extends Component {
                 comparison_label: "",
                 currency: {},
                 journals: [],
+                accounts: [],
+                partners: [],
                 lines: [],
             },
         });
@@ -81,6 +91,8 @@ export class DctInteractiveReport extends Component {
             "applyFilters",
             "resetFilters",
             "toggleJournals",
+            "toggleAccounts",
+            "togglePartners",
             "toggleOptions",
             "onPeriodPresetChange",
             "onReportTypeChange",
@@ -91,6 +103,12 @@ export class DctInteractiveReport extends Component {
             "onShowZeroChange",
             "toggleJournal",
             "clearJournals",
+            "onAccountQueryInput",
+            "toggleAccount",
+            "clearAccounts",
+            "onPartnerQueryInput",
+            "togglePartner",
+            "clearPartners",
             "toggleSection",
             "unfoldAll",
             "foldAll",
@@ -105,26 +123,32 @@ export class DctInteractiveReport extends Component {
 
     get isStatement() {
         return ["profit_loss", "balance_sheet", "executive_summary"].includes(
-            this.state.data.report_type
+            this.state.options.report_type
         );
     }
 
     get isAgedReport() {
-        return ["aged_receivable", "aged_payable"].includes(this.state.data.report_type);
+        return ["aged_receivable", "aged_payable"].includes(this.state.options.report_type);
     }
 
     get isCashFlow() {
-        return this.state.data.report_type === "cash_flow";
+        return this.state.options.report_type === "cash_flow";
     }
 
     get isAsOfReport() {
         return ["balance_sheet", "aged_receivable", "aged_payable"].includes(
-            this.state.data.report_type
+            this.state.options.report_type
         );
     }
 
     get supportsComparison() {
-        return !this.isAgedReport;
+        return [
+            "balance_sheet",
+            "profit_loss",
+            "executive_summary",
+            "cash_flow",
+            "trial_balance",
+        ].includes(this.state.options.report_type);
     }
 
     get hasComparison() {
@@ -167,11 +191,73 @@ export class DctInteractiveReport extends Component {
         return _t("%s Journals", count);
     }
 
+    get accountLabel() {
+        const count = this.state.options.account_ids.length;
+        if (!count) {
+            return _t("All Accounts");
+        }
+        if (count === 1) {
+            const account = this.state.data.accounts.find(
+                (item) => item.id === this.state.options.account_ids[0]
+            );
+            return account?.code || account?.name || _t("1 Account");
+        }
+        return _t("%s Accounts", count);
+    }
+
+    get partnerLabel() {
+        const count = this.state.options.partner_ids.length;
+        if (!count) {
+            return _t("All Partners");
+        }
+        if (count === 1) {
+            const partner = this.state.data.partners.find(
+                (item) => item.id === this.state.options.partner_ids[0]
+            );
+            return partner?.name || _t("1 Partner");
+        }
+        return _t("%s Partners", count);
+    }
+
+    get showPartnerFilter() {
+        return ["partner_ledger", "aged_receivable", "aged_payable"].includes(
+            this.state.options.report_type
+        );
+    }
+
+    get isDetailedReport() {
+        return ["general_ledger", "partner_ledger", "journal_ledger"].includes(
+            this.state.options.report_type
+        );
+    }
+
+    get filteredAccounts() {
+        if (!this.state.accountQuery.trim()) {
+            return this.state.data.accounts;
+        }
+        return fuzzyLookup(
+            this.state.accountQuery,
+            this.state.data.accounts,
+            (account) => `${account.code} ${account.name}`
+        );
+    }
+
+    get filteredPartners() {
+        if (!this.state.partnerQuery.trim()) {
+            return this.state.data.partners;
+        }
+        return fuzzyLookup(
+            this.state.partnerQuery,
+            this.state.data.partners,
+            (partner) => partner.name
+        );
+    }
+
     get lineNameLabel() {
-        if (this.isAgedReport || this.state.data.report_type === "partner_ledger") {
+        if (this.isAgedReport || this.state.options.report_type === "partner_ledger") {
             return _t("Partner");
         }
-        if (this.state.data.report_type === "journal_ledger") {
+        if (this.state.options.report_type === "journal_ledger") {
             return _t("Journal");
         }
         return _t("Account");
@@ -214,6 +300,19 @@ export class DctInteractiveReport extends Component {
     }
 
     async loadReport() {
+        if (
+            !this.isAsOfReport &&
+            this.state.options.date_from &&
+            this.state.options.date_to &&
+            this.state.options.date_from > this.state.options.date_to
+        ) {
+            this.state.dateOpen = true;
+            this.notification.add(_t("The start date must be before the end date."), {
+                type: "warning",
+            });
+            return;
+        }
+        const defaultFold = !this.state.options.wizard_id && this.isDetailedReport;
         this.state.loading = true;
         try {
             const data = await this.orm.call(
@@ -221,7 +320,13 @@ export class DctInteractiveReport extends Component {
                 "get_report_data",
                 [{ ...this.state.options }]
             );
-            this.state.data = data;
+            this.state.data = {
+                journals: [],
+                accounts: [],
+                partners: [],
+                lines: [],
+                ...data,
+            };
             this.state.options.wizard_id = data.wizard_id;
             this.state.options.report_type = data.report_type;
             this.state.options.date_from = data.date_from;
@@ -229,9 +334,22 @@ export class DctInteractiveReport extends Component {
             this.state.options.target_move = data.target_move;
             this.state.options.comparison = data.comparison;
             this.state.options.show_zero = data.show_zero;
-            this.state.options.journal_ids = data.journals
+            this.state.options.journal_ids = this.state.data.journals
                 .filter((journal) => journal.selected)
                 .map((journal) => journal.id);
+            this.state.options.account_ids = this.state.data.accounts
+                .filter((account) => account.selected)
+                .map((account) => account.id);
+            this.state.options.partner_ids = this.state.data.partners
+                .filter((partner) => partner.selected)
+                .map((partner) => partner.id);
+            if (defaultFold) {
+                this.state.collapsed = Object.fromEntries(
+                    this.state.data.lines
+                        .filter((line) => line.foldable && line.line_key)
+                        .map((line) => [line.line_key, true])
+                );
+            }
         } catch (error) {
             this.notification.add(_t("The accounting report could not be loaded."), {
                 type: "danger",
@@ -245,27 +363,52 @@ export class DctInteractiveReport extends Component {
     async applyFilters() {
         this.state.dateOpen = false;
         this.state.journalOpen = false;
+        this.state.accountOpen = false;
+        this.state.partnerOpen = false;
         this.state.optionsOpen = false;
         await this.loadReport();
     }
 
     async resetFilters() {
         const period = currentMonth();
+        const asOf = ["balance_sheet", "aged_receivable", "aged_payable"].includes(
+            this.state.options.report_type
+        );
         Object.assign(this.state.options, {
-            date_from: period.dateFrom,
+            date_from: asOf ? period.dateTo : period.dateFrom,
             date_to: period.dateTo,
             target_move: "posted",
             comparison: "none",
             journal_ids: [],
+            account_ids: [],
+            partner_ids: [],
             show_zero: false,
         });
-        this.state.periodPreset = "month";
+        this.state.periodPreset = asOf ? "today" : "month";
         await this.applyFilters();
     }
 
     toggleJournals() {
         this.state.journalOpen = !this.state.journalOpen;
         this.state.dateOpen = false;
+        this.state.accountOpen = false;
+        this.state.partnerOpen = false;
+        this.state.optionsOpen = false;
+    }
+
+    toggleAccounts() {
+        this.state.accountOpen = !this.state.accountOpen;
+        this.state.dateOpen = false;
+        this.state.journalOpen = false;
+        this.state.partnerOpen = false;
+        this.state.optionsOpen = false;
+    }
+
+    togglePartners() {
+        this.state.partnerOpen = !this.state.partnerOpen;
+        this.state.dateOpen = false;
+        this.state.journalOpen = false;
+        this.state.accountOpen = false;
         this.state.optionsOpen = false;
     }
 
@@ -273,6 +416,8 @@ export class DctInteractiveReport extends Component {
         this.state.optionsOpen = !this.state.optionsOpen;
         this.state.dateOpen = false;
         this.state.journalOpen = false;
+        this.state.accountOpen = false;
+        this.state.partnerOpen = false;
     }
 
     async onPeriodPresetChange(event) {
@@ -281,6 +426,8 @@ export class DctInteractiveReport extends Component {
             this.state.periodPreset = "custom";
             this.state.dateOpen = true;
             this.state.journalOpen = false;
+            this.state.accountOpen = false;
+            this.state.partnerOpen = false;
             this.state.optionsOpen = false;
             return;
         }
@@ -291,7 +438,15 @@ export class DctInteractiveReport extends Component {
         const today = new Date();
         let dateFrom;
         let dateTo = today;
-        if (preset === "month") {
+        if (preset === "today") {
+            dateFrom = today;
+        } else if (preset === "last_month_end") {
+            dateTo = new Date(today.getFullYear(), today.getMonth(), 0);
+            dateFrom = dateTo;
+        } else if (preset === "last_year_end") {
+            dateTo = new Date(today.getFullYear() - 1, 11, 31);
+            dateFrom = dateTo;
+        } else if (preset === "month") {
             dateFrom = new Date(today.getFullYear(), today.getMonth(), 1);
         } else if (preset === "quarter") {
             const quarterMonth = Math.floor(today.getMonth() / 3) * 3;
@@ -312,10 +467,23 @@ export class DctInteractiveReport extends Component {
     }
 
     async onReportTypeChange(event) {
+        const wasAsOf = this.isAsOfReport;
         this.state.options.report_type = event.target.value;
         this.state.options.wizard_id = false;
-        if (["aged_receivable", "aged_payable"].includes(event.target.value)) {
+        if (![
+            "balance_sheet",
+            "profit_loss",
+            "executive_summary",
+            "cash_flow",
+            "trial_balance",
+        ].includes(event.target.value)) {
             this.state.options.comparison = "none";
+        }
+        if (!["partner_ledger", "aged_receivable", "aged_payable"].includes(event.target.value)) {
+            this.state.options.partner_ids = [];
+        }
+        if (wasAsOf !== this.isAsOfReport) {
+            this.state.periodPreset = "custom";
         }
         this.state.collapsed = {};
         await this.loadReport();
@@ -358,6 +526,36 @@ export class DctInteractiveReport extends Component {
 
     clearJournals() {
         this.state.options.journal_ids = [];
+    }
+
+    onAccountQueryInput(event) {
+        this.state.accountQuery = event.target.value;
+    }
+
+    toggleAccount(accountId) {
+        const selected = new Set(this.state.options.account_ids);
+        selected.has(accountId) ? selected.delete(accountId) : selected.add(accountId);
+        this.state.options.account_ids = [...selected];
+    }
+
+    clearAccounts() {
+        this.state.options.account_ids = [];
+        this.state.accountQuery = "";
+    }
+
+    onPartnerQueryInput(event) {
+        this.state.partnerQuery = event.target.value;
+    }
+
+    togglePartner(partnerId) {
+        const selected = new Set(this.state.options.partner_ids);
+        selected.has(partnerId) ? selected.delete(partnerId) : selected.add(partnerId);
+        this.state.options.partner_ids = [...selected];
+    }
+
+    clearPartners() {
+        this.state.options.partner_ids = [];
+        this.state.partnerQuery = "";
     }
 
     toggleSection(lineKey) {

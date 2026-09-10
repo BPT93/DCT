@@ -1,0 +1,499 @@
+.o_dct_payroll_enterprise {
+    --dctp-brand: #714b67;
+    --dctp-brand-soft: color-mix(in srgb, var(--dctp-brand) 12%, transparent);
+    --dctp-border: var(--border-color, #dee2e6);
+    --dctp-muted: var(--text-muted, #6c757d);
+    --dctp-card: var(--o-view-background-color, #fff);
+    background: var(--o-webclient-background-color, #f7f7f8);
+    color: var(--body-color, #212529);
+
+    .dctp_enterprise_loading {
+        align-items: center;
+        color: var(--dctp-brand);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        height: 100%;
+        justify-content: center;
+
+        p {
+            color: var(--dctp-muted);
+            font-size: 1rem;
+        }
+    }
+
+    .dctp_enterprise_header {
+        align-items: center;
+        display: flex;
+        gap: 1.5rem;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .dctp_enterprise_company {
+        align-items: center;
+        display: flex;
+        gap: 0.9rem;
+        min-width: 0;
+
+        img {
+            background: #fff;
+            border: 1px solid var(--dctp-border);
+            border-radius: 0.6rem;
+            height: 54px;
+            object-fit: contain;
+            padding: 0.35rem;
+            width: 54px;
+        }
+
+        p {
+            color: var(--dctp-brand);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            margin: 0 0 0.1rem;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 1.45rem;
+            font-weight: 650;
+            line-height: 1.15;
+            margin: 0;
+        }
+
+        span {
+            color: var(--dctp-muted);
+            display: block;
+            font-size: 0.78rem;
+            margin-top: 0.25rem;
+        }
+    }
+
+    .dctp_enterprise_header_actions {
+        display: flex;
+        flex: 0 0 auto;
+        gap: 0.5rem;
+
+        .btn-primary {
+            background: var(--dctp-brand);
+            border-color: var(--dctp-brand);
+        }
+    }
+
+    .dctp_enterprise_card {
+        background: var(--dctp-card);
+        border: 1px solid var(--dctp-border);
+        border-radius: 0.55rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+
+        > .card-header {
+            align-items: center;
+            background: transparent;
+            border-bottom: 1px solid var(--dctp-border);
+            display: flex;
+            justify-content: space-between;
+            min-height: 67px;
+            padding: 0.8rem 1rem;
+
+            h2 {
+                font-size: 1.05rem;
+                font-weight: 600;
+                margin: 0;
+            }
+
+            .btn-link {
+                color: var(--dctp-brand);
+                padding: 0.25rem 0.4rem;
+                text-decoration: none;
+            }
+        }
+    }
+
+    .dctp_card_eyebrow {
+        color: var(--dctp-muted);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        margin: 0 0 0.15rem;
+        text-transform: uppercase;
+    }
+
+    .dctp_enterprise_half,
+    .dctp_stat_card {
+        height: 350px;
+    }
+
+    .dctp_warning_list,
+    .dctp_batch_list {
+        max-height: 282px;
+        overflow-y: auto;
+
+        .list-group-item {
+            align-items: center;
+            background: transparent;
+            border-color: var(--dctp-border);
+            color: inherit;
+            display: flex;
+            gap: 0.7rem;
+            min-height: 57px;
+            padding: 0.65rem 1rem;
+            text-align: left;
+
+            &:hover {
+                background: var(--dctp-brand-soft);
+            }
+
+            > .fa-chevron-right {
+                color: var(--dctp-muted);
+                font-size: 0.65rem;
+            }
+        }
+    }
+
+    .dctp_warning_icon {
+        align-items: center;
+        border-radius: 50%;
+        display: inline-flex;
+        flex: 0 0 auto;
+        height: 30px;
+        justify-content: center;
+        width: 30px;
+
+        &.is-warning {
+            background: #fff3cd;
+            color: #997404;
+        }
+
+        &.is-danger {
+            background: #f8d7da;
+            color: #b02a37;
+        }
+
+        &.is-info {
+            background: #cff4fc;
+            color: #087990;
+        }
+    }
+
+    .dctp_warning_label {
+        flex: 1;
+        font-size: 0.84rem;
+        line-height: 1.25;
+    }
+
+    .dctp_batch_name {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+
+        strong {
+            font-size: 0.85rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        small {
+            color: var(--dctp-muted);
+            margin-top: 0.15rem;
+        }
+    }
+
+    .dctp_enterprise_empty {
+        align-items: center;
+        color: var(--dctp-muted);
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        height: calc(100% - 67px);
+        justify-content: center;
+        padding: 1.5rem;
+        text-align: center;
+
+        > .fa {
+            color: color-mix(in srgb, var(--dctp-brand) 65%, #fff);
+            font-size: 2.2rem;
+        }
+
+        strong {
+            color: inherit;
+            font-size: 0.95rem;
+        }
+
+        span {
+            font-size: 0.8rem;
+            max-width: 260px;
+        }
+    }
+
+    .dctp_period_toggle {
+        align-items: center;
+        background: transparent;
+        border: 0;
+        color: var(--dctp-muted);
+        display: flex;
+        font-size: 0.7rem;
+        gap: 0.35rem;
+        padding: 0;
+
+        .fa {
+            color: var(--dctp-brand);
+            font-size: 1.35rem;
+        }
+
+        .active {
+            color: inherit;
+            font-weight: 700;
+        }
+    }
+
+    .dctp_stat_card .card-body {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 0.75rem 1rem 1rem;
+    }
+
+    .dctp_chart_legend {
+        display: flex;
+        gap: 0.85rem;
+        justify-content: flex-end;
+        min-height: 20px;
+
+        span {
+            align-items: center;
+            color: var(--dctp-muted);
+            display: inline-flex;
+            font-size: 0.68rem;
+            gap: 0.28rem;
+        }
+
+        i {
+            border-radius: 50%;
+            display: inline-block;
+            height: 8px;
+            width: 8px;
+        }
+    }
+
+    .dctp_enterprise_chart {
+        align-items: flex-end;
+        display: flex;
+        flex: 1;
+        gap: 0.75rem;
+        justify-content: space-around;
+        min-height: 220px;
+        padding-top: 0.5rem;
+    }
+
+    .dctp_chart_column {
+        align-items: center;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        height: 100%;
+        justify-content: flex-end;
+        min-width: 0;
+
+        small {
+            color: var(--dctp-muted);
+            font-size: 0.66rem;
+            margin-top: 0.45rem;
+            white-space: nowrap;
+        }
+    }
+
+    .dctp_chart_track {
+        align-items: flex-end;
+        border-bottom: 1px solid var(--dctp-border);
+        display: flex;
+        flex: 1;
+        gap: 4px;
+        justify-content: center;
+        max-height: 190px;
+        position: relative;
+        width: 100%;
+    }
+
+    .dctp_chart_bar {
+        border-radius: 4px 4px 0 0;
+        display: block;
+        max-width: 28px;
+        min-height: 1px;
+        transition: height 240ms ease;
+        width: 32%;
+
+        &.is-gross,
+        &.is-employee {
+            background: var(--dctp-brand);
+        }
+
+        &.is-net {
+            background: #a5d8d7;
+        }
+    }
+
+    .dctp_chart_legend .is-gross {
+        background: var(--dctp-brand);
+    }
+
+    .dctp_chart_legend .is-net {
+        background: #a5d8d7;
+    }
+
+    .dctp_chart_value {
+        color: var(--dctp-muted);
+        font-size: 0.72rem;
+        font-weight: 700;
+        left: 50%;
+        position: absolute;
+        top: 0;
+        transform: translateX(-50%);
+    }
+
+    .dctp_enterprise_chart.is-employees .dctp_chart_bar {
+        max-width: 52px;
+        width: 48%;
+    }
+
+    .dctp_todo_card {
+        display: flex;
+        flex-direction: column;
+        min-height: 716px;
+    }
+
+    .dctp_todo_tabs {
+        border-bottom: 1px solid var(--dctp-border);
+        display: flex;
+        min-height: 51px;
+    }
+
+    .dctp_todo_tab_scroller {
+        display: flex;
+        flex: 1;
+        min-width: 0;
+        overflow-x: auto;
+    }
+
+    .dctp_todo_tab,
+    .dctp_todo_add {
+        background: transparent;
+        border: 0;
+        color: var(--dctp-muted);
+    }
+
+    .dctp_todo_tab {
+        border-right: 1px solid var(--dctp-border);
+        flex: 0 0 auto;
+        font-size: 0.82rem;
+        max-width: 160px;
+        overflow: hidden;
+        padding: 0.75rem 1rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &.active {
+            border-top: 3px solid var(--dctp-brand);
+            color: inherit;
+            font-weight: 600;
+            padding-top: calc(0.75rem - 3px);
+        }
+    }
+
+    .dctp_todo_add {
+        border-left: 1px solid var(--dctp-border);
+        flex: 0 0 50px;
+
+        &:hover {
+            background: var(--dctp-brand-soft);
+            color: var(--dctp-brand);
+        }
+    }
+
+    .dctp_todo_editor {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 0.85rem;
+        min-height: 0;
+        padding: 1rem;
+
+        textarea {
+            flex: 1;
+            line-height: 1.55;
+            min-height: 500px;
+            resize: none;
+        }
+
+        footer {
+            align-items: center;
+            color: var(--dctp-muted);
+            display: flex;
+            font-size: 0.72rem;
+            gap: 1rem;
+            justify-content: space-between;
+
+            .btn-primary {
+                background: var(--dctp-brand);
+                border-color: var(--dctp-brand);
+            }
+        }
+    }
+
+    .dctp_todo_title_row {
+        display: flex;
+        gap: 0.5rem;
+
+        input {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+    }
+
+    .dctp_todo_empty {
+        flex: 1;
+        height: auto;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .o_dct_payroll_enterprise {
+        .dctp_enterprise_header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .dctp_enterprise_header_actions {
+            width: 100%;
+
+            .btn {
+                flex: 1;
+            }
+        }
+
+        .dctp_enterprise_half,
+        .dctp_stat_card {
+            height: 330px;
+        }
+
+        .dctp_todo_card {
+            min-height: 560px;
+        }
+
+        .dctp_todo_editor textarea {
+            min-height: 330px;
+        }
+
+        .dctp_todo_editor footer {
+            align-items: flex-start;
+            flex-direction: column;
+
+            .btn {
+                width: 100%;
+            }
+        }
+    }
+}

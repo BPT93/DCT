@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from odoo import fields
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
@@ -89,6 +91,75 @@ class TestDctAccountReports(AccountTestInvoicingCommon):
             line for line in payload["lines"] if line["name"] == "Net Income"
         )
         self.assertAlmostEqual(net_profit["variance"], 1000.0, places=2)
+
+    def test_interactive_filters_are_applied_and_returned(self):
+        revenue_account = self.company_data["default_account_revenue"]
+        payload = self.env["dct.account.report.wizard"].get_report_data({
+            "report_type": "partner_ledger",
+            "date_from": self.today.replace(day=1).isoformat(),
+            "date_to": self.today.isoformat(),
+            "journal_ids": [self.invoice.journal_id.id, 999999999],
+            "account_ids": [revenue_account.id, 999999999],
+            "partner_ids": [self.partner_a.id, 999999999],
+        })
+
+        wizard = self.env["dct.account.report.wizard"].browse(payload["wizard_id"])
+        self.assertEqual(wizard.journal_ids, self.invoice.journal_id)
+        self.assertEqual(wizard.account_ids, revenue_account)
+        self.assertEqual(wizard.partner_ids, self.partner_a)
+        self.assertEqual(
+            [item["id"] for item in payload["journals"] if item["selected"]],
+            [self.invoice.journal_id.id],
+        )
+        self.assertEqual(
+            [item["id"] for item in payload["accounts"] if item["selected"]],
+            [revenue_account.id],
+        )
+        self.assertEqual(
+            [item["id"] for item in payload["partners"] if item["selected"]],
+            [self.partner_a.id],
+        )
+
+    def test_account_filter_changes_report_totals(self):
+        receivable_account = self.invoice.line_ids.filtered(
+            lambda line: line.account_id.account_type == "asset_receivable"
+        ).account_id
+        payload = self.env["dct.account.report.wizard"].get_report_data({
+            "report_type": "profit_loss",
+            "date_from": self.today.replace(day=1).isoformat(),
+            "date_to": self.today.isoformat(),
+            "account_ids": receivable_account.ids,
+        })
+
+        net_profit = next(line for line in payload["lines"] if line["name"] == "Net Income")
+        self.assertAlmostEqual(net_profit["balance"], 0.0, places=2)
+
+    def test_detailed_ledgers_include_openable_journal_items(self):
+        for report_type in ("general_ledger", "partner_ledger", "journal_ledger"):
+            wizard = self._wizard(report_type)
+            wizard._generate_lines()
+            entries = wizard.line_ids.filtered(lambda line: line.line_type == "entry")
+            self.assertTrue(entries, report_type)
+            self.assertEqual(len(entries), len(entries.mapped("move_line_id")), report_type)
+
+    def test_detailed_reports_do_not_keep_unsupported_comparison(self):
+        payload = self.env["dct.account.report.wizard"].get_report_data({
+            "report_type": "general_ledger",
+            "date_from": self.today.replace(day=1).isoformat(),
+            "date_to": self.today.isoformat(),
+            "comparison": "previous_year",
+        })
+
+        self.assertEqual(payload["comparison"], "none")
+
+    def test_as_of_report_normalizes_hidden_start_date(self):
+        payload = self.env["dct.account.report.wizard"].get_report_data({
+            "report_type": "aged_receivable",
+            "date_from": (self.today + timedelta(days=1)).isoformat(),
+            "date_to": self.today.isoformat(),
+        })
+
+        self.assertEqual(payload["date_from"], payload["date_to"])
 
     def test_accounting_report_menus_use_interactive_client_actions(self):
         menu = self.env.ref("dct_accounting.menu_dct_profit_loss")
