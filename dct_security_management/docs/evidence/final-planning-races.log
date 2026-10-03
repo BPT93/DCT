@@ -1,0 +1,5 @@
+{"test": "overlapping guard assignments", "results": [{"status": "ok", "value": 95, "retries": 0}, {"status": "rejected", "reason": "This guard already has an overlapping assignment.", "retries": 1}]}
+{"test": "overlapping attendance allocations", "results": [{"status": "ok", "value": 36, "retries": 0}, {"status": "rejected", "reason": "The same worked time cannot be allocated more than once.", "retries": 1}]}
+{"test": "repeated roster generation", "results": [{"status": "ok", "value": [99, 100, 101], "retries": 0}, {"status": "ok", "value": [99, 100, 101], "retries": 1}]}
+{"test": "publication versus adding a guard", "results": [{"status": "ok", "value": 98, "retries": 1}, {"status": "ok", "value": 97, "retries": 0}]}
+DCT_PLANNING_CONCURRENCY_PASS: 4 independent-cursor races passed

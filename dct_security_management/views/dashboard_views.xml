@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_dashboard" model="ir.actions.client"><field name="name">Operations Overview</field><field name="tag">dct_security_management.dashboard</field></record>
+    <record id="action_weekly_board" model="ir.actions.client"><field name="name">Weekly Guard Schedule</field><field name="tag">dct_security_management.weekly_board</field></record>
+    <record id="action_site_map" model="ir.actions.client"><field name="name">Site Map</field><field name="tag">dct_security_management.site_map</field></record>
+</odoo>

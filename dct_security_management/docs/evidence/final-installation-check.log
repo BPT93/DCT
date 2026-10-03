@@ -1,0 +1,35 @@
+{"window_action": "dct_security_management.action_allocation", "model": "dct.security.allocation", "loaded": ["list", "pivot", "graph", "form", "search"]}
+{"window_action": "dct_security_management.action_assignment", "model": "dct.security.assignment", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_attendance", "model": "hr.attendance", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_attendance_correction", "model": "dct.security.attendance.correction", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_attendance_exception", "model": "dct.security.attendance.exception", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_attendance_period", "model": "dct.security.attendance.period", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_billing", "model": "dct.security.billing", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_compensation", "model": "dct.security.compensation", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_contract", "model": "dct.security.contract", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_generate_roster", "model": "dct.security.generate.roster", "loaded": ["form", "search"]}
+{"window_action": "dct_security_management.action_guard", "model": "hr.employee", "loaded": ["kanban", "form", "list", "search"]}
+{"window_action": "dct_security_management.action_guard_qualification", "model": "dct.security.guard.qualification", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_incident", "model": "dct.security.incident", "loaded": ["list", "form", "pivot", "graph", "search"]}
+{"window_action": "dct_security_management.action_incident_category", "model": "dct.security.incident.category", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_inspection_template", "model": "dct.security.inspection.template", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_patrol", "model": "dct.security.patrol.round", "loaded": ["list", "form", "pivot", "graph", "search"]}
+{"window_action": "dct_security_management.action_payroll", "model": "dct.security.payroll", "loaded": ["list", "form", "pivot", "search"]}
+{"window_action": "dct_security_management.action_post", "model": "dct.security.post", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_qualification", "model": "dct.security.qualification", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_route", "model": "dct.security.patrol.route", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_security_company", "model": "res.company", "loaded": ["form", "search"]}
+{"window_action": "dct_security_management.action_security_supervisors", "model": "hr.employee", "loaded": ["form", "list", "search"]}
+{"window_action": "dct_security_management.action_shift", "model": "dct.security.shift", "loaded": ["calendar", "list", "form", "search"]}
+{"window_action": "dct_security_management.action_site", "model": "dct.security.site", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_template", "model": "dct.security.shift.template", "loaded": ["list", "form", "search"]}
+{"window_action": "dct_security_management.action_visit", "model": "dct.security.visit", "loaded": ["list", "form", "pivot", "graph", "search"]}
+{"report": "dct_security_management.report_coverage", "template": "dct_security_management.coverage_document", "model": "dct.security.shift", "paperformat": "dct_security_management.paperformat_security"}
+{"report": "dct_security_management.report_roster", "template": "dct_security_management.roster_document", "model": "dct.security.assignment", "paperformat": "dct_security_management.paperformat_security"}
+{"report": "dct_security_management.report_attendance", "template": "dct_security_management.attendance_document", "model": "dct.security.assignment", "paperformat": "dct_security_management.paperformat_security"}
+{"report": "dct_security_management.report_incident", "template": "dct_security_management.incident_document", "model": "dct.security.incident", "paperformat": "dct_security_management.paperformat_security"}
+{"report": "dct_security_management.report_patrol", "template": "dct_security_management.patrol_document", "model": "dct.security.patrol.round", "paperformat": "dct_security_management.paperformat_security"}
+{"report": "dct_security_management.report_visit", "template": "dct_security_management.visit_document", "model": "dct.security.visit", "paperformat": "dct_security_management.paperformat_security"}
+{"report": "dct_security_management.report_payroll", "template": "dct_security_management.payroll_document", "model": "dct.security.payroll", "paperformat": "dct_security_management.paperformat_security"}
+{"report": "dct_security_management.report_billing", "template": "dct_security_management.billing_document", "model": "dct.security.billing", "paperformat": "dct_security_management.paperformat_security"}
+DCT_INSTALLATION_CHECK_PASS {"client_actions": 3, "database": "dct_security_test_fresh_20261003", "loaded_view_modes": 87, "menus": 42, "paperformats": 1, "readonly": true, "reports": 8, "window_actions": 26}

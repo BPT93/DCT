@@ -1,0 +1,32 @@
+{
+  "database": "dct_security_test_fresh_20261003",
+  "base": "http://127.0.0.1:18080",
+  "locale": "en",
+  "started": "2026-10-03T12:07:23.715Z",
+  "checks": [
+    "native login to isolated test database",
+    "connected dashboard cards and source drilldown",
+    "dashboard date and site filters",
+    "weekly board guard rows, draft form and existing shift",
+    "native shift calendar",
+    "unconfigured map remains usable with no external requests",
+    "configured map pins, attribution and offline list fallback",
+    "native Guards list and record",
+    "native Sites list and record",
+    "native Contracts list and record",
+    "native Assignments list and record",
+    "native Attendance list and record",
+    "native Patrols list and record",
+    "native Incidents list and record",
+    "native Visits list and record",
+    "native Payroll list and record",
+    "native Billing list and record",
+    "asset and JavaScript errors"
+  ],
+  "errors": [],
+  "assetFailures": [],
+  "externalRequests": [],
+  "interceptedTileRequests": 18,
+  "passed": true,
+  "finished": "2026-10-03T12:07:56.958Z"
+}

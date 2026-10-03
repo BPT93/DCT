@@ -1,0 +1,43 @@
+<odoo>
+    <menuitem id="menu_security_root" name="DCT Security Operations" sequence="35" groups="group_readonly"/>
+    <menuitem id="menu_overview" name="Overview" parent="menu_security_root" action="action_dashboard" sequence="10"/>
+    <menuitem id="menu_guards" name="Guards" parent="menu_security_root" action="action_guard" sequence="20"/>
+    <menuitem id="menu_sites" name="Sites &amp; Posts" parent="menu_security_root" sequence="30"/>
+    <menuitem id="menu_site_records" name="Sites" parent="menu_sites" action="action_site" sequence="10"/>
+    <menuitem id="menu_post_records" name="Posts" parent="menu_sites" action="action_post" sequence="20"/>
+    <menuitem id="menu_map" name="Site Map" parent="menu_sites" action="action_site_map" sequence="30"/>
+    <menuitem id="menu_contracts" name="Contracts" parent="menu_security_root" action="action_contract" sequence="40"/>
+    <menuitem id="menu_planning" name="Planning" parent="menu_security_root" sequence="50"/>
+    <menuitem id="menu_weekly" name="Weekly Board" parent="menu_planning" action="action_weekly_board" sequence="10"/>
+    <menuitem id="menu_shifts" name="Shifts and Calendar" parent="menu_planning" action="action_shift" sequence="20"/>
+    <menuitem id="menu_assignments" name="Guard Assignments" parent="menu_planning" action="action_assignment" sequence="30"/>
+    <menuitem id="menu_generate" name="Generate Draft Roster" parent="menu_planning" action="action_generate_roster" groups="group_manager,group_supervisor" sequence="40"/>
+    <menuitem id="menu_attendance" name="Attendance" parent="menu_security_root" sequence="60"/>
+    <menuitem id="menu_attendance_events" name="Actual Attendance" parent="menu_attendance" action="action_attendance" sequence="10"/>
+    <menuitem id="menu_allocations" name="Work Allocations" parent="menu_attendance" action="action_allocation" sequence="20"/>
+    <menuitem id="menu_attendance_exceptions" name="Exceptions to Review" parent="menu_attendance" action="action_attendance_exception" sequence="30"/>
+    <menuitem id="menu_attendance_corrections" name="Attendance Corrections" parent="menu_attendance" action="action_attendance_correction" groups="group_manager,group_supervisor,group_hr" sequence="40"/>
+    <menuitem id="menu_attendance_periods" name="Period Approvals" parent="menu_attendance" action="action_attendance_period" groups="group_manager,group_hr" sequence="50"/>
+    <menuitem id="menu_patrols" name="Patrols" parent="menu_security_root" action="action_patrol" sequence="70"/>
+    <menuitem id="menu_incidents" name="Incidents" parent="menu_security_root" action="action_incident" sequence="80"/>
+    <menuitem id="menu_visits" name="Supervisor Visits" parent="menu_security_root" action="action_visit" sequence="90"/>
+    <menuitem id="menu_payroll" name="Payroll Worksheets" parent="menu_security_root" action="action_payroll" groups="group_finance" sequence="100"/>
+    <menuitem id="menu_billing" name="Billing" parent="menu_security_root" action="action_billing" groups="group_finance" sequence="110"/>
+    <menuitem id="menu_reports" name="Reports" parent="menu_security_root" sequence="120"/>
+    <menuitem id="menu_report_coverage" name="Coverage and Rosters" parent="menu_reports" action="action_shift" sequence="10"/>
+    <menuitem id="menu_report_attendance" name="Attendance and Overtime" parent="menu_reports" action="action_assignment" sequence="20"/>
+    <menuitem id="menu_report_incidents" name="Incident Analysis" parent="menu_reports" action="action_incident" sequence="30"/>
+    <menuitem id="menu_report_patrols" name="Patrol Completion" parent="menu_reports" action="action_patrol" sequence="40"/>
+    <menuitem id="menu_report_visits" name="Supervisor Visits" parent="menu_reports" action="action_visit" sequence="50"/>
+    <menuitem id="menu_report_payroll" name="Payroll Worksheets" parent="menu_reports" action="action_payroll" groups="group_finance" sequence="60"/>
+    <menuitem id="menu_report_billing" name="Contract Billing" parent="menu_reports" action="action_billing" groups="group_finance" sequence="70"/>
+    <menuitem id="menu_configuration" name="Configuration" parent="menu_security_root" groups="group_manager,group_hr,group_finance" sequence="130"/>
+    <menuitem id="menu_templates" name="Shift Templates" parent="menu_configuration" action="action_template" groups="group_manager" sequence="10"/>
+    <menuitem id="menu_routes" name="Patrol Routes" parent="menu_configuration" action="action_route" groups="group_manager" sequence="20"/>
+    <menuitem id="menu_inspection_templates" name="Inspection Checklists" parent="menu_configuration" action="action_inspection_template" groups="group_manager" sequence="30"/>
+    <menuitem id="menu_incident_categories" name="Incident Categories" parent="menu_configuration" action="action_incident_category" groups="group_manager" sequence="40"/>
+    <menuitem id="menu_qualifications" name="Qualification Types" parent="menu_configuration" action="action_qualification" groups="group_manager" sequence="50"/>
+    <menuitem id="menu_guard_qualifications" name="Qualifications and Expiry" parent="menu_configuration" action="action_guard_qualification" groups="group_manager,group_hr" sequence="60"/>
+    <menuitem id="menu_compensation" name="Compensation Settings" parent="menu_configuration" action="action_compensation" groups="group_finance" sequence="70"/>
+    <menuitem id="menu_company_policies" name="Company Policies" parent="menu_configuration" action="action_security_company" groups="base.group_system" sequence="80"/>
+</odoo>

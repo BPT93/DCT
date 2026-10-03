@@ -1,0 +1,1 @@
+2026-10-03 11:55:52,502 4464 INFO dct_security_test_fresh_20261003 odoo.tests.result: 0 failed, 0 error(s) of 61 tests when loading database 'dct_security_test_fresh_20261003'

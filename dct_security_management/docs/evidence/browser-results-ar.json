@@ -1,0 +1,18 @@
+{
+  "database": "dct_security_test_fresh_20261003",
+  "base": "http://127.0.0.1:18080",
+  "locale": "ar",
+  "started": "2026-10-03T12:08:08.367Z",
+  "checks": [
+    "native login to isolated test database",
+    "Arabic dashboard direction, filters and drilldown",
+    "Arabic weekly board and calendar",
+    "Arabic map fallback and finance forms",
+    "Arabic assets, JavaScript and external requests"
+  ],
+  "errors": [],
+  "assetFailures": [],
+  "externalRequests": [],
+  "passed": true,
+  "finished": "2026-10-03T12:08:28.258Z"
+}

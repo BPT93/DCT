@@ -1,0 +1,5 @@
+{"test": "overlapping billing approvals", "results": [{"status": "rejected", "reason": "This contract already has an approved or invoiced billing period that overlaps.", "retries": 1}, {"status": "ok", "id": 62, "retries": 0}]}
+{"test": "repeated invoice creation", "results": [{"status": "ok", "id": 50, "retries": 1}, {"status": "ok", "id": 50, "retries": 0}]}
+{"test": "overlapping payroll creation", "results": [{"status": "rejected", "reason": "Payroll worksheet periods cannot overlap for the same guard and company.", "retries": 1}, {"status": "ok", "id": 34, "retries": 0}]}
+{"test": "repeated payroll journal creation", "results": [{"status": "ok", "id": 51, "retries": 1}, {"status": "ok", "id": 51, "retries": 0}]}
+DCT_FINANCE_CONCURRENCY_PASS: 4 independent-cursor races passed
